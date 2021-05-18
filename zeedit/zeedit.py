@@ -28,57 +28,112 @@ This script should be run at regular intervals, for example, every 6 hours
 so that new claims are downloaded periodically, and at the same time
 older files are deleted to free space in the drive.
 
-A configuration module `zeedit_config.py` should be placed in the same
-directory as this file to quickly define all relevant variables passed
-to the `lbrytools` functions.
-
 If `lbrytools` is correctly installed in the Python path, this script
 can be executed directly, or through the Python interpreter.
 ::
-    python zeedit.py
+    python zeedit.py [config.py]
+
+A configuration module can be passed as first argument to quickly define
+all relevant variables used by the `lbrytools` functions.
+If no argument is given, or the provided configuration file does not exist,
+it will try to load a configuration under the name `zeedit_config.py`.
 """
-import zeedit_config as cfg
-import lbrytools as lbryt
+import importlib
+import os
+import sys
 
-# Download the latest claims from select channels.
-print(80 * "=")
-print("1. Download step")
-lbryt.ch_download_latest_multi(channels=cfg.channels,
-                               ddir=cfg.ddir,
-                               own_dir=cfg.own_dir,
-                               number=cfg.number)
+try:
+    # import lbrytools as lbryt
+    lbryt = importlib.import_module("lbrytools")
+except ModuleNotFoundError as err:
+    print(f"{err}")
+    print("This package must be in the same directory as this script, "
+          "or installed to a Python 'site-packages' directory")
+    exit(1)
 
-# For a seeding only system, the media files (mp4, mp3, mkv, etc.)
-# will be removed and only the binary blobs will remain.
-# This will also affect the cleanup section.
-print(80 * "=")
-print("2. Seeding step")
-if cfg.seeding_only:
-    lbryt.remove_media(never_delete=None)
-    cfg.what_to_delete = "both"
 
-# Normal cleanup step.
-# Free space in the disk by removing older media files and blobs according
-# to the configuration.
-print(80 * "=")
-print("3. Cleanup step")
-lbryt.cleanup_space(main_dir=cfg.main_dir,
-                    size=cfg.size,
-                    percent=cfg.percent,
-                    never_delete=cfg.never_delete,
-                    what=cfg.what_to_delete)
+def usage():
+    """Print the usage to the terminal."""
+    msg = ["Usage:",
+           "  zeedit [config.py]",
+           "",
+           "A configuration file is optional as first argument.",
+           "Otherwise it looks for the default 'zeedit_config.py'."]
 
-# Print a summary of the existing downloaded content.
-print(80 * "=")
-print("4. Summary")
-if cfg.sm_summary:
-    lbryt.print_summary(show=cfg.sm_show,
-                        title=cfg.sm_title,
-                        typ=cfg.sm_type,
-                        path=cfg.sm_path,
-                        cid=cfg.sm_cid,
-                        blobs=cfg.sm_blobs,
-                        ch=cfg.sm_ch,
-                        name=cfg.sm_name,
-                        file=cfg.sm_file,
-                        date=cfg.sm_date)
+    print("\n".join(msg))
+
+
+if __name__ == "__main__":
+    cfg_loaded = False
+
+    # The first argument is the configuration file.
+    # Otherwise it tries using a default module.
+    if len(sys.argv) > 1:
+        config = sys.argv[1]
+
+        if not os.path.exists(config):
+            print(f"Configuration file does not exist, '{config}'")
+        else:
+            spec = importlib.util.spec_from_file_location("cfg",
+                                                          location=config)
+            cfg = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cfg)
+            cfg_loaded = True
+            print(f"Configuration will use '{config}'")
+
+    if not cfg_loaded:
+        config = "zeedit_config"
+        print(f"Configuration will use '{config}.py'")
+
+        try:
+            cfg = importlib.import_module(config)
+        except ModuleNotFoundError as err:
+            print(f"{err}")
+            print("Exiting.")
+            print()
+            usage()
+            exit(1)
+
+    # Download the latest claims from select channels.
+    print(80 * "=")
+    print("1. Download step")
+    lbryt.ch_download_latest_multi(channels=cfg.channels,
+                                   ddir=cfg.ddir,
+                                   own_dir=cfg.own_dir,
+                                   number=cfg.number)
+
+    # For a seeding only system, the media files (mp4, mp3, mkv, etc.)
+    # will be removed and only the binary blobs will remain.
+    # This will also affect the cleanup section.
+    print(80 * "=")
+    print("2. Seeding step")
+    if cfg.seeding_only:
+        lbryt.remove_media(never_delete=None)
+        cfg.what_to_delete = "both"
+
+    # Normal cleanup step.
+    # Free space in the disk by removing older media files and blobs according
+    # to the configuration.
+    print(80 * "=")
+    print("3. Cleanup step")
+    lbryt.cleanup_space(main_dir=cfg.main_dir,
+                        size=cfg.size,
+                        percent=cfg.percent,
+                        never_delete=cfg.never_delete,
+                        what=cfg.what_to_delete)
+
+    # Print a summary of the existing downloaded content.
+    print(80 * "=")
+    print("4. Summary")
+    if cfg.sm_summary:
+        lbryt.print_summary(show=cfg.sm_show,
+                            title=cfg.sm_title,
+                            typ=cfg.sm_type,
+                            path=cfg.sm_path,
+                            cid=cfg.sm_cid,
+                            blobs=cfg.sm_blobs,
+                            ch=cfg.sm_ch,
+                            name=cfg.sm_name,
+                            file=cfg.sm_file,
+                            date=cfg.sm_date)
+

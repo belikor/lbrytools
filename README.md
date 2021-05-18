@@ -28,10 +28,13 @@ library was written from scratch to provide more functionality.
 
 Copy the internal [lbrytools](./lbrytools) directory, and place it inside
 a `site-packages` directory that is searched by Python.
-This can be in the user's home directory, or in a system-wide directory.
+This can be in the user's home directory,
 ```
 /home/user/.local/lib/python3.8/site-packages/lbrytools
+```
 
+or in a system-wide directory.
+```
 /usr/local/lib/python3.8/dist-packages/lbrytools
 /usr/lib/python3/dist-packages/lbrytools
 ```
@@ -77,19 +80,31 @@ This script should be run periodically to constantly download new content,
 and remove the older files if they take too much space.
 See [zeedit.py](./zeedit/zeedit.py).
 
-It uses a configuration file [zeedit_config.py](./zeedit/zeedit_config.py)
-to set up a few options such as the channels to download content from,
-when it should perform cleanup of older files, and whether to write
-a summary file of all claims.
+It uses a configuration file to set up a few options such as the channels
+to download content from, the download directory, at which point
+it should perform cleanup of older files, and whether to write a summary
+of all downloaded claims.
+Read the comments in [zeedit_config.py](./zeedit/zeedit_config.py)
+to know about the options that can be configured.
 
-If `lbrytools` is correctly installed in the Python path, and the configuration
-file is in the same directory as `zeedit.py`, it can be run:
+If `lbrytools` is correctly installed in the Python path, the script can be
+executed directly, or through the Python interpreter.
 ```
-python zeedit.py
+python zeedit.py [config.py]
 ```
+
+The configuration file can be passed as the first argument, so it is possible
+to have different configurations to download content of different channels.
+```
+python zeedit.py funny_config.py
+python zeedit.py tech_channels_config.py
+```
+
+If no argument is given, or the provided configuration file does not exist,
+it will try to load a configuration under the name `zeedit_config.py`.
 
 To keep everything contained, the `lbrytools` package can be placed in the same
-directory as `zeedit.py`.
+directory as `zeedit.py` and `zeedit_config.py`.
 ```
 zeedit/
       zeedit.py
