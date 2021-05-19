@@ -69,6 +69,7 @@ from lbrytools.search import sort_items
 from lbrytools.search import parse_claim_file
 
 from lbrytools.print import print_summary
+from lbrytools.print import print_multi_list
 
 from lbrytools.download import download_single
 from lbrytools.download import ch_download_latest

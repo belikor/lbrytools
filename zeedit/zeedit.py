@@ -97,10 +97,11 @@ if __name__ == "__main__":
     # Download the latest claims from select channels.
     print(80 * "=")
     print("1. Download step")
-    lbryt.ch_download_latest_multi(channels=cfg.channels,
-                                   ddir=cfg.ddir,
-                                   own_dir=cfg.own_dir,
-                                   number=cfg.number)
+    info = lbryt.ch_download_latest_multi(channels=cfg.channels,
+                                          ddir=cfg.ddir,
+                                          own_dir=cfg.own_dir,
+                                          number=cfg.number)
+    lbryt.print_multi_list(info)
 
     # For a seeding only system, the media files (mp4, mp3, mkv, etc.)
     # will be removed and only the binary blobs will remain.

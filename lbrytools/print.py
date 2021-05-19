@@ -142,6 +142,71 @@ def print_info_post_get(info_get=None):
     return True
 
 
+def print_multi_list(list_ch_info=None):
+    """Print the summary of downloaded claims from multiple channels.
+
+    This is meant to be used with the returned list from
+    `ch_download_latest_multi`.
+
+    Parameters
+    ----------
+    list of lists of dicts
+        A list of lists, where each internal list represents one channel,
+        and this internal list has as many dictionaries as downloaded claims.
+        The information in each dictionary represents the standard output
+        of the `lbrynet_get` command for each downloaded claim.
+
+        If the download fails, then the corresponding item in the list
+        may be `False`, in which case no claim information is printed.
+
+    Returns
+    -------
+    bool
+        It returns `True` if the information was read and printed
+        without problems.
+        If there is a problem or no list of items, it will return `False`.
+    """
+    if not list_ch_info or not isinstance(list_ch_info, (list, tuple)):
+        print("Print information from a list of lists from multiple "
+              "channels obtained from `ch_download_latest_multi`.")
+        return False
+
+    if len(list_ch_info) < 1:
+        print("Empty list.")
+        return False
+
+    # flat_list = [item for sublist in list_ch_info for item in sublist]
+    flat_list = []
+    for sublist in list_ch_info:
+        if not sublist:
+            flat_list.append(None)
+            continue
+
+        for item in sublist:
+            if not item:
+                flat_list.append(None)
+                continue
+            flat_list.append(item)
+
+    n_items = len(flat_list)
+
+    print("Summary of downloads")
+
+    for it, item in enumerate(flat_list, start=1):
+        out = "{:2d}/{:2d}, ".format(it, n_items)
+
+        if "claim_id" in item:
+            print(out + "{}, {}, {}".format(item["claim_id"],
+                                            item["channel_name"],
+                                            item["claim_name"]))
+        elif "error" in item:
+            print(out + "{}".format(item["error"]))
+        else:
+            print(out + "not downloaded")
+
+    return True
+
+
 def print_items(items=None, show="all",
                 title=False, typ=False, path=False,
                 cid=True, blobs=True, ch=False, name=True,
