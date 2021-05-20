@@ -144,7 +144,7 @@ def delete_single(uri=None, cid=None, name=None,
 
     if what in "blobs":
         print("Remove blobs")
-    elif what in "all":
+    elif what in "both":
         print("Remove both, blobs and file")
         cmd_id.append("--delete_from_download_dir")
         cmd_name.append("--delete_from_download_dir")
