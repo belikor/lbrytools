@@ -23,22 +23,35 @@
 # DEALINGS IN THE SOFTWARE.
 # ----------------------------------------------------------------------------
 """Auxiliary functions for other methods of the lbrytools package."""
+import requests
 import subprocess
 
 
-def check_lbry():
+def start_lbry():
+    subprocess.run(["lbrynet", "start"], stdout=subprocess.DEVNULL)
+
+
+def check_lbry(server="http://localhost:5279"):
     """Check if the LBRY daemon is running, and launch it if it's not.
 
-    Check by searching for the process ID of the daemon.
-    ::
-        pidof lbrynet
+    Send a `'status'` request to the server `'http://localhost:5279'`,
+    and check for `'is_running'` being `True`.
 
-    Start the service if there is no process ID.
+    Start the service if it is not running.
     ::
         lbrynet start
 
     Other functions that need to call `lbrynet` should call this method
     before doing other things.
+
+    Parameters
+    ----------
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -47,9 +60,30 @@ def check_lbry():
         It returns `False` if the LBRY daemon was not running
         but it was started manually. 
     """
+    msg = {"method": "status"}
     try:
-        subprocess.run(["pidof", "lbrynet"], stdout=subprocess.DEVNULL)
-        return True
-    except subprocess.CalledProcessError:
-        subprocess.run(["lbrynet", "start"], stdout=subprocess.DEVNULL)
+        output = requests.post(server, json=msg).json()
+    except requests.exceptions.ConnectionError as err:
+        # Trap all with requests.exceptions.RequestException
+        print(err)
+        start_lbry()
         return False
+
+    if "result" not in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        start_lbry()
+        return False
+
+    if "is_running" in output["result"] and output["result"]["is_running"]:
+        return True
+
+    start_lbry()
+    return False
+
+    # Only really works in Linux
+    # try:
+    #     subprocess.run(["pidof", "lbrynet"], stdout=subprocess.DEVNULL)
+    #     return True
+    # except subprocess.CalledProcessError:
+    #     start_lbry()
+    #     return False
