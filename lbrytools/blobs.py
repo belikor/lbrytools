@@ -24,14 +24,14 @@
 # ----------------------------------------------------------------------------
 """Functions to help use with blobs from LBRY content."""
 import os
-import subprocess
+import requests
 import sys
 
 from lbrytools.funcs import check_lbry
 
 
 def get_blobs(blobfiles=None, action="get",
-              start=1, end=0):
+              start=1, end=0, server="http://localhost:5279"):
     """Refresh all binary blobs from the blobfiles directory.
 
     Parameters
@@ -55,6 +55,12 @@ def get_blobs(blobfiles=None, action="get",
         Operate until and including this index in the list of blobs
         in the directory of blobs `blobfiles`.
         If it is 0, it is the same as the last index in the list.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -106,23 +112,37 @@ def get_blobs(blobfiles=None, action="get",
             cmd[2] = "announce"
 
         print(out + " ".join(cmd))
-        output = subprocess.run(cmd,
-                                capture_output=True,
-                                check=True,
-                                text=True)
-        if output.returncode == 1:
-            print(f"Error: {output.stderr}")
-            sys.exit(1)
+        # output = subprocess.run(cmd,
+        #                         capture_output=True,
+        #                         check=True,
+        #                         text=True)
+        # if output.returncode == 1:
+        #     print(f"Error: {output.stderr}")
+        #     sys.exit(1)
+
+        msg = {"method": cmd[1] + "_" + cmd[2],
+               "params": {"blob_hash": item}}
+        output = requests.post(server, json=msg).json()
+
+        if "error" in output:
+            print(output["error"]["data"]["name"])
 
         if action in "both":
             cmd[2] = "announce"
             print(out + " ".join(cmd))
-            output = subprocess.run(cmd,
-                                    capture_output=True,
-                                    check=True,
-                                    text=True)
-            if output.returncode == 1:
-                print(f"Error: {output.stderr}")
-                sys.exit(1)
+            # output = subprocess.run(cmd,
+            #                         capture_output=True,
+            #                         check=True,
+            #                         text=True)
+            # if output.returncode == 1:
+            #     print(f"Error: {output.stderr}")
+            #     sys.exit(1)
+
+            msg = {"method": cmd[1] + "_" + cmd[2],
+                   "params": {"blob_hash": item}}
+            output = requests.post(server, json=msg).json()
+
+            if "error" in output:
+                print(output["error"]["data"]["name"])
 
     return True
