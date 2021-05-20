@@ -26,7 +26,7 @@
 import json
 import os
 import random
-import subprocess
+import requests
 import sys
 
 from lbrytools.funcs import check_lbry
@@ -40,17 +40,30 @@ from lbrytools.print import print_info_pre_get
 from lbrytools.print import print_info_post_get
 
 
-def lbrynet_get(get_cmd=None):
+def lbrynet_get(get_cmd=None,
+                server="http://localhost:5279"):
     """Run the lbrynet get command and return the information that it shows.
 
     Parameters
     ----------
     get_cmd: list of str
         A list of strings that defines a command to get a claim.
-        This list has at least three elements,
-        and is passed to the `subprocess.run` method for execution.
+        This list has at least three elements
         ::
             get_cmd = ['lbrynet', 'get', 'lbry://@asaaa#5/a#b']
+
+        The third element is the `'canonical_url'` of the claim
+        which will be used to download the claim.
+
+        A fourth element can be the download directory parameter.
+        ::
+            get_cmd = [..., ..., ..., '--download_directory=/opt']
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -62,19 +75,40 @@ def lbrynet_get(get_cmd=None):
         print("No input command, using default value.")
         get_cmd = ["lbrynet",
                    "get",
-                   "'lbry://@asaaa#5/a#b'"]
-        print("Download: " + " ".join(get_cmd))
+                   "lbry://@asaaa#5/a#b"]
+        get_cmd2 = get_cmd[:]
+        get_cmd2[2] = "'" + get_cmd2[2] + "'"
+        print("Download: " + " ".join(get_cmd2))
 
     check_lbry()
-    output = subprocess.run(get_cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # output = subprocess.run(get_cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
-    info_get = json.loads(output.stdout)
+    # info_get = json.loads(output.stdout)
+
+    uri = get_cmd[2]
+    try:
+        ddir = get_cmd[3]
+        ddir = ddir.lstrip("--download_directory=")
+    except IndexError:
+        ddir = os.path.expanduser("~")
+
+    msg = {"method": "get",
+           "params": {"uri": uri,
+                      "download_directory": ddir}}
+
+    output = requests.post(server, json=msg).json()
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    info_get = output["result"]
+
     return info_get
 
 

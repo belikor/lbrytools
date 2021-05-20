@@ -48,13 +48,13 @@ Instead of using the `lbrynet` executable through `subprocess`
 we could also use the `request` module, by sending json messages directly
 to the running daemon in `localhost`.
 ::
-    import request
+    import requests
     
     server = "http://localhost:5279"
     json = {"method": "get",
             "params": {"uri": "astream#bcd03a"}}
     
-    request.post(server, json=json).json()
+    requests.post(server, json=json).json()
 
 Developed and tested with Python 3.8.
 """
