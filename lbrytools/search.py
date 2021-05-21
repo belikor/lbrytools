@@ -25,7 +25,7 @@
 """Functions to help with searching claims in the LBRY network."""
 import json
 import os
-import subprocess
+import requests
 import sys
 
 from lbrytools.funcs import check_lbry
@@ -63,7 +63,8 @@ def check_repost(item):
     return item
 
 
-def search_item_uri(uri=None):
+def search_item_uri(uri=None,
+                    server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the URI.
 
     Parameters
@@ -77,6 +78,12 @@ def search_item_uri(uri=None):
             uri = 'some-video-name'
 
         The URI is also called the `'canonical_url'` of the claim.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -100,15 +107,27 @@ def search_item_uri(uri=None):
     cmd = ["lbrynet",
            "resolve",
            uri]
-    output = subprocess.run(cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # output = subprocess.run(cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
-    data = json.loads(output.stdout)
+    # data = json.loads(output.stdout)
+
+    msg = {"method": cmd[1],
+           "params": {"urls": uri}}
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    data = output["result"]
+
     item = data[uri]
 
     if "error" in item:
@@ -126,7 +145,8 @@ def search_item_uri(uri=None):
     return item
 
 
-def search_item_name(name=None, cid=None):
+def search_item_name(name=None, cid=None,
+                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the name or claim id.
 
     If both `cid` and `name` are given, `cid` is used.
@@ -142,6 +162,12 @@ def search_item_name(name=None, cid=None):
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -173,23 +199,34 @@ def search_item_name(name=None, cid=None):
     if cid:
         cmd[3] = "--claim_ids=" + cid
 
-    output = subprocess.run(cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # output = subprocess.run(cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
-    data = json.loads(output.stdout)
+    # data = json.loads(output.stdout)
+
+    msg = {"method": cmd[1] + "_" + cmd[2],
+           "params": {"name": name}}
+    if cid:
+        msg["params"] = {"claim_id": cid}
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    data = output["result"]
 
     if data["total_items"] <= 0:
-        out = False
-        if name:
-            out = name
         if cid:
-            out = cid
-        print(f">>> Error: no items found, '{out}'")
+            print(f">>> Error: no items found, cid={cid}")
+        elif name:
+            print(f">>> Error: no items found, name={name}")
         print(">>> Check spelling.")
         return False
 
@@ -202,7 +239,8 @@ def search_item_name(name=None, cid=None):
     return item
 
 
-def search_item(uri=None, cid=None, name=None):
+def search_item(uri=None, cid=None, name=None,
+                server="http://localhost:5279"):
     """Find a single item in the LBRY network resolving URI, claim id, or name.
 
     If all inputs are provided, `uri` is used.
@@ -228,6 +266,12 @@ def search_item(uri=None, cid=None, name=None):
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -244,14 +288,15 @@ def search_item(uri=None, cid=None, name=None):
         return False
 
     if uri and not cid:
-        item = search_item_uri(uri=uri)
+        item = search_item_uri(uri=uri, server=server)
     else:
-        item = search_item_name(name=name, cid=cid)
+        item = search_item_name(name=name, cid=cid, server=server)
 
     return item
 
 
-def ch_search_latest(channel=None, number=2):
+def ch_search_latest(channel=None, number=2,
+                     server="http://localhost:5279"):
     """Search for the latest claims published by a specific channel.
 
     Parameters
@@ -266,6 +311,12 @@ def ch_search_latest(channel=None, number=2):
     number: int, optional
         It defaults to 2.
         The number of items to search that were last posted by `channel`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -303,16 +354,28 @@ def ch_search_latest(channel=None, number=2):
 
     print("Search: " + " ".join(search_cmd2))
     print(80 * "-")
-    output = subprocess.run(search_cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
+    # output = subprocess.run(search_cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
 
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
-    data = json.loads(output.stdout)
+    # data = json.loads(output.stdout)
+
+    msg = {"method": search_cmd[1] + "_" + search_cmd[2],
+           "params": {"channel": channel,
+                      "page_size": number,
+                      "order_by": "release_time"}}
+    output = requests.post(server, json=msg).json()
+
+    if "result" not in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    data = output["result"]
 
     if "items" not in data:
         print(">>> No 'items' found in output dictionary")
@@ -404,8 +467,17 @@ def find_channel(uri=None, cid=None, name=None,
     return name
 
 
-def sort_items():
+def sort_items(server="http://localhost:5279"):
     """Return a list of claims that were downloaded, sorted by time.
+
+    Parameters
+    ----------
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -423,22 +495,33 @@ def sort_items():
         If there is a problem it will return False.
     """
     check_lbry()
+    page_size = 99000
     list_cmd = ["lbrynet",
                 "file",
                 "list",
-                "--page_size=99000"]
+                "--page_size=" + str(page_size)]
 
     print(80 * "-")
     print("List: " + " ".join(list_cmd))
-    output = subprocess.run(list_cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # output = subprocess.run(list_cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
-    data = json.loads(output.stdout)
+    # data = json.loads(output.stdout)
+
+    msg = {"method": list_cmd[1] + "_" + list_cmd[2],
+           "params": {"page_size": page_size}}
+    output = requests.post(server, json=msg).json()
+
+    if "result" not in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    data = output["result"]
 
     if "items" not in data:
         print(">>> No 'items' found in output dictionary")
