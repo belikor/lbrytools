@@ -69,14 +69,22 @@ def print_info_pre_get(item=None):
                               time.localtime(_time))
 
     _size = 0
-    if "size" in item["value"]["source"]:
+    if "source" in item["value"] and "size" in item["value"]["source"]:
          _size = float(item["value"]["source"]["size"])/(1024*1024)
 
+    _title = item["name"]
+    if "title" in item["value"]:
+        _title = item["value"]["title"]
+
+    _type = item["type"]
+    if "stream_type" in item["value"]:
+        _type = item["value"]["stream_type"]
+    
     info = ["canonical_url: " + item["canonical_url"],
             "claim_id: " + item["claim_id"],
             "release_time: " + _time,
-            "title: " + item["value"]["title"],
-            "stream_type: " + item["value"]["stream_type"],
+            "title: " + _title,
+            "stream_type: " + _type,
             "size: {:.4f} MB".format(_size)]
 
     rem_min = 0
