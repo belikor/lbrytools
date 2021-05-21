@@ -25,7 +25,7 @@
 """Functions to clean downloaded content from the LBRY network."""
 import json
 import os
-import subprocess
+import requests
 import shutil
 import sys
 
@@ -35,7 +35,8 @@ from lbrytools.search import find_channel
 
 
 def delete_single(uri=None, cid=None, name=None,
-                  what="media"):
+                  what="media",
+                  server="http://localhost:5279"):
     """Delete a single file, and optionally the downloaded blobs.
 
     As long as the blobs are present, the content can be seeded
@@ -68,6 +69,12 @@ def delete_single(uri=None, cid=None, name=None,
         If it is `'blobs'`, it will delete only the blobs.
         If it is `'both'`, it will delete both the media file
         and the blobs.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -100,15 +107,25 @@ def delete_single(uri=None, cid=None, name=None,
            "file",
            "list",
            "--claim_id=" + _claim_id]
-    output = subprocess.run(cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # output = subprocess.run(cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
-    data = json.loads(output.stdout)
+    # data = json.loads(output.stdout)
+
+    msg = {"method": cmd[1] + "_" + cmd[2],
+           "params": {"claim_id": _claim_id}}
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    data = output["result"]
 
     if not data["items"] or data["total_items"] < 1:
         print("No item found locally, probably already deleted.")
@@ -153,15 +170,28 @@ def delete_single(uri=None, cid=None, name=None,
     print("Remove: " + " ".join(cmd_id))
     print("Remove: " + " ".join(cmd_name))
 
-    output = subprocess.run(cmd_id,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
+    # output = subprocess.run(cmd_id,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
 
     # data = json.loads(output.stdout)
+
+    msg = {"method": cmd_id[1] + "_" + cmd_id[2],
+           "params": {"claim_id": _claim_id}}
+    
+    if what in "both":
+        msg["params"]["delete_from_download_dir"] = True
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
     print("Blobs deleted")
     print()
 
@@ -334,7 +364,8 @@ def measure_usage(main_dir=None, size=1000, percent=90, bar=True):
 
 
 def cleanup_space(main_dir=None, size=1000, percent=90,
-                  never_delete=None, what="media"):
+                  never_delete=None, what="media",
+                  server="http://localhost:5279"):
     """Clean up space in the download drive when it is sufficiently full.
 
     Parameters
@@ -378,6 +409,12 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         As long as the blobs are present, the content can be seeded
         to the network, and the full file can be restored.
         That is, while the blobs exist the file is not completely deleted.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -440,7 +477,8 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
                 continue
 
         print(out + "item will be deleted.")
-        delete_single(cid=item["claim_id"], what=what)
+        delete_single(cid=item["claim_id"], what=what,
+                      server=server)
 
         limit_crossed = measure_usage(main_dir=main_dir, size=size,
                                       percent=percent)
