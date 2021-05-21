@@ -26,6 +26,7 @@
 import json
 import os
 import subprocess
+import shutil
 import sys
 
 from lbrytools.search import search_item
@@ -210,18 +211,9 @@ def used_space(main_dir=None):
         print("Download directory should exist; "
               f"set to main_dir='{main_dir}'")
 
-    cmd = ["du", "-s", main_dir]
-    output = subprocess.run(cmd,
-                            capture_output=True,
-                            check=True,
-                            text=True)
-    if output.returncode == 1:
-        print(f"Error: {output.stderr}")
-        sys.exit(1)
-
-    size_bytes = output.stdout
-    size_bytes = size_bytes.split()[0]
-    size_GB = float(size_bytes)/(1024*1024)
+    total, used, free = shutil.disk_usage(main_dir)
+    size_bytes = used
+    size_GB = float(size_bytes)/(1024*1024*1024)
     return size_GB
 
 
