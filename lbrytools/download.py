@@ -147,7 +147,7 @@ def download_single(uri=None, cid=None, name=None,
 
     uri = item["canonical_url"]
 
-    if "name" in item["signing_channel"]:
+    if "signing_channel" in item and "name" in item["signing_channel"]:
         channel = item["signing_channel"]["name"]
     else:
         channel = "@_Unknown_"
