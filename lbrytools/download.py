@@ -305,7 +305,7 @@ def ch_download_latest(channel=None, number=2,
 
 
 def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
-                             number=None):
+                             number=None, rand=True):
     """Download the latest claims published by a list of a channels.
 
     Parameters
@@ -333,6 +333,17 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         numbers in `channels`.
         That is, the number of claims that will be downloaded
         will be the same for every channel.
+    rand: bool, optional
+        It defaults to `True`, in which case it will shuffle
+        the list of channels so that they are not processed in the order
+        that they come.
+
+        If the list is very long the LBRY daemon may stop processing
+        the claims, so it may happen that only the first channels
+        are processed but not the last ones.
+        So by processing the channels in random order, we increase
+        the probability of processing all channels by running this function
+        multiple times.
 
     Alternative input
     -----------------
@@ -392,12 +403,19 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         print(">>> No channels in the list")
         return False
 
+    if rand:
+        if isinstance(channels, tuple):
+            channels = list(channels)
+        random.shuffle(channels)
+        random.shuffle(channels)
+
     # Each element of the `channels` list may be a string,
     # a list with a single element, or a list with multiple elements (two).
     #     ch1 = "Channel"
     #     ch2 = ["@Ch1"]
     #     ch3 = ["Mychan", 2]
     #     channels = [ch1, ch2, ch3]
+
     for it, channel in enumerate(channels, start=1):
         ch_info = []
         if isinstance(channel, str):
