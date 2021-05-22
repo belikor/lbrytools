@@ -24,10 +24,8 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help with searching claims in the LBRY network."""
-import json
 import os
 import requests
-import sys
 
 from lbrytools.funcs import check_lbry
 
@@ -561,7 +559,7 @@ def parse_claim_file(file=None, start=1, end=0):
         This file can be produced by `print_summary(file='summary.txt')`
     start: int, optional
         It defaults to 1.
-        Operate on the item starting from this index in `file`. 
+        Operate on the item starting from this index in `file`.
     end: int, optional
         It defaults to 0.
         Operate until and including this index in `file`.

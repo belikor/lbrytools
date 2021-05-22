@@ -24,11 +24,9 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help with downloading content from the LBRY network."""
-import json
 import os
 import random
 import requests
-import sys
 
 from lbrytools.funcs import check_lbry
 

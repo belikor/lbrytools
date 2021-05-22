@@ -29,6 +29,7 @@ import subprocess
 
 
 def start_lbry():
+    """Launch the lbrynet client through subprocess."""
     subprocess.run(["lbrynet", "start"], stdout=subprocess.DEVNULL)
 
 
@@ -59,7 +60,7 @@ def check_lbry(server="http://localhost:5279"):
     bool
         It returns `True` if the LBRY daemon is already running.
         It returns `False` if the LBRY daemon was not running
-        but it was started manually. 
+        but it was started manually.
     """
     msg = {"method": "status"}
     try:

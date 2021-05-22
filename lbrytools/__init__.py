@@ -33,11 +33,11 @@ We use the `requests` module to send json messages to the running JSON-RPC
 in `localhost`.
 ::
     import requests
-    
+
     server = "http://localhost:5279"
     json = {"method": "get",
             "params": {"uri": "astream#bcd03a"}}
-    
+
     requests.post(server, json=json).json()
 
 In the past the `subprocess` module was used to run the `lbrynet` command.
@@ -47,7 +47,7 @@ In the past the `subprocess` module was used to run the `lbrynet` command.
 That is
 ::
     import subprocess
-    
+
     cmd = ["lbrynet", "get", "lbry://..."]
     output = subprocess.run(cmd, capture_output=True, check=True, text=True)
     data = json.loads(output.stdout)
@@ -90,6 +90,7 @@ True if sort_items else False
 True if parse_claim_file else False
 
 True if print_summary else False
+True if print_multi_list else False
 
 True if download_single else False
 True if ch_download_latest else False

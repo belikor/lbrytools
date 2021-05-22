@@ -136,4 +136,3 @@ sm_ch = 0
 
 # Print the name of the claim.
 sm_name = 1
-

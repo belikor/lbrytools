@@ -71,7 +71,7 @@ def print_info_pre_get(item=None):
 
     _size = 0
     if "source" in item["value"] and "size" in item["value"]["source"]:
-         _size = float(item["value"]["source"]["size"])/(1024*1024)
+        _size = float(item["value"]["source"]["size"])/(1024*1024)
 
     _title = item["name"]
     if "title" in item["value"]:
@@ -80,7 +80,7 @@ def print_info_pre_get(item=None):
     _type = item["type"]
     if "stream_type" in item["value"]:
         _type = item["value"]["stream_type"]
-    
+
     info = ["canonical_url: " + item["canonical_url"],
             "claim_id: " + item["claim_id"],
             "release_time: " + _time,
@@ -324,7 +324,7 @@ def print_items(items=None, show="all",
         return False
 
     fd = 0
-    
+
     if file:
         dirn = os.path.dirname(file)
         base = os.path.basename(file)

@@ -26,7 +26,6 @@
 """Functions to help use with blobs from LBRY content."""
 import os
 import requests
-import sys
 
 from lbrytools.funcs import check_lbry
 

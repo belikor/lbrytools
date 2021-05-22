@@ -24,11 +24,9 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to clean downloaded content from the LBRY network."""
-import json
 import os
 import requests
 import shutil
-import sys
 
 from lbrytools.search import search_item
 from lbrytools.search import sort_items
@@ -183,7 +181,7 @@ def delete_single(uri=None, cid=None, name=None,
 
     msg = {"method": cmd_id[1] + "_" + cmd_id[2],
            "params": {"claim_id": _claim_id}}
-    
+
     if what in "both":
         msg["params"]["delete_from_download_dir"] = True
 
@@ -536,7 +534,7 @@ def remove_media(never_delete=None):
 
     items = sort_items()
     n_items = len(items)
-    
+
     for it, item in enumerate(items, start=1):
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
         if never_delete:
