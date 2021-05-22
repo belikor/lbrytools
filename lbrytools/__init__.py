@@ -28,8 +28,18 @@ The daemon must be started before using the majority of these tools.
 ::
     lbrynet start
 
-The current system uses `lbrynet` in a subprocess to communicate with
-the daemon.
+We use the `requests` module to send json messages to the running JSON-RPC
+in `localhost`.
+::
+    import requests
+    
+    server = "http://localhost:5279"
+    json = {"method": "get",
+            "params": {"uri": "astream#bcd03a"}}
+    
+    requests.post(server, json=json).json()
+
+In the past the `subprocess` module was used to run the `lbrynet` command.
 ::
     lbrynet get 'lbry://...'
 
@@ -40,21 +50,6 @@ That is
     cmd = ["lbrynet", "get", "lbry://..."]
     output = subprocess.run(cmd, capture_output=True, check=True, text=True)
     data = json.loads(output.stdout)
-
-To Do
-----
-
-Instead of using the `lbrynet` executable through `subprocess`
-we could also use the `request` module, by sending json messages directly
-to the running daemon in `localhost`.
-::
-    import requests
-    
-    server = "http://localhost:5279"
-    json = {"method": "get",
-            "params": {"uri": "astream#bcd03a"}}
-    
-    requests.post(server, json=json).json()
 
 Developed and tested with Python 3.8.
 """
