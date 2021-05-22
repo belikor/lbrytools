@@ -73,6 +73,13 @@ channels = [
 c = ch_download_latest_multi(channels=channels, ddir=ddir, number=1)
 ```
 
+If the list of channels is very large, it is better to randomize it
+so that we can start downloading from an arbitrary channel, and not
+always from the first ones.
+```py
+c = ch_download_latest_multi(channels=channels, ddir=ddir, rand=True)
+```
+
 ----
 
 Print a list of claims that have been downloaded partially or fully

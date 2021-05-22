@@ -31,6 +31,12 @@ own_dir = 1
 # Set to 0 or None to disable.
 number = 0
 
+# Set to 1 (True) to shuffle the list of channels so that they aren't always
+# downloaded in sequence. Occasionally the LBRY daemon stops when many
+# downloads are active, so this is useful to make sure all channels are
+# considered, and not only the first ones in the list.
+shuffle = 1
+
 # =============================================================================
 # 2. Seeding options
 #

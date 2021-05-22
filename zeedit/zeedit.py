@@ -101,7 +101,8 @@ if __name__ == "__main__":
     info = lbryt.ch_download_latest_multi(channels=cfg.channels,
                                           ddir=cfg.ddir,
                                           own_dir=cfg.own_dir,
-                                          number=cfg.number)
+                                          number=cfg.number,
+                                          rand=cfg.shuffle)
     lbryt.print_multi_list(info)
 
     # For a seeding only system, the media files (mp4, mp3, mkv, etc.)
