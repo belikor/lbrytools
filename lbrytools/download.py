@@ -480,7 +480,8 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
     return list_ch_info
 
 
-def redownload_latest(number=2, ddir=None, own_dir=True, rand=False):
+def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
+                      server="http://localhost:5279"):
     """Attempt to redownload the latest claims that were already downloaded.
 
     This function is useful to resume the download of partially
@@ -511,6 +512,12 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False):
         If it is `True` it will shuffle the list of claims
         so that `number` indicates a random number of claims,
         not only the newest ones.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -529,7 +536,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False):
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
-    sorted_items = sort_items()
+    sorted_items = sort_items(server=server)
     sorted_items.reverse()
 
     if rand:
@@ -546,7 +553,8 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False):
             break
         print(f"Re-download {it}/{number}")
 
-        d = download_single(cid=item["claim_id"], ddir=ddir, own_dir=own_dir)
+        d = download_single(cid=item["claim_id"], ddir=ddir, own_dir=own_dir,
+                            server=server)
         list_info_get.append(d)
         print()
 
@@ -554,7 +562,8 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False):
 
 
 def redownload_claims(ddir=None, own_dir=True,
-                      start=1, end=0, file=None):
+                      start=1, end=0, file=None,
+                      server="http://localhost:5279"):
     """Try to re-download all claims already downloaded, or from a file.
 
     Parameters
@@ -584,6 +593,12 @@ def redownload_claims(ddir=None, own_dir=True,
         If `file=None` it will re-download the claims obtained
         from `sort_items` which should already be present in the system
         fully or partially.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -599,7 +614,7 @@ def redownload_claims(ddir=None, own_dir=True,
 
     if not file:
         print("Redownload from existing claims")
-        sorted_items = sort_items()
+        sorted_items = sort_items(server=server)
 
         if not sorted_items:
             print(">>> Error: no claims previously downloaded.")
@@ -635,7 +650,8 @@ def redownload_claims(ddir=None, own_dir=True,
 
         print("{:4d}/{:4d}".format(it, n_items))
         info_get = download_single(cid=item["claim_id"],
-                                   ddir=ddir, own_dir=own_dir)
+                                   ddir=ddir, own_dir=own_dir,
+                                   server=server)
         list_info_get.append(info_get)
         print()
 
