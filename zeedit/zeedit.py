@@ -125,7 +125,8 @@ if __name__ == "__main__":
                         size=cfg.size,
                         percent=cfg.percent,
                         never_delete=cfg.never_delete,
-                        what=cfg.what_to_delete)
+                        what=cfg.what_to_delete,
+                        server=cfg.server)
 
     # Print a summary of the existing downloaded content.
     print(80 * "=")
