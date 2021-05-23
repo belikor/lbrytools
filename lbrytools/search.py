@@ -390,7 +390,8 @@ def ch_search_latest(channel=None, number=2,
 
 
 def find_channel(uri=None, cid=None, name=None,
-                 full=True, canonical=False):
+                 full=True, canonical=False,
+                 server="http://localhost:5279"):
     """Return the channel's name to which the given claim belongs.
 
     If `uri`, `cid`, and `name` are provided, `uri` is used.
@@ -426,6 +427,12 @@ def find_channel(uri=None, cid=None, name=None,
         It defaults to `False`.
         If it is `True`, the `'canonical_url'` of the channel is returned
         regardless of the value of `full`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -449,7 +456,8 @@ def find_channel(uri=None, cid=None, name=None,
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
-    item = search_item(uri=uri, cid=cid, name=name)
+    item = search_item(uri=uri, cid=cid, name=name,
+                       server=server)
 
     if not item:
         print(f"uri={uri}, cid={cid}, name={name}")

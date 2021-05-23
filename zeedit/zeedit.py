@@ -112,7 +112,8 @@ if __name__ == "__main__":
     print(80 * "=")
     print("2. Seeding step")
     if cfg.seeding_only:
-        lbryt.remove_media(never_delete=None)
+        lbryt.remove_media(never_delete=None,
+                           server=cfg.server)
         cfg.what_to_delete = "both"
 
     # Normal cleanup step.

@@ -496,7 +496,8 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
     return True
 
 
-def remove_media(never_delete=None):
+def remove_media(never_delete=None,
+                 server="http://localhost:5279"):
     """Remove all media files but leave the binary blobs.
 
     This function is intended for systems that will only seed content.
@@ -515,6 +516,12 @@ def remove_media(never_delete=None):
 
         Using this parameter is slow as it needs to perform
         an additional search for the channel.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -532,13 +539,14 @@ def remove_media(never_delete=None):
     print(80 * "-")
     print("Delete all media files")
 
-    items = sort_items()
+    items = sort_items(server=server)
     n_items = len(items)
 
     for it, item in enumerate(items, start=1):
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
         if never_delete:
-            channel = find_channel(cid=item["claim_id"], full=False)
+            channel = find_channel(cid=item["claim_id"], full=False,
+                                   server=server)
             if not channel:
                 continue
 
