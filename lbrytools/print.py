@@ -220,7 +220,8 @@ def print_items(items=None, show="all",
                 title=False, typ=False, path=False,
                 cid=True, blobs=True, ch=False, name=True,
                 start=1, end=0, channel=None,
-                file=None, date=False):
+                file=None, date=False,
+                server="http://localhost:5279"):
     """Print information on each claim in the given list of claims.
 
     Parameters
@@ -286,6 +287,12 @@ def print_items(items=None, show="all",
     date: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -385,7 +392,8 @@ def print_items(items=None, show="all",
         if blobs:
             out += "{:3d}/{:3d}, ".format(_blobs, _blobs_in_stream)
         if ch:
-            _channel = find_channel(cid=item["claim_id"], full=True)
+            _channel = find_channel(cid=item["claim_id"], full=True,
+                                    server=server)
             out += f"{_channel}, "
 
             # Skip if the item is not published by the specified channel
@@ -416,7 +424,8 @@ def print_summary(show="all",
                   title=False, typ=False, path=False,
                   cid=True, blobs=True, ch=False, name=True,
                   start=1, end=0, channel=None,
-                  file=None, date=False):
+                  file=None, date=False,
+                  server="http://localhost:5279"):
     """Print a summary of the items downloaded from the LBRY network.
 
     Parameters
@@ -478,6 +487,12 @@ def print_summary(show="all",
     date: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -485,10 +500,11 @@ def print_summary(show="all",
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
-    items = sort_items()
+    items = sort_items(server=server)
     status = print_items(items, show=show,
                          title=title, typ=typ, path=path,
                          cid=cid, blobs=blobs, ch=ch, name=name,
                          start=start, end=end, channel=channel,
-                         file=file, date=date)
+                         file=file, date=date,
+                         server=server)
     return status

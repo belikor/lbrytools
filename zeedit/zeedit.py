@@ -141,4 +141,5 @@ if __name__ == "__main__":
                             ch=cfg.sm_ch,
                             name=cfg.sm_name,
                             file=cfg.sm_file,
-                            date=cfg.sm_date)
+                            date=cfg.sm_date,
+                            server=cfg.server)
