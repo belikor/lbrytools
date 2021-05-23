@@ -37,6 +37,10 @@ number = 0
 # considered, and not only the first ones in the list.
 shuffle = 1
 
+# Set the address of the JSON-RPC server of the LBRY daemon.
+# Normally, this value does not need to be changed.
+server = "http://localhost:5279"
+
 # =============================================================================
 # 2. Seeding options
 #

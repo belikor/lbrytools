@@ -102,7 +102,8 @@ if __name__ == "__main__":
                                           ddir=cfg.ddir,
                                           own_dir=cfg.own_dir,
                                           number=cfg.number,
-                                          rand=cfg.shuffle)
+                                          rand=cfg.shuffle,
+                                          server=cfg.server)
     lbryt.print_multi_list(info)
 
     # For a seeding only system, the media files (mp4, mp3, mkv, etc.)

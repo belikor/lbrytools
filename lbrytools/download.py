@@ -112,7 +112,8 @@ def lbrynet_get(get_cmd=None,
 
 
 def download_single(uri=None, cid=None, name=None,
-                    ddir=None, own_dir=True):
+                    ddir=None, own_dir=True,
+                    server="http://localhost:5279"):
     """Download a single item and place it in the download directory.
 
     If `uri`, `cid`, and `name` are provided, `uri` is used.
@@ -153,6 +154,12 @@ def download_single(uri=None, cid=None, name=None,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -173,7 +180,8 @@ def download_single(uri=None, cid=None, name=None,
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
     # It also checks if it's a reposted claim
-    item = search_item(uri=uri, cid=cid, name=name)
+    item = search_item(uri=uri, cid=cid, name=name,
+                       server=server)
     if not item:
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
@@ -224,7 +232,8 @@ def download_single(uri=None, cid=None, name=None,
     print("Download: " + " ".join(get_cmd2))
     print_info_pre_get(item)
 
-    info_get = lbrynet_get(get_cmd)
+    info_get = lbrynet_get(get_cmd,
+                           server=server)
 
     if not info_get:
         print(">>> Error: empty information from `lbrynet get`")
@@ -236,7 +245,8 @@ def download_single(uri=None, cid=None, name=None,
 
 
 def ch_download_latest(channel=None, number=2,
-                       ddir=None, own_dir=True):
+                       ddir=None, own_dir=True,
+                       server="http://localhost:5279"):
     """Download the latest claims published by a specific channel.
 
     Parameters
@@ -257,6 +267,12 @@ def ch_download_latest(channel=None, number=2,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
@@ -284,7 +300,8 @@ def ch_download_latest(channel=None, number=2,
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
     list_info_get = []
-    items = ch_search_latest(channel=channel, number=number)
+    items = ch_search_latest(channel=channel, number=number,
+                             server=server)
 
     if not items:
         print()
@@ -296,7 +313,8 @@ def ch_download_latest(channel=None, number=2,
         print(f"Item {it}/{n_items}")
 
         info_get = download_single(uri=item["canonical_url"],
-                                   ddir=ddir, own_dir=True)
+                                   ddir=ddir, own_dir=True,
+                                   server=server)
         list_info_get.append(info_get)
         print()
 
@@ -304,7 +322,8 @@ def ch_download_latest(channel=None, number=2,
 
 
 def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
-                             number=None, rand=True):
+                             number=None, rand=True,
+                             server="http://localhost:5279"):
     """Download the latest claims published by a list of a channels.
 
     Parameters
@@ -343,6 +362,12 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         So by processing the channels in random order, we increase
         the probability of processing all channels by running this function
         multiple times.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Alternative input
     -----------------
@@ -447,7 +472,8 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
 
         print(f"Channel {it}/{n_channels}, {channel}")
         ch_info = ch_download_latest(channel=channel, number=_number,
-                                     ddir=ddir, own_dir=own_dir)
+                                     ddir=ddir, own_dir=own_dir,
+                                     server=server)
 
         list_ch_info.append(ch_info)
 
@@ -456,7 +482,7 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
 
 def redownload_latest(number=2, ddir=None, own_dir=True, rand=False):
     """Attempt to redownload the latest claims that were already downloaded.
-    
+
     This function is useful to resume the download of partially
     downloaded claims, that is, those that for any reason didn't complete
     the first time.
