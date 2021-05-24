@@ -529,8 +529,7 @@ def remove_media(never_delete=None,
     Returns
     -------
     bool
-        It returns `True` if some of the older files
-        were successfully deleted.
+        It returns `True` if the older files were successfully deleted.
         It returns `False` if there is a problem, or if there
         was nothing to clean up.
     """
