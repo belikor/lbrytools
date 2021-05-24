@@ -28,9 +28,7 @@ import os
 import requests
 import shutil
 
-from lbrytools.search import search_item
-from lbrytools.search import sort_items
-from lbrytools.search import find_channel
+import lbrytools.search as srch
 
 
 def delete_single(uri=None, cid=None, name=None,
@@ -92,8 +90,8 @@ def delete_single(uri=None, cid=None, name=None,
         print(f"what={what}")
         return False
 
-    item = search_item(uri=uri, cid=cid, name=name,
-                       server=server)
+    item = srch.search_item(uri=uri, cid=cid, name=name,
+                            server=server)
     if not item:
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
@@ -465,7 +463,7 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         print("Nothing to clean up.")
         return False
 
-    sorted_items = sort_items(server=server)
+    sorted_items = srch.sort_items(server=server)
     n_items = len(sorted_items)
 
     for it, item in enumerate(sorted_items, start=1):
@@ -473,8 +471,8 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
 
         if never_delete:
-            channel = find_channel(cid=item["claim_id"], full=False,
-                                   server=server)
+            channel = srch.find_channel(cid=item["claim_id"], full=False,
+                                        server=server)
             if channel in never_delete:
                 print(out + f"item from {channel} will not be deleted. "
                       "Skipping.")
@@ -544,14 +542,14 @@ def remove_media(never_delete=None,
     print(80 * "-")
     print("Delete all media files")
 
-    items = sort_items(server=server)
+    items = srch.sort_items(server=server)
     n_items = len(items)
 
     for it, item in enumerate(items, start=1):
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
         if never_delete:
-            channel = find_channel(cid=item["claim_id"], full=False,
-                                   server=server)
+            channel = srch.find_channel(cid=item["claim_id"], full=False,
+                                        server=server)
             if not channel:
                 continue
 

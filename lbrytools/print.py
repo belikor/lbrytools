@@ -27,8 +27,7 @@
 import os
 import time
 
-from lbrytools.search import find_channel
-from lbrytools.search import sort_items
+import lbrytools.search as srch
 
 
 def print_info_pre_get(item=None):
@@ -392,7 +391,7 @@ def print_items(items=None, show="all",
         if blobs:
             out += "{:3d}/{:3d}, ".format(_blobs, _blobs_in_stream)
         if ch:
-            _channel = find_channel(cid=item["claim_id"], full=True,
+            _channel = srch.find_channel(cid=item["claim_id"], full=True,
                                     server=server)
             out += f"{_channel}, "
 
@@ -500,7 +499,7 @@ def print_summary(show="all",
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
-    items = sort_items(server=server)
+    items = srch.sort_items(server=server)
     status = print_items(items, show=show,
                          title=title, typ=typ, path=path,
                          cid=cid, blobs=blobs, ch=ch, name=name,

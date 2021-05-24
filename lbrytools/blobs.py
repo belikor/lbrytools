@@ -27,7 +27,7 @@
 import os
 import requests
 
-from lbrytools.funcs import check_lbry
+import lbrytools.funcs as funcs
 
 
 def get_blobs(blobfiles=None, action="get",
@@ -92,7 +92,7 @@ def get_blobs(blobfiles=None, action="get",
         print(f"action={action}")
         return False
 
-    check_lbry(server=server)
+    funcs.check_lbry(server=server)
     list_blobs = os.listdir(blobfiles)
     n_blobs = len(list_blobs)
 

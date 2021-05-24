@@ -28,15 +28,9 @@ import os
 import random
 import requests
 
-from lbrytools.funcs import check_lbry
-
-from lbrytools.search import search_item
-from lbrytools.search import ch_search_latest
-from lbrytools.search import sort_items
-from lbrytools.search import parse_claim_file
-
-from lbrytools.print import print_info_pre_get
-from lbrytools.print import print_info_post_get
+import lbrytools.funcs as funcs
+import lbrytools.search as srch
+import lbrytools.print as prnt
 
 
 def lbrynet_get(get_cmd=None,
@@ -79,7 +73,7 @@ def lbrynet_get(get_cmd=None,
         get_cmd2[2] = "'" + get_cmd2[2] + "'"
         print("Download: " + " ".join(get_cmd2))
 
-    check_lbry()
+    funcs.check_lbry(server=server)
     # output = subprocess.run(get_cmd,
     #                         capture_output=True,
     #                         check=True,
@@ -180,8 +174,8 @@ def download_single(uri=None, cid=None, name=None,
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
     # It also checks if it's a reposted claim
-    item = search_item(uri=uri, cid=cid, name=name,
-                       server=server)
+    item = srch.search_item(uri=uri, cid=cid, name=name,
+                            server=server)
     if not item:
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
@@ -230,7 +224,7 @@ def download_single(uri=None, cid=None, name=None,
     get_cmd2.append("--download_directory=" + "'" + ddir + "'")
 
     print("Download: " + " ".join(get_cmd2))
-    print_info_pre_get(item)
+    prnt.print_info_pre_get(item)
 
     info_get = lbrynet_get(get_cmd,
                            server=server)
@@ -239,7 +233,7 @@ def download_single(uri=None, cid=None, name=None,
         print(">>> Error: empty information from `lbrynet get`")
         return False
 
-    print_info_post_get(info_get)
+    prnt.print_info_post_get(info_get)
 
     return info_get
 
@@ -300,8 +294,8 @@ def ch_download_latest(channel=None, number=2,
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
     list_info_get = []
-    items = ch_search_latest(channel=channel, number=number,
-                             server=server)
+    items = srch.ch_search_latest(channel=channel, number=number,
+                                  server=server)
 
     if not items:
         print()
@@ -536,7 +530,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
-    sorted_items = sort_items(server=server)
+    sorted_items = srch.sort_items(server=server)
     sorted_items.reverse()
 
     if rand:
@@ -591,8 +585,8 @@ def redownload_claims(ddir=None, own_dir=True,
         with `download_single` to get that claim.
 
         If `file=None` it will re-download the claims obtained
-        from `sort_items` which should already be present in the system
-        fully or partially.
+        from `search.sort_items` which should already be present
+        in the system fully or partially.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -614,7 +608,7 @@ def redownload_claims(ddir=None, own_dir=True,
 
     if not file:
         print("Redownload from existing claims")
-        sorted_items = sort_items(server=server)
+        sorted_items = srch.sort_items(server=server)
 
         if not sorted_items:
             print(">>> Error: no claims previously downloaded.")
@@ -626,7 +620,7 @@ def redownload_claims(ddir=None, own_dir=True,
             return False
 
         print("Redownload from existing file")
-        sorted_items = parse_claim_file(file)
+        sorted_items = srch.parse_claim_file(file=file)
         print()
 
         if not sorted_items:

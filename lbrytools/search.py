@@ -27,7 +27,7 @@
 import os
 import requests
 
-from lbrytools.funcs import check_lbry
+import lbrytools.funcs as funcs
 
 
 def check_repost(item):
@@ -102,7 +102,7 @@ def search_item_uri(uri=None,
         print(f"uri={uri}")
         return False
 
-    check_lbry(server=server)
+    funcs.check_lbry(server=server)
     cmd = ["lbrynet",
            "resolve",
            uri]
@@ -190,7 +190,7 @@ def search_item_name(name=None, cid=None,
         print(f"name={name}, cid={cid}")
         return False
 
-    check_lbry(server=server)
+    funcs.check_lbry(server=server)
     cmd = ["lbrynet",
            "claim",
            "search",
@@ -339,7 +339,7 @@ def ch_search_latest(channel=None, number=2,
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    check_lbry(server=server)
+    funcs.check_lbry(server=server)
     search_cmd = ["lbrynet",
                   "claim",
                   "search",
@@ -505,7 +505,7 @@ def sort_items(server="http://localhost:5279"):
     False
         If there is a problem it will return False.
     """
-    check_lbry(server=server)
+    funcs.check_lbry(server=server)
     page_size = 99000
     list_cmd = ["lbrynet",
                 "file",
