@@ -31,7 +31,8 @@ from lbrytools.funcs import check_lbry
 
 
 def get_blobs(blobfiles=None, action="get",
-              start=1, end=0, server="http://localhost:5279"):
+              start=1, end=0,
+              server="http://localhost:5279"):
     """Refresh all binary blobs from the blobfiles directory.
 
     Parameters
