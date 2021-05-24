@@ -92,7 +92,7 @@ def get_blobs(blobfiles=None, action="get",
         print(f"action={action}")
         return False
 
-    check_lbry()
+    check_lbry(server=server)
     list_blobs = os.listdir(blobfiles)
     n_blobs = len(list_blobs)
 
