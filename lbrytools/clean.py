@@ -351,16 +351,19 @@ def measure_usage(main_dir=None, size=1000, percent=90, bar=True):
                                                            size))
     print("Usage: {:.2f}% ({:.1f} GB)".format(actual_percent, actual_usage))
 
+    above = False
     if actual_percent >= percent:
-        print(">>> Downloads are above the indicated limit.")
-        if bar:
-            pr_bar(size=size, percent=percent, actual_percent=actual_percent)
-        return True
+        above = True
 
-    print("Downloads are within limits.")
+    if above:
+        print(">>> Downloads are above the indicated limit.")
+    else:
+        print("Downloads are within limits.")
+
     if bar:
         pr_bar(size=size, percent=percent, actual_percent=actual_percent)
-    return False
+
+    return above
 
 
 def cleanup_space(main_dir=None, size=1000, percent=90,
