@@ -21,7 +21,7 @@ to search, download, and delete many claims easier.
 
 This library is inspired by tuxfoo's [lbry-seedit](https://github.com/tuxfoo/lbry-seedit) script,
 which provides basic functions, and a configuration file to download and seed
-claims. Initially tuxfoo's code was extended lightly but eventually an entire
+claims. Initially tuxfoo's code was extended slightly but eventually an entire
 library was written from scratch to provide more functionality.
 
 # Installation
