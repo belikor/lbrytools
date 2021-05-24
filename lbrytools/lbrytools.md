@@ -10,7 +10,7 @@ lbrynet start
 Then in a Python terminal, or in a Python script, import `lbrtytools`
 or the individual methods.
 ```py
-import lbrytools as lt
+import lbrytools as lbryt
 ```
 
 Or
@@ -38,8 +38,8 @@ Download a single item from the LBRY network by URI (`'canonical_url'`)
 or `'claim_id'`.
 Place the file in a subdirectory in the download directory.
 ```py
-d = lt.download_single(uri="RoboCopOS#c", ddir=ddir, own_dir=True)
-d = lt.download_single(cid="c8e8bb0029f6cb7d1b4d287b6e040339aa8b7f3e", ddir=ddir, own_dir=True)
+d = lbryt.download_single(uri="RoboCopOS#c", ddir=ddir, own_dir=True)
+d = lbryt.download_single(cid="c8e8bb0029f6cb7d1b4d287b6e040339aa8b7f3e", ddir=ddir, own_dir=True)
 ```
 
 # Multiple downloads
@@ -49,7 +49,7 @@ The channel may be specified fully, with the prefix `@` and characters after
 `#` or `:`, or partially, without them.
 Full names are necessary to distinguish two channels with the same base name.
 ```py
-c = lt.ch_download_latest(channel="@lbry", number=3, ddir=ddir)
+c = lbryt.ch_download_latest(channel="@lbry", number=3, ddir=ddir)
 ```
 
 Various claims from many channels can be downloaded at the same time.
@@ -67,14 +67,14 @@ channels = [
     ["@Veritasium:f", 2]
 ]
 
-ch = lt.ch_download_latest_multi(channels=channels, ddir=ddir)
+ch = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir)
 ```
 
 By using the `number` parameter, the individual numbers in `channels`
 are overriden.
 For exampe, download the 4 newest claims from each channel.
 ```py
-ch = lt.ch_download_latest_multi(channels=channels, ddir=ddir, number=4)
+ch = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, number=4)
 ```
 
 Another way of specifying the list of channels is as a simple list of strings.
@@ -87,14 +87,14 @@ channels = [
     "MoneroTalk"
 ]
 
-c = lt.ch_download_latest_multi(channels=channels, ddir=ddir, number=1)
+c = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, number=1)
 ```
 
 If the list of channels is large, it is better to randomize it
 so that we can start downloading from an arbitrary channel, and not
 always from the first one in the list.
 ```py
-c = lt.ch_download_latest_multi(channels=channels, ddir=ddir, rand=True)
+c = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, rand=True)
 ```
 
 # Printing
@@ -108,9 +108,9 @@ the `'timestamp'` is used.
 Specify a filename to print to that file, otherwise it will print to
 the terminal. Optionally add the date to the filename.
 ```py
-p = lt.print_summary()
-p = lt.print_summary(file="/opt/summary.txt")
-p = lt.print_summary(file="/opt/summary.txt", date=True)
+p = lbryt.print_summary()
+p = lbryt.print_summary(file="/opt/summary.txt")
+p = lbryt.print_summary(file="/opt/summary.txt", date=True)
 ```
 
 Various options control which claims are actually printed.
@@ -120,11 +120,11 @@ or only those which have all their blobs,
 or only those for which the full media file (mp4, mp3, mkv, etc.) exists,
 or only those for which the media file is missing.
 ```py
-p = lt.print_summary(show="all")
-p = lt.print_summary(show="incomplete")
-p = lt.print_summary(show="full")
-p = lt.print_summary(show="media")
-p = lt.print_summary(show="missing")
+p = lbryt.print_summary(show="all")
+p = lbryt.print_summary(show="incomplete")
+p = lbryt.print_summary(show="full")
+p = lbryt.print_summary(show="media")
+p = lbryt.print_summary(show="missing")
 ```
 
 Normally only items that have all blobs also have a media file; however,
@@ -136,15 +136,16 @@ and name of claim.
 Printing the channel's name is slow as it needs to perform an additional search
 for the channel.
 ```py
-p = lt.print_summary(title=True, typ=False, path=False,
-                     cid=True, blobs=True, ch=False, name=True)
+p = lbryt.print_summary(title=True, typ=False, path=False,
+                        cid=True, blobs=True, ch=False,
+                        name=True)
 ```
  
 Print only a range of items, or only the claims by a specific channel
 (it implies `ch=True` and is slow).
 ```py
-p = lt.print_summary(start=20, end=40)
-p = lt.print_summary(channel="Veritasium")
+p = lbryt.print_summary(start=20, end=40)
+p = lbryt.print_summary(channel="Veritasium")
 ```
 
 # Re-download
@@ -153,13 +154,13 @@ Attempt to re-download the latest (newest) items that were already downloaded.
 This can be done to resume the download of claims that for some reason stopped,
 and didn't complete.
 ```py
-r = lt.redownload_latest(number=10, ddir=ddir, own_dir=True)
+r = lbryt.redownload_latest(number=10, ddir=ddir, own_dir=True)
 ```
 
 If the list of claims is shuffled, then we can re-download random claims,
 not necessarily the latest ones.
 ```py
-r = lt.redownload_latest(number=20, ddir=ddir, own_dir=True, rand=True)
+r = lbryt.redownload_latest(number=20, ddir=ddir, own_dir=True, rand=True)
 ```
 
 ----
@@ -167,17 +168,17 @@ r = lt.redownload_latest(number=20, ddir=ddir, own_dir=True, rand=True)
 Redownload all claims previously downloaded, or from a range of indices
 in chronological order, older items first.
 ```py
-q = lt.redownload_claims(ddir=ddir)
-q = lt.redownload_claims(ddir=ddir, own_dir=True, start=20, end=80)
+q = lbryt.redownload_claims(ddir=ddir)
+q = lbryt.redownload_claims(ddir=ddir, own_dir=True, start=20, end=80)
 ```
 
 Redownload claims from a comma-separated values (CSV) file that lists
 one claim per row, with the `'claim_id'` in one column.
 This type of file can be generated by `print_summary`.
 ```py
-p = lt.print_summary(file="summary.txt")
+p = lbryt.print_summary(file="summary.txt")
 
-q = lt.redownload_claims(ddir=ddir, file="summary.txt")
+q = lbryt.redownload_claims(ddir=ddir, file="summary.txt")
 ```
 
 Sharing a list of claims in this way allows different systems to download,
@@ -188,9 +189,9 @@ and seed the same content.
 Delete a single downloaded item by URI or `'claim_id'`.
 Choose to delete the media file (mp4, mp3, mkv, etc.), the blobs, or both.
 ```py
-s = lt.delete_single(cid="099ace3145fba6bef6b529bcf03efcc0eb8ebfc9", what="media")
-s = lt.delete_single(uri="if-samsung-made-a-macbook", what="blobs")
-s = lt.delete_single(uri="RoboCopOS", what="both")
+s = lbryt.delete_single(cid="099ace3145fba6bef6b529bcf03efcc0eb8ebfc9", what="media")
+s = lbryt.delete_single(uri="if-samsung-made-a-macbook", what="blobs")
+s = lbryt.delete_single(uri="RoboCopOS", what="both")
 ```
 
 As long as the blobs are present, the content can be seeded to the network,
@@ -229,24 +230,24 @@ Then `size` is the space in gigabytes (GB) in `main_dir` dedicated
 to the media and blobs; `percent` is how much it will fill up before space
 needs to be freed.
 ```py
-m = lt.measure_usage(main_dir=main_dir, size=1000, percent=90)
-m = lt.measure_usage(main_dir=main_dir, size=1000, percent=90, bar=False)
+m = lbryt.measure_usage(main_dir=main_dir, size=1000, percent=90)
+m = lbryt.measure_usage(main_dir=main_dir, size=1000, percent=90, bar=False)
 ```
 
 # Clean up space
 
 Free space by deleting older media files when 90% of `size` is full.
 ```py
-n = lt.cleanup_space(main_dir=main_dir, size=1000, percent=90, what="media")
+n = lbryt.cleanup_space(main_dir=main_dir, size=1000, percent=90, what="media")
 ```
 
 We can choose to delete media files, blobs, or both.
 While the blobs exist, the media file can be seeded and recreated.
 More space is freed by deleting both media and blobs.
 ```py
-n = lt.cleanup_space(main_dir=main_dir, what="media")
-n = lt.cleanup_space(main_dir=main_dir, what="blobs")
-n = lt.cleanup_space(main_dir=main_dir, what="both")
+n = lbryt.cleanup_space(main_dir=main_dir, what="media")
+n = lbryt.cleanup_space(main_dir=main_dir, what="blobs")
+n = lbryt.cleanup_space(main_dir=main_dir, what="both")
 ```
 
 Free space but avoid deleting the content from certain channels.
@@ -259,7 +260,7 @@ never_delete = [
     "@RobBraxmanTech"
 ]
 
-n = lt.cleanup_space(main_dir=main_dir, size=2000, never_delete=never_delete)
+n = lbryt.cleanup_space(main_dir=main_dir, size=2000, never_delete=never_delete)
 ```
 
 ----
@@ -269,34 +270,34 @@ the binary blobs.
 This is useful for systems that will only seed the downloaded content,
 as only the blobs are necessary in this case.
 ```py
-k = lt.remove_media()
+k = lbryt.remove_media()
 ```
 
 The `never_delete` list can be used, although for headless systems that will
 only seed it should be avoided.
 ```py
-k = lt.remove_media(never_delete=never_delete)
+k = lbryt.remove_media(never_delete=never_delete)
 ```
 
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
 a local JSON-RCP server.
-By default, the server is in `"http://localhost:5279"`.
+By default, the server is listening on `http://localhost:5279`.
 
 Most functions accept an optional parameter to specify the server address,
 although this rarely needs to be provided.
 ```py
 server = "http://localhost:5279"
 
-lt.download_single(..., server=server)
-lt.ch_download_latest(..., server=server)
-lt.ch_download_latest_multi(..., server=server)
-lt.print_summary(..., server=server)
-lt.redownload_latest(..., server=server)
-lt.redownload_claims(..., server=server)
-lt.delete_single(..., server=server)
-lt.measure_usage(...)
-lt.cleanup_space(..., server=server)
-lt.remove_media(..., server=server)
+lbryt.download_single(..., server=server)
+lbryt.ch_download_latest(..., server=server)
+lbryt.ch_download_latest_multi(..., server=server)
+lbryt.print_summary(..., server=server)
+lbryt.redownload_latest(..., server=server)
+lbryt.redownload_claims(..., server=server)
+lbryt.delete_single(..., server=server)
+lbryt.measure_usage(...)
+lbryt.cleanup_space(..., server=server)
+lbryt.remove_media(..., server=server)
 ```
