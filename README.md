@@ -115,3 +115,17 @@ zeedit/
                ...
 ```
 
+# Development
+
+Ideally, this collection of tools can be merged into the official
+LBRY sources so that everybody has access to them.
+Where possible, the tools should also be available from a graphical
+interface such as the LBRY Desktop application.
+* [lbryio/lbry-sdk](https://github.com/lbryio/lbry-sdk)
+* [lbryio/lbry-desktop](https://github.com/lbryio/lbry-desktop)
+
+If you wish to support this work you can send a donation:
+```
+LBC: bY38MHNfE59ncq3Ch3zLW5g41ckGoHMzDq
+XMR: 8565RALsab2cWsSyLg4v1dbLkd3quc7sciqFJ2mpfip6PeVyBt4ZUbZesAAVpKG1M31Qi5k9mpDSGSDpb3fK5hKYSUs8Zff
+```
