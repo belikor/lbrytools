@@ -12,9 +12,10 @@ This libary is released as free software under the MIT license.
 
 # Motivation
 
-The LBRY Desktop application provides basic functionality to manage downloaded
-claims. Real control of the system is achieved with the `lbrynet` headless
-client.
+The [LBRY Desktop application](https://github.com/lbryio/lbry-desktop)
+provides basic functionality to manage downloaded claims.
+Real control of the system is achieved with the `lbrynet` headless
+client, also called the [lbry-sdk](https://github.com/lbryio/lbry-sdk).
 
 This library provides convenience functions that wrap around `lbrynet` in order
 to search, download, and delete many claims easier.
@@ -25,6 +26,13 @@ claims. Initially tuxfoo's code was extended slightly but eventually an entire
 library was written from scratch to provide more functionality.
 
 # Installation
+
+You must have the LBRY Desktop application or the `lbrynet` client.
+Get them from [lbry.com/get](https://lbry.com/get).
+
+You must have Python installed. Most Linux distributions come with Python
+ready to use; for Windows you may need to get the official package,
+or a full featured distribution such as Anaconda.
 
 Copy the internal [lbrytools](./lbrytools) directory, and place it inside
 a `site-packages` directory that is searched by Python.
@@ -41,6 +49,8 @@ or in a system-wide directory.
 
 This library was developed and tested with Python 3.8 but it may also work with
 earlier versions with small changes.
+It uses standard modules such as `importlib`, `os`, `random`, `requests`,
+`sys`, and `time`.
 
 # Usage
 
