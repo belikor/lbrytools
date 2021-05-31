@@ -463,7 +463,8 @@ def find_channel(uri=None, cid=None, name=None,
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
-    if "canonical_url" not in item["signing_channel"]:
+    if ("signing_channel" not in item
+            or "canonical_url" not in item["signing_channel"]):
         name = "@_Unknown_"
         return name
 
