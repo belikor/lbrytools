@@ -132,7 +132,8 @@ def print_info_post_get(info_get=None):
         # In certain cases the information does not have blobs in the stream
         # nor download path. This may need to be checked if it causes
         # an error that cannot be handled later.
-    # elif (not info_get["blobs_in_stream"] or not info_get["download_path"]):
+        # elif (not info_get["blobs_in_stream"]
+        #       or not info_get["download_path"]):
         # print(info_get)
         print(">>> Error in downloading claim, "
               f"blobs_in_stream={info_get['blobs_in_stream']}, "
@@ -202,6 +203,10 @@ def print_multi_list(list_ch_info=None):
 
     for it, item in enumerate(flat_list, start=1):
         out = "{:2d}/{:2d}, ".format(it, n_items)
+
+        if not item:
+            print(out + "empty item; failed download?")
+            continue
 
         if "claim_id" in item:
             print(out + "{}, {}, {}".format(item["claim_id"],
@@ -392,7 +397,7 @@ def print_items(items=None, show="all",
             out += "{:3d}/{:3d}, ".format(_blobs, _blobs_in_stream)
         if ch:
             _channel = srch.find_channel(cid=item["claim_id"], full=True,
-                                    server=server)
+                                         server=server)
             out += f"{_channel}, "
 
             # Skip if the item is not published by the specified channel
