@@ -479,11 +479,24 @@ def find_channel(uri=None, cid=None, name=None,
     return name
 
 
-def sort_items(server="http://localhost:5279"):
+def sort_items(channel=None,
+               server="http://localhost:5279"):
     """Return a list of claims that were downloaded, sorted by time.
+
+    If `channel` is provided it will list the downloaded claims
+    by this channel only.
+    Otherwise it will list all claims.
 
     Parameters
     ----------
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -513,6 +526,16 @@ def sort_items(server="http://localhost:5279"):
                 "list",
                 "--page_size=" + str(page_size)]
 
+    if channel and not isinstance(channel, str):
+        print("Channel must be a string. Set to 'None'.")
+        print(f"channel={channel}")
+        channel = None
+
+    if channel:
+        if not channel.startswith("@"):
+            channel = "@" + channel
+        list_cmd.append("--channel_name=" + channel)
+
     print(80 * "-")
     print("List: " + " ".join(list_cmd))
     # output = subprocess.run(list_cmd,
@@ -527,6 +550,9 @@ def sort_items(server="http://localhost:5279"):
 
     msg = {"method": list_cmd[1] + "_" + list_cmd[2],
            "params": {"page_size": page_size}}
+    if channel:
+        msg["params"]["channel_name"] = channel
+
     output = requests.post(server, json=msg).json()
 
     if "result" not in output:
