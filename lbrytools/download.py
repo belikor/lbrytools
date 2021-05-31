@@ -555,10 +555,10 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
     return list_info_get
 
 
-def redownload_claims(ddir=None, own_dir=True,
-                      start=1, end=0, file=None,
-                      server="http://localhost:5279"):
-    """Try to re-download all claims already downloaded, or from a file.
+def download_claims(ddir=None, own_dir=True,
+                    start=1, end=0, file=None,
+                    server="http://localhost:5279"):
+    """Download claims from a file, or redownload the ones already present.
 
     Parameters
     ----------
@@ -619,7 +619,7 @@ def redownload_claims(ddir=None, own_dir=True,
             print(f"file={file}")
             return False
 
-        print("Redownload from existing file")
+        print("Download from existing file")
         sorted_items = srch.parse_claim_file(file=file)
         print()
 

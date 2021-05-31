@@ -71,7 +71,7 @@ from lbrytools.download import download_single
 from lbrytools.download import ch_download_latest
 from lbrytools.download import ch_download_latest_multi
 from lbrytools.download import redownload_latest
-from lbrytools.download import redownload_claims
+from lbrytools.download import download_claims
 
 from lbrytools.clean import delete_single
 from lbrytools.clean import measure_usage
@@ -96,7 +96,7 @@ True if download_single else False
 True if ch_download_latest else False
 True if ch_download_latest_multi else False
 True if redownload_latest else False
-True if redownload_claims else False
+True if download_claims else False
 
 True if delete_single else False
 True if measure_usage else False
