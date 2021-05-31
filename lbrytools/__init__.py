@@ -74,6 +74,8 @@ from lbrytools.download import redownload_latest
 from lbrytools.download import download_claims
 
 from lbrytools.clean import delete_single
+from lbrytools.clean import ch_cleanup
+from lbrytools.clean import ch_cleanup_multi
 from lbrytools.clean import measure_usage
 from lbrytools.clean import cleanup_space
 from lbrytools.clean import remove_media
@@ -99,6 +101,8 @@ True if redownload_latest else False
 True if download_claims else False
 
 True if delete_single else False
+True if ch_cleanup else False
+True if ch_cleanup_multi else False
 True if measure_usage else False
 True if cleanup_space else False
 True if remove_media else False

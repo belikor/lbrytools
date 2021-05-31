@@ -93,7 +93,6 @@ def delete_single(uri=None, cid=None, name=None,
     item = srch.search_item(uri=uri, cid=cid, name=name,
                             server=server)
     if not item:
-        print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
     _uri = item["canonical_url"]
@@ -148,7 +147,6 @@ def delete_single(uri=None, cid=None, name=None,
             print("Media file deleted")
         else:
             print("No media found locally, probably already deleted.")
-        print()
         return True
 
     cmd_name = ["lbrynet",
@@ -191,9 +189,246 @@ def delete_single(uri=None, cid=None, name=None,
         return False
 
     print("Blobs deleted")
-    print()
 
     return True
+
+
+def ch_cleanup(channel=None, number=2, what="media",
+               server="http://localhost:5279"):
+    """Delete all claims from a channel, except for the latest ones.
+
+    Parameters
+    ----------
+    channel: str
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+    number: int, optional
+        It defaults to 2.
+        The number of items to keep from `channel`.
+        These will be the newest ones according to their `'release_time'`
+        or `'timestamp'`, if the former is missing.
+    what: str, optional
+        It defaults to `'media'`, in which case only the full media file
+        (mp4, mp3, mkv, etc.) is deleted.
+        If it is `'blobs'`, it will delete only the blobs.
+        If it is `'both'`, it will delete both the media file
+        and the blobs.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of bool
+        It returns a list of booleans, where each boolean represents
+        a deleted item; `True` if the claim was deleted successfully,
+        and `False` if it was not.
+    False
+        If there is a problem or non existing channel,
+        it will return `False`.
+    """
+    if not channel or not isinstance(channel, str):
+        print("Clean up items from a single channel.")
+        print(f"channel={channel}")
+        return False
+
+    if (number is None or number is False
+            or not isinstance(number, int) or number < 0):
+        number = 2
+        print("Number must be a positive integer, "
+              f"set to default value, number={number}")
+
+    if (not isinstance(what, str)
+            or what not in ("media", "blobs", "both")):
+        print(">>> Error: what can only be 'media', 'blobs', 'both'")
+        print(f"what={what}")
+        return False
+
+    list_info_del = []
+    sorted_items = srch.sort_items(channel=channel,
+                                   server=server)
+    if not sorted_items:
+        print()
+        return False
+
+    n_items = len(sorted_items)
+
+    remaining = n_items - 0
+
+    for it, item in enumerate(sorted_items, start=1):
+        if remaining <= number:
+            print(8*"-")
+            print(f"Finished deleting; remaining {remaining}")
+            print()
+            break
+
+        print(f"Item {it}/{n_items}")
+
+        del_info = delete_single(cid=item["claim_id"], what=what,
+                                 server=server)
+        list_info_del.append(del_info)
+        remaining = n_items - it
+
+        if remaining > number:
+            print()
+
+        if remaining == 0:
+            print(8*"-")
+            print(f"Finished deleting; remaining {remaining}")
+            print()
+
+    return list_info_del
+
+
+def ch_cleanup_multi(channels=None, what="media", number=None,
+                     server="http://localhost:5279"):
+    """Delete all claims from a list of channels, except for the latest ones.
+
+    Parameters
+    ----------
+    channels: list of lists
+        Each element in the list is a list of two elements.
+        The first element is a channel's name, full or partial;
+        the second element is an integer that indicates the number
+        of items from that channel that will be kept.
+        ::
+            channels = [
+                         ['@MyChannel#5', 3],
+                         ['GoodChannel#f', 4],
+                         ['Fast_channel', 2]
+                       ]
+    what: str, optional
+        It defaults to `'media'`, in which case only the full media file
+        (mp4, mp3, mkv, etc.) is deleted.
+        If it is `'blobs'`, it will delete only the blobs.
+        If it is `'both'`, it will delete both the media file
+        and the blobs.
+    number: int, optional
+        It defaults to `None`.
+        If this is present, it will override the individual
+        numbers in `channels`.
+        That is, the number of claims that will be kept
+        will be the same for every channel.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Alternative input
+    -----------------
+    channels: list of str
+        The list of channels can also be specified as a list of strings.
+        ::
+            channels = [
+                         '@MyChannel#5',
+                         'GoodChannel#f',
+                         'Fast_channel'
+                       ]
+            number = 4
+
+        In this case `number` must be specified explicitly to control
+        the number of claims that will be kept for every channel.
+
+    Returns
+    -------
+    list of lists of bool
+        A list of lists, where each internal list represents one channel,
+        and this internal list has a boolean value for each deleted item;
+        `True` if the claim was deleted successfully, and `False` if it
+        was not.
+    False
+        If there is a problem, or an empty channel list,
+        it will return `False`.
+    """
+    if not channels or not isinstance(channels, (list, tuple)):
+        m = ["Delete items from a list of channels and numbers.",
+             "  [",
+             "    ['@MyChannel', 2],",
+             "    ['@AwesomeCh:8', 1],",
+             "    ['@A-B-C#a', 3]",
+             "  ]"]
+        print("\n".join(m))
+        print(f"channels={channels}")
+        return False
+
+    if (not isinstance(what, str)
+            or what not in ("media", "blobs", "both")):
+        print(">>> Error: what can only be 'media', 'blobs', 'both'")
+        print(f"what={what}")
+        return False
+
+    DEFAULT_NUM = 2
+
+    if number:
+        if not isinstance(number, int) or number < 0:
+            number = DEFAULT_NUM
+            print("Number must be a positive integer, "
+                  f"set to default value, number={number}")
+
+        print("Global value overrides per channel number, "
+              f"number={number}")
+
+    n_channels = len(channels)
+
+    if n_channels <= 0:
+        print(">>> No channels in the list")
+        return False
+
+    list_ch_del_info = []
+
+    # Each element of the `channels` list may be a string,
+    # a list with a single element, or a list with multiple elements (two).
+    #     ch1 = "Channel"
+    #     ch2 = ["@Ch1"]
+    #     ch3 = ["Mychan", 2]
+    #     channels = [ch1, ch2, ch3]
+
+    for it, channel in enumerate(channels, start=1):
+        ch_del_info = []
+        if isinstance(channel, str):
+            _number = DEFAULT_NUM
+        elif isinstance(channel, (list, tuple)):
+            if len(channel) < 2:
+                _number = DEFAULT_NUM
+            else:
+                _number = channel[1]
+                if not isinstance(_number, (int, float)) or _number < 0:
+                    print(f">>> Number set to {DEFAULT_NUM}")
+                    _number = DEFAULT_NUM
+                _number = int(_number)
+
+            channel = channel[0]
+
+        if not isinstance(channel, str):
+            print(f"Channel {it}/{n_channels}, {channel}")
+            print(">>> Error: channel must be a string. Skip channel.")
+            print()
+            list_ch_del_info.append(ch_del_info)
+            continue
+
+        if not channel.startswith("@"):
+            channel = "@" + channel
+
+        # Number overrides the individual number for all channels
+        if number:
+            _number = number
+
+        print(f"Channel {it}/{n_channels}, {channel}")
+        ch_del_info = ch_cleanup(channel=channel, number=_number, what=what,
+                                 server=server)
+
+        list_ch_del_info.append(ch_del_info)
+
+    return list_ch_del_info
 
 
 def used_space(main_dir=None):
