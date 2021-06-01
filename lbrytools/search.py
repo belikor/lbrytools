@@ -551,7 +551,18 @@ def sort_items(channel=None,
     msg = {"method": list_cmd[1] + "_" + list_cmd[2],
            "params": {"page_size": page_size}}
     if channel:
+        # Currently searching by channel does not work very well
+        # because only a small portion of channels are searchable
+        # through this function
         msg["params"]["channel_name"] = channel
+
+        # A way to solve this is to find the channel of each item
+        # in the full list, and then compare against `channel`.
+        # However, this is slow becauase of the reverse search
+        # for the channel for each individual claim.
+
+        # Maybe instead of using `'channel_name'`, the `'channel_claim_id'`
+        # can be used instead to find the desired channel.
 
     output = requests.post(server, json=msg).json()
 
@@ -581,7 +592,11 @@ def sort_items(channel=None,
                           key=lambda v: int(v["metadata"]["release_time"]))
 
     n_items = len(sorted_items)
-    print(f"Number of items {n_items}")
+    if n_items < 1:
+        print("No items found; "
+              f"check that the channel exists, and its spelling, {channel}")
+    else:
+        print(f"Number of items {n_items}")
     return sorted_items
 
 
