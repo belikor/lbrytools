@@ -398,6 +398,9 @@ def print_items(items=None, show="all",
         if ch:
             _channel = srch.find_channel(cid=item["claim_id"], full=True,
                                          server=server)
+            if not _channel:
+                continue
+
             out += f"{_channel}, "
 
             # Skip if the item is not published by the specified channel
