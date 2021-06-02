@@ -125,16 +125,14 @@ def search_item_uri(uri=None,
         print(">>> No 'result' in the JSON-RPC server output")
         return False
 
-    data = output["result"]
-
-    item = data[uri]
+    item = output["result"][uri]
 
     if "error" in item:
-        if "name" in item["error"]:
-            print(">>> Error: {}, {}".format(item["error"]["name"],
-                                             item["error"]["text"]))
+        error = item["error"]
+        if "name" in error:
+            print(">>> Error: {}, {}".format(error["name"], error["text"]))
         else:
-            print(">>> Error: {}".format(item["error"]))
+            print(">>> Error: {}".format(error))
         print(">>> Check spelling.")
         return False
 
@@ -687,3 +685,76 @@ def parse_claim_file(file=None, start=1, end=0):
 
     print(f"Effective claims found: {len(claims)}")
     return claims
+
+
+def resolve_channel(channel=None,
+                    server="http://localhost:5279"):
+    """Resolve a channel name so that it can be found by file_list.
+
+    lbrio/lbry-sdk, issue #3316
+    Currently when we use some functions like `sort_items`
+    the channel will not be found by the internal call to `lbrynet file list`
+    if the channel isn't resolved first.
+
+    Therefore, this function must be called before we try to search by channel.
+
+    Parameters
+    ----------
+    channel: str
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        Returns the dictionary that represents the channel that was found
+        matching the `channel` address.
+    False
+        If the dictionary has the `'error'` key, it will print the contents
+        of this key, and return `False`.
+    """
+    if not channel or not isinstance(channel, str):
+        print("Channel must be a string.")
+        print(f"channel={channel}")
+        return False
+
+    # The channel must start with @, otherwise we may resolve a claim
+    if not channel.startswith("@"):
+        channel = "@" + channel
+
+    funcs.check_lbry(server=server)
+    cmd = ["lbrynet",
+           "resolve",
+           channel]
+
+    msg = {"method": cmd[1],
+           "params": {"urls": channel}}
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    ch_item = output["result"][channel]
+
+    if "error" in ch_item:
+        error = ch_item["error"]
+        if "name" in error:
+            print(">>> Error: {}, {}".format(error["name"], error["text"]))
+        else:
+            print(">>> Error: {}".format(error))
+        print(">>> Check spelling.")
+        return False
+
+    return ch_item
