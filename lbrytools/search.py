@@ -367,6 +367,17 @@ def ch_search_latest(channel=None, number=2,
            "params": {"channel": channel,
                       "page_size": number,
                       "order_by": "release_time"}}
+
+    # A bug (lbryio/lbry-sdk #3316) prevents the `lbrynet file list`
+    # command from finding the channel, therefore the channel must be
+    # resolved with `lbrynet resolve` before it becomes known by other
+    # functions.
+    ch = resolve_channel(channel=channel, server=server)
+    if not ch:
+        print(">>> No channel found; "
+              f"check that the name is correct, channel={channel}")
+        return False
+
     output = requests.post(server, json=msg).json()
 
     if "error" in output:
