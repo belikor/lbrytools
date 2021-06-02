@@ -549,18 +549,17 @@ def sort_items(channel=None,
     msg = {"method": list_cmd[1] + "_" + list_cmd[2],
            "params": {"page_size": page_size}}
     if channel:
-        # Currently searching by channel does not work very well
-        # because only a small portion of channels are searchable
-        # through this function
         msg["params"]["channel_name"] = channel
 
-        # A way to solve this is to find the channel of each item
-        # in the full list, and then compare against `channel`.
-        # However, this is slow becauase of the reverse search
-        # for the channel for each individual claim.
-
-        # Maybe instead of using `'channel_name'`, the `'channel_claim_id'`
-        # can be used instead to find the desired channel.
+        # A bug (lbryio/lbry-sdk #3316) prevents the `lbrynet file list`
+        # command from finding the channel, therefore the channel must be
+        # resolved with `lbrynet resolve` before it becomes known by other
+        # functions.
+        ch = resolve_channel(channel=channel, server=server)
+        if not ch:
+            print("No channel found; "
+                  f"check spelling of channel, {channel}")
+            return False
 
     output = requests.post(server, json=msg).json()
 
@@ -591,10 +590,11 @@ def sort_items(channel=None,
 
     n_items = len(sorted_items)
     if n_items < 1:
-        print("No items found; "
-              f"check that the channel exists, and its spelling, {channel}")
-    else:
-        print(f"Number of items {n_items}")
+        print("No items found; at least one item must be downloaded; "
+              f"check spelling of channel, {channel}")
+        return False
+
+    print(f"Number of items {n_items}")
     return sorted_items
 
 
