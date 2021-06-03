@@ -183,7 +183,22 @@ def download_single(uri=None, cid=None, name=None,
     uri = item["canonical_url"]
 
     if "signing_channel" in item and "name" in item["signing_channel"]:
+        # A bug (lbryio/lbry-sdk #3316) prevents
+        # the `lbrynet file list --channel_name=@Channel`
+        # command from finding the channel, therefore the channel must be
+        # resolved with `lbrynet resolve` before it becomes known by other
+        # functions.
+        #
+        # Both the short `@Name` and the canonical `@Name#7` are resolved.
+        # The second form is necessary to get the exact channel, in case
+        # it has the same base name as another channel.
         channel = item["signing_channel"]["name"]
+        ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
+
+        srch.resolve_channel(channel=channel, server=server)
+        srch.resolve_channel(channel=ch_full, server=server)
+
+        channel = ch_full.replace("#", ":")
     else:
         channel = "@_Unknown_"
 
