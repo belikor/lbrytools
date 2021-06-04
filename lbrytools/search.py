@@ -133,7 +133,7 @@ def search_item_uri(uri=None,
             print(">>> Error: {}, {}".format(error["name"], error["text"]))
         else:
             print(">>> Error: {}".format(error))
-        print(">>> Check spelling.")
+        print(f">>> Check that the URI is correct, uri={uri}")
         return False
 
     # The found item may be a repost so we check it,
@@ -221,10 +221,11 @@ def search_item_name(name=None, cid=None,
 
     if data["total_items"] <= 0:
         if cid:
-            print(f">>> Error: no items found, cid={cid}")
+            print(">>> No items found, "
+                  f"check that the claim ID is correct, cid={cid}")
         elif name:
-            print(f">>> Error: no items found, name={name}")
-        print(">>> Check spelling.")
+            print(">>> No items found, "
+                  f"check that the name is correct, name={name}")
         return False
 
     # The list of items may include various reposts;
@@ -368,21 +369,15 @@ def ch_search_latest(channel=None, number=2,
                       "order_by": "release_time"}}
     output = requests.post(server, json=msg).json()
 
-    if "result" not in output:
+    if "error" in output:
         print(">>> No 'result' in the JSON-RPC server output")
         return False
 
-    data = output["result"]
-
-    if "items" not in data:
-        print(">>> No 'items' found in output dictionary")
-        return False
-
-    items = data["items"]
+    items = output["result"]["items"]
 
     if len(items) < 1:
-        print(">>> Empty item list. "
-              f"Check that the name is correct, '{channel}'")
+        print(">>> No items found; "
+              f"check that the name is correct, channel={channel}")
 
     return items
 
@@ -557,44 +552,43 @@ def sort_items(channel=None,
         # functions.
         ch = resolve_channel(channel=channel, server=server)
         if not ch:
-            print("No channel found; "
-                  f"check spelling of channel, {channel}")
+            print(">>> No channel found; "
+                  f"check that the name is correct, channel={channel}")
             return False
 
     output = requests.post(server, json=msg).json()
 
-    if "result" not in output:
+    if "error" in output:
         print(">>> No 'result' in the JSON-RPC server output")
         return False
 
-    data = output["result"]
+    items = output["result"]["items"]
 
-    if "items" not in data:
-        print(">>> No 'items' found in output dictionary")
-        return False
+    n_items = len(items)
 
-    new_items = []
-
-    # Certain items don't have 'release_time'; we add this key
-    # and use the value of 'timestamp'.
-    for item in data['items']:
-        if "release_time" in item["metadata"]:
-            new_items.append(item)
-        else:
-            item["metadata"]["release_time"] = item["timestamp"]
-            new_items.append(item)
-
-    # Sort by using the original release time; older items first
-    sorted_items = sorted(new_items,
-                          key=lambda v: int(v["metadata"]["release_time"]))
-
-    n_items = len(sorted_items)
     if n_items < 1:
-        print("No items found; at least one item must be downloaded; "
-              f"check spelling of channel, {channel}")
+        if channel:
+            print("No items found; at least one item must be downloaded; "
+                  f"check that the name is correct, channel={channel}")
+        else:
+            print("No items found; at least one item must be downloaded.")
         return False
 
     print(f"Number of items {n_items}")
+
+    new_items = []
+
+    # Older claims may not have 'release_time'; we use the 'timestamp' instead
+    for it, item in enumerate(items, start=1):
+        if "release_time" not in item["metadata"]:
+            print(f"{it}/{n_items}, {item['claim_name']}, using 'timestamp'")
+            item["metadata"]["release_time"] = item["timestamp"]
+        new_items.append(item)
+
+    # Sort by using the original 'release_time'; older items first
+    sorted_items = sorted(new_items,
+                          key=lambda v: int(v["metadata"]["release_time"]))
+
     return sorted_items
 
 
@@ -754,7 +748,7 @@ def resolve_channel(channel=None,
             print(">>> Error: {}, {}".format(error["name"], error["text"]))
         else:
             print(">>> Error: {}".format(error))
-        print(">>> Check spelling.")
+        print(f">>> Check that the name is correct, channel={channel}")
         return False
 
     return ch_item
