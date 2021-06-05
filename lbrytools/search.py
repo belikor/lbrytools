@@ -374,8 +374,6 @@ def ch_search_latest(channel=None, number=2,
     # functions.
     ch = resolve_channel(channel=channel, server=server)
     if not ch:
-        print(">>> No channel found; "
-              f"check that the name is correct, channel={channel}")
         return False
 
     output = requests.post(server, json=msg).json()
@@ -563,8 +561,6 @@ def sort_items(channel=None,
         # functions.
         ch = resolve_channel(channel=channel, server=server)
         if not ch:
-            print(">>> No channel found; "
-                  f"check that the name is correct, channel={channel}")
             return False
 
     output = requests.post(server, json=msg).json()
