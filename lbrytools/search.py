@@ -142,9 +142,9 @@ def search_item_uri(uri=None,
     return item
 
 
-def search_item_name(name=None, cid=None,
-                     server="http://localhost:5279"):
-    """Find a single item in the LBRY network, resolving the name or claim id.
+def search_item_cid(cid=None, name=None,
+                    server="http://localhost:5279"):
+    """Find a single item in the LBRY network, resolving the claim id or name.
 
     If both `cid` and `name` are given, `cid` is used.
 
@@ -185,7 +185,8 @@ def search_item_name(name=None, cid=None,
              "                    ^-------------^",
              "                          name"]
         print("\n".join(m))
-        print(f"name={name}, cid={cid}")
+        print(f"cid={cid}")
+        print(f"name={name}")
         return False
 
     funcs.check_lbry(server=server)
@@ -290,7 +291,7 @@ def search_item(uri=None, cid=None, name=None,
     if uri and not cid:
         item = search_item_uri(uri=uri, server=server)
     else:
-        item = search_item_name(name=name, cid=cid, server=server)
+        item = search_item_cid(cid=cid, name=name, server=server)
 
     if not item:
         print(f">>> uri={uri}")
