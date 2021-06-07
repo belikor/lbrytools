@@ -419,9 +419,11 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
+    DEFAULT_NUM = 2
+
     if number:
         if not isinstance(number, int) or number < 0:
-            number = 2
+            number = DEFAULT_NUM
             print("Number must be a positive integer, "
                   f"set to default value, number={number}")
 
@@ -429,11 +431,12 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
               f"number={number}")
 
     n_channels = len(channels)
-    list_ch_info = []
 
     if n_channels <= 0:
         print(">>> No channels in the list")
         return False
+
+    list_ch_info = []
 
     if rand:
         if isinstance(channels, tuple):
@@ -451,15 +454,15 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
     for it, channel in enumerate(channels, start=1):
         ch_info = []
         if isinstance(channel, str):
-            _number = 2
+            _number = DEFAULT_NUM
         elif isinstance(channel, (list, tuple)):
             if len(channel) < 2:
-                _number = 2
+                _number = DEFAULT_NUM
             else:
                 _number = channel[1]
-                if not isinstance(_number, (int, float)):
-                    print(">>> Number set to 2")
-                    _number = 2
+                if not isinstance(_number, (int, float)) or _number < 0:
+                    print(f">>> Number set to {DEFAULT_NUM}")
+                    _number = DEFAULT_NUM
                 _number = int(_number)
 
             channel = channel[0]
