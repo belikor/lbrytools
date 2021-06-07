@@ -133,7 +133,7 @@ def search_item_uri(uri=None,
             print(">>> Error: {}, {}".format(error["name"], error["text"]))
         else:
             print(">>> Error: {}".format(error))
-        print(f">>> Check that the URI is correct, uri={uri}")
+        print(f">>> Check that the URI is correct.")
         return False
 
     # The found item may be a repost so we check it,
@@ -221,11 +221,11 @@ def search_item_name(name=None, cid=None,
 
     if data["total_items"] <= 0:
         if cid:
-            print(">>> No items found, "
-                  f"check that the claim ID is correct, cid={cid}")
+            print(">>> No item found, "
+                  f"check that the claim ID is correct.")
         elif name:
-            print(">>> No items found, "
-                  f"check that the name is correct, name={name}")
+            print(">>> No item found, "
+                  f"check that the name is correct.")
         return False
 
     # The list of items may include various reposts;
@@ -282,13 +282,20 @@ def search_item(uri=None, cid=None, name=None,
     """
     if not (uri or cid or name):
         print("Search by 'URI', 'claim_id' or 'name'.")
-        print(f"uri={uri}, cid={cid}, name={name}")
+        print(f"uri={uri}")
+        print(f"cid={cid}")
+        print(f"name={name}")
         return False
 
     if uri and not cid:
         item = search_item_uri(uri=uri, server=server)
     else:
         item = search_item_name(name=name, cid=cid, server=server)
+
+    if not item:
+        print(f">>> uri={uri}")
+        print(f">>> cid={cid}")
+        print(f">>> name={name}")
 
     return item
 

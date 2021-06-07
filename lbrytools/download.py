@@ -177,7 +177,6 @@ def download_single(uri=None, cid=None, name=None,
     item = srch.search_item(uri=uri, cid=cid, name=name,
                             server=server)
     if not item:
-        print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
     uri = item["canonical_url"]
