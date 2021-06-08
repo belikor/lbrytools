@@ -18,10 +18,12 @@ Or
 from lbrytools import download_single
 from lbrytools import ch_download_latest
 from lbrytools import ch_download_latest_multi
-from lbrytools import print_summary
 from lbrytools import redownload_latest
 from lbrytools import download_claims
+from lbrytools import print_summary
 from lbrytools import delete_single
+from lbrytools import ch_cleanup
+from lbrytools import ch_cleanup_multi
 from lbrytools import measure_usage
 from lbrytools import cleanup_space
 from lbrytools import remove_media
@@ -78,7 +80,8 @@ ch = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, number=4)
 ```
 
 Another way of specifying the list of channels is as a simple list of strings.
-Again, `number` controls the number of downloads for all channels.
+In this case `number` must be specified explicitly to control the number
+of downloads for each channel.
 For example, download the latest claim for each channel in the list.
 ```py
 channels = [
@@ -100,7 +103,7 @@ c = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, rand=True)
 # Printing
 
 Print a list of claims that have been downloaded partially or fully
-in chronological order, by `item['metadata']['release_time']`.
+in chronological order, by `'release_time'`.
 Older claims appear first.
 Certain items don't have `'release time'`, so for these
 the `'timestamp'` is used.
@@ -209,6 +212,53 @@ As long as the blobs are present, the content can be seeded to the network,
 and the full file can be restored.
 That is, while the blobs exist the file is not completely deleted.
 
+# Delete claims from channel
+
+Delete all downloaded claims from a single channel with the exception
+of the newest claims, as determined by their `'release_time'`,
+or `'timestamp'` if the former is missing.
+Choose to delete the media files, the blobs, or both.
+This is useful to only seed the newest videos from a particular channel.
+```py
+s = lbryt.ch_cleanup(channel="@gothix", number=5, what="both")
+s = lbryt.ch_cleanup(channel="@emmyhucker", number=10, what="media")
+s = lbryt.ch_cleanup(channel="@samtime", number=4, what="blobs")
+```
+
+Similar to the `ch_download_latest_multi` method, you can define
+the channels in a list, and the number of items to keep for each channel.
+```py
+channels = [
+    ["@AlphaNerd#8", 3],
+    ["@gothix:c", 8],
+    ["@samtime#1", 2],
+    ["@AfterSkool", 5]
+]
+
+ch = lbryt.ch_cleanup_multi(channels=channels, what="media")
+```
+
+By using the `number` parameter, the individual numbers in `channels`
+are overriden.
+For exampe, keep only the 3 newest claims from each channel.
+```py
+ch = lbryt.ch_cleanup_multi(channels=channels, number=3)
+```
+
+Another way of specifying the list of channels is as a simple list of strings.
+In this case `number` must be specified explicitly to control the number
+of claims that will remain for every channel.
+```py
+channels = [
+    "AlisonMorrow",
+    "ThePholosopher",
+    "ChrissieMayr",
+    "emmyhucker"
+]
+
+c = lbryt.ch_cleanup_multi(channels=channels, number=4)
+```
+
 # Measure disk usage
 
 Measure the space that is being used by downloaded content and their blobs;
@@ -304,10 +354,12 @@ server = "http://localhost:5279"
 lbryt.download_single(..., server=server)
 lbryt.ch_download_latest(..., server=server)
 lbryt.ch_download_latest_multi(..., server=server)
-lbryt.print_summary(..., server=server)
 lbryt.redownload_latest(..., server=server)
 lbryt.download_claims(..., server=server)
+lbryt.print_summary(..., server=server)
 lbryt.delete_single(..., server=server)
+lbryt.ch_cleanup(..., server=server)
+lbryt.ch_cleanup_multi(..., server=server)
 lbryt.measure_usage(...)
 lbryt.cleanup_space(..., server=server)
 lbryt.remove_media(..., server=server)
