@@ -546,8 +546,8 @@ def sort_items(channel=None,
             channel = "@" + channel
         list_cmd.append("--channel_name=" + channel)
 
-    print(80 * "-")
     print("List: " + " ".join(list_cmd))
+    print(80 * "-")
     # output = subprocess.run(list_cmd,
     #                         capture_output=True,
     #                         check=True,
