@@ -55,7 +55,8 @@ That is
 Developed and tested with Python 3.8.
 """
 from lbrytools.funcs import check_lbry
-from lbrytools.blobs import get_blobs
+
+from lbrytools.blobs import blobs_action
 
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
@@ -82,7 +83,8 @@ from lbrytools.clean import remove_media
 
 # Use of the modules so that code checkers don't complain (flake8)
 True if check_lbry else False
-True if get_blobs else False
+
+True if blobs_action else False
 
 True if check_repost else False
 True if search_item else False

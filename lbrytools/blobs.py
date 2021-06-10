@@ -30,10 +30,10 @@ import requests
 import lbrytools.funcs as funcs
 
 
-def get_blobs(blobfiles=None, action="get",
-              start=1, end=0,
-              server="http://localhost:5279"):
-    """Refresh all binary blobs from the blobfiles directory.
+def blobs_action(blobfiles=None, action="get",
+                 start=1, end=0,
+                 server="http://localhost:5279"):
+    """Get or announce all binary blobs from the blobfiles directory.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ def get_blobs(blobfiles=None, action="get",
         In Linux this is normally
         `'$HOME/.locals/share/lbry/lbrynet/blobfiles'`
         but it can be any other directory if it is symbolically linked
-        to it, such as `/opt/lbryblobfiles`
+        to it, such as `'/opt/lbryblobfiles'`
     action: str, optional
         It defaults to `'get'`, in which case it re-downloads all blobs
         in the `blobfiles` directory.
@@ -96,7 +96,7 @@ def get_blobs(blobfiles=None, action="get",
     list_blobs = os.listdir(blobfiles)
     n_blobs = len(list_blobs)
 
-    for it, item in enumerate(list_blobs, start=1):
+    for it, blob in enumerate(list_blobs, start=1):
         if it < start:
             continue
         if end != 0 and it > end:
@@ -107,7 +107,7 @@ def get_blobs(blobfiles=None, action="get",
         cmd = ["lbrynet",
                "blob",
                "get",
-               item]
+               blob]
 
         if action in "announce":
             cmd[2] = "announce"
@@ -122,7 +122,7 @@ def get_blobs(blobfiles=None, action="get",
         #     sys.exit(1)
 
         msg = {"method": cmd[1] + "_" + cmd[2],
-               "params": {"blob_hash": item}}
+               "params": {"blob_hash": blob}}
         output = requests.post(server, json=msg).json()
 
         if "error" in output:
@@ -140,7 +140,7 @@ def get_blobs(blobfiles=None, action="get",
             #     sys.exit(1)
 
             msg = {"method": cmd[1] + "_" + cmd[2],
-                   "params": {"blob_hash": item}}
+                   "params": {"blob_hash": blob}}
             output = requests.post(server, json=msg).json()
 
             if "error" in output:
