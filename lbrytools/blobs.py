@@ -30,6 +30,104 @@ import requests
 import lbrytools.funcs as funcs
 
 
+def blob_get(blob=None, action="get", out="",
+             server="http://localhost:5279"):
+    """Get or announce one blob from the LBRY network.
+
+    At the moment it cannot be used with missing blobs;
+    the command hangs and never timeouts.
+    It can only be used with a blob that is already downloaded.
+
+    This bug is reported in lbryio/lbry-sdk, issue #2070.
+
+    Therefore, at this moment this function is not very useful.
+
+    Parameters
+    ----------
+    blob: str
+        The 96-alphanumeric character that denotes a blob.
+        This will be downloaded to the `blobfiles` directory,
+        which in Linux is normally
+        `'$HOME/.locals/share/lbry/lbrynet/blobfiles'`
+    action: str, optional
+        It defaults to `'get'`, in which case it downloads
+        the specified `blob`.
+        It can be `'get'`, `'announce'`, or `'both'`.
+    out: str, optional
+        It defaults to an empty string `""`.
+        It is an arbitrary string that will be printed before the string
+        `'lbrynet blob get <blob>'`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    bool
+        It returns `True` if it finished downloading or announcing
+        the indicated blob successfully.
+        If there is a problem or non existing blob hash,
+        it will return `False`.
+    """
+    if not isinstance(blob, str) or len(blob) < 96:
+        print(">>> Error: blob must be a 96-character alphanumeric string")
+        print(f"blob={blob}")
+        return False
+
+    if (not isinstance(action, str)
+            or action not in ("get", "announce", "both")):
+        print(">>> Error: action can only be 'announce', 'get', 'both'")
+        print(f"action={action}")
+        return False
+
+    cmd = ["lbrynet",
+           "blob",
+           "get",
+           blob]
+
+    if action in "announce":
+        cmd[2] = "announce"
+
+    print(out + " ".join(cmd))
+    # output = subprocess.run(cmd,
+    #                         capture_output=True,
+    #                         check=True,
+    #                         text=True)
+    # if output.returncode == 1:
+    #     print(f"Error: {output.stderr}")
+    #     sys.exit(1)
+
+    msg = {"method": cmd[1] + "_" + cmd[2],
+           "params": {"blob_hash": blob}}
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(output["error"]["data"]["name"])
+
+    if action in "both":
+        cmd[2] = "announce"
+        print(out + " ".join(cmd))
+        # output = subprocess.run(cmd,
+        #                         capture_output=True,
+        #                         check=True,
+        #                         text=True)
+        # if output.returncode == 1:
+        #     print(f"Error: {output.stderr}")
+        #     sys.exit(1)
+
+        msg = {"method": cmd[1] + "_" + cmd[2],
+               "params": {"blob_hash": blob}}
+        output = requests.post(server, json=msg).json()
+
+        if "error" in output:
+            print(output["error"]["data"]["name"])
+
+    return True
+
+
 def blobs_action(blobfiles=None, action="get",
                  start=1, end=0,
                  server="http://localhost:5279"):
@@ -104,46 +202,7 @@ def blobs_action(blobfiles=None, action="get",
 
         out = "{:6d}/{:6d}, ".format(it, n_blobs)
 
-        cmd = ["lbrynet",
-               "blob",
-               "get",
-               blob]
-
-        if action in "announce":
-            cmd[2] = "announce"
-
-        print(out + " ".join(cmd))
-        # output = subprocess.run(cmd,
-        #                         capture_output=True,
-        #                         check=True,
-        #                         text=True)
-        # if output.returncode == 1:
-        #     print(f"Error: {output.stderr}")
-        #     sys.exit(1)
-
-        msg = {"method": cmd[1] + "_" + cmd[2],
-               "params": {"blob_hash": blob}}
-        output = requests.post(server, json=msg).json()
-
-        if "error" in output:
-            print(output["error"]["data"]["name"])
-
-        if action in "both":
-            cmd[2] = "announce"
-            print(out + " ".join(cmd))
-            # output = subprocess.run(cmd,
-            #                         capture_output=True,
-            #                         check=True,
-            #                         text=True)
-            # if output.returncode == 1:
-            #     print(f"Error: {output.stderr}")
-            #     sys.exit(1)
-
-            msg = {"method": cmd[1] + "_" + cmd[2],
-                   "params": {"blob_hash": blob}}
-            output = requests.post(server, json=msg).json()
-
-            if "error" in output:
-                print(output["error"]["data"]["name"])
+        blob_get(blob=blob, action=action, out=out,
+                 server=server)
 
     return True

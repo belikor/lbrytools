@@ -56,6 +56,7 @@ Developed and tested with Python 3.8.
 """
 from lbrytools.funcs import check_lbry
 
+from lbrytools.blobs import blob_get
 from lbrytools.blobs import blobs_action
 
 from lbrytools.search import check_repost
@@ -84,6 +85,7 @@ from lbrytools.clean import remove_media
 # Use of the modules so that code checkers don't complain (flake8)
 True if check_lbry else False
 
+True if blob_get else False
 True if blobs_action else False
 
 True if check_repost else False
