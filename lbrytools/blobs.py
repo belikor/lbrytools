@@ -24,10 +24,12 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help use with blobs from LBRY content."""
+import json
 import os
 import requests
 
 import lbrytools.funcs as funcs
+import lbrytools.search as srch
 
 
 def blob_get(blob=None, action="get", out="",
@@ -206,3 +208,147 @@ def blobs_action(blobfiles=None, action="get",
                  server=server)
 
     return True
+
+
+def count_blobs(uri=None, cid=None, name=None,
+                blobfiles=None, print_each=True,
+                server="http://localhost:5279"):
+    """Count blobs that have been downloaded from a claim.
+
+    Parameters
+    ----------
+    uri: str
+        A unified resource identifier (URI) to a claim on the LBRY network.
+        It can be full or partial.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            uri = '@MyChannel#3/some-video-name#2'
+            uri = 'some-video-name'
+
+        The URI is also called the `'canonical_url'` of the claim.
+    cid: str, optional
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs are downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`
+    print_each: bool, optional
+        It defaults to `True`, in which case it will print all blobs
+        that belong to the claim, and whether each of them is already
+        in `blobfiles`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        A dictionary with several keys with information about the claim,
+        and its blobs.
+        - `'canonical_url'`, `'claim_id'`, `'sd_hash'`: strings with
+          the appropriate information of the claim.
+        - `'all_present'`: a boolean value that is `True` if all blobs
+          exist in the `blobfiles` path. It will be `False` if at least
+          one blob is missing.
+        - `'blobs'`: a list of lists, where each internal list refers to
+          one blob of the claim. The internal lists have three elements,
+          the first is the blob number, the second is a string with
+          the 96-alphanumeric hash of the blob, and the third is a boolean
+          value indicating if the blob is present `True` or not `False`
+          in the `blobfiles` path.
+        - `'missing'`: a list of lists, similar to the `'blobs'` key.
+          However, this list will only contain those sublists for missing
+          blobs. If all blobs are already present, this is an empty list.
+    False
+        If there is a problem, like non existing blobfiles directory,
+        or non existent claim, or non existent `'sd_hash'` blob,
+        it will return `False`.
+    """
+    if (not blobfiles or not isinstance(blobfiles, str)
+            or not os.path.exists(blobfiles)):
+        print("Get blobs from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
+        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
+
+        home = os.path.expanduser("~")
+        blobfiles = os.path.join(home,
+                                 ".local", "share",
+                                 "lbry", "lbrynet", "blobfiles")
+
+        if not os.path.exists(blobfiles):
+            print(f"Blobfiles directory does not exist: {blobfiles}")
+            return False
+
+    item = srch.search_item(uri=uri, cid=cid, name=name,
+                            server=server)
+    if not item:
+        return False
+
+    sd_hash = item["value"]["source"]["sd_hash"]
+    c_uri = item["canonical_url"]
+    c_cid = item["claim_id"]
+    print(f"canonical_url: {c_uri}")
+    print(f"claim_id: {c_cid}")
+    print(f"sd_hash: {sd_hash}")
+
+    # list_all_blobs = os.listdir(blobfiles)
+    # n_all_blobs = len(list_all_blobs)
+
+    sd_hash_f = os.path.join(blobfiles, sd_hash)
+
+    # if not os.path.exists(sd_hash_f) or sd_hash not in list_all_blobs:
+    if not os.path.exists(sd_hash_f):
+        print(f">>> 'sd_hash' blob not in directory: {blobfiles}")
+        print(">>> Redownload the claim")
+        return False
+
+    fd = open(sd_hash_f)
+    lines = fd.readlines()
+    fd.close()
+
+    blobs = json.loads(lines[0])
+    n_blobs = len(blobs["blobs"]) - 1
+    print(f"Total blobs: {n_blobs}")
+
+    present_list = []
+    blob_list = []
+    blob_missing = []
+
+    for blob in blobs["blobs"]:
+        if "blob_hash" not in blob:
+            continue
+
+        num = blob["blob_num"]
+        blob_hash = blob["blob_hash"]
+        present = os.path.exists(os.path.join(blobfiles, blob_hash))
+        present_list.append(present)
+        blob_list.append([num, blob_hash, present])
+
+        if not present:
+            blob_missing.append([num, blob_hash, present])
+
+        if print_each:
+            print("{:3d}/{:3d}, {}, {}".format(num, n_blobs,
+                                               blob_hash,
+                                               present))
+
+    all_present = all(present_list)
+    print(f"All blob files present: {all_present}")
+
+    blob_info = {"canonical_url": c_uri,
+                 "claim_id": c_cid,
+                 "sd_hash": sd_hash,
+                 "all_present": all_present,
+                 "blobs": blob_list,
+                 "missing": blob_missing}
+    return blob_info
