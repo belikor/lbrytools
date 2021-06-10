@@ -28,6 +28,8 @@ import json
 import os
 import requests
 
+import lbrytools.clean as clean
+import lbrytools.download as dld
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
@@ -441,3 +443,104 @@ def count_blobs_all(blobfiles=None, print_each=False,
     print(f"total claims processed: {total}")
 
     return blob_all_info
+
+
+def redownload_blobs(uri=None, cid=None, name=None,
+                     ddir=None, own_dir=True,
+                     blobfiles=None, print_each=False,
+                     server="http://localhost:5279"):
+    """Redownload the blobs from a claim.
+
+    If all blobs from a given claim are present, the function does nothing.
+
+    Parameters
+    ----------
+    uri: str
+        A unified resource identifier (URI) to a claim on the LBRY network.
+        It can be full or partial.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            uri = '@MyChannel#3/some-video-name#2'
+            uri = 'some-video-name'
+
+        The URI is also called the `'canonical_url'` of the claim.
+    cid: str, optional
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    ddir: str, optional
+        It defaults to `$HOME`.
+        The path to the download directory.
+    own_dir: bool, optional
+        It defaults to `True`, in which case it places the downloaded
+        content inside a subdirectory named after the channel in `ddir`.
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs are downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`
+    print_each: bool, optional
+        It defaults to `False`.
+        If it is `True` it will not print all blobs
+        that belong to the claim, and whether each of them is already
+        in `blobfiles`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    bool
+        It returns `True` if all blobs are already present in the system
+        so nothing needs to be downloaded.
+        It returns `False` if the item does not exist,
+        of if at least one blob was downloaded.
+
+    Bug
+    ---
+    At the moment downloading missing blobs is not possible;
+    the command hangs and never timeouts.
+    ::
+        lbrynet blob get <hash>
+
+    This bug is reported in lbryio/lbry-sdk, issue #2070.
+
+    If the bug is solved, `blob_get` could be called with the missing blob
+    hash to only get that piece.
+    """
+    blob_info = count_blobs(uri=uri, cid=cid, name=name,
+                            blobfiles=blobfiles, print_each=print_each,
+                            server=server)
+    print(80 * "-")
+
+    if not blob_info:
+        return False
+
+    if blob_info["all_present"]:
+        print("All blobs files present, nothing to download.")
+        return True
+
+    # If the bug #2070 is solved, this could be run.
+    # print("Blobs missing; redownload blobs")
+    # for blob in blob_info["missing"]:
+    #     out = f"{blob[0]}, "
+    #     blob_get(blob=blob[1], action="get", out=out,
+    #              server=server)
+
+    # The missing blobs will only be downloaded if the media file
+    # is not present so we must make sure it is deleted.
+    print("Blobs missing; redownload claim")
+    clean.delete_single(cid=blob_info["claim_id"], what="media",
+                        server=server)
+    dld.download_single(cid=blob_info["claim_id"],
+                        ddir=ddir, own_dir=own_dir,
+                        server=server)
+
+    return False
