@@ -352,3 +352,92 @@ def count_blobs(uri=None, cid=None, name=None,
                  "blobs": blob_list,
                  "missing": blob_missing}
     return blob_info
+
+
+def count_blobs_all(blobfiles=None, print_each=False,
+                    start=1, end=0,
+                    server="http://localhost:5279"):
+    """Count all blobs from all downloaded claims.
+
+    Parameters
+    ----------
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs are downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`
+    print_each: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print all blobs
+        that belong to the claim, and whether each of them is already
+        in `blobfiles`.
+    start: int, optional
+        It defaults to 1.
+        Count the blobs from claims starting from this index
+        in the list of items.
+    end: int, optional
+        It defaults to 0.
+        Count the blobs from claims until and including this index
+        in the list of items.
+        If it is 0, it is the same as the last index in the list.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of dict
+        It returns a list of dicts where each dictionary corresponds
+        to the information from a single claim.
+        The dictionary contains two keys
+        - `'num'`: an integer from 1 up to the last item saved in the system.
+        - `'blob_info'`: the dictionary output from the `count_blobs` method.
+          If there is a problem with a claim, this will be a single boolean
+          value `False`.
+    """
+    items = srch.sort_items(server=server)
+    n_items = len(items)
+    print()
+
+    print("Count all blob files")
+    print(80 * "-")
+
+    blob_all_info = []
+    blobs_complete = 0
+    blobs_incomplete = 0
+    claim_missing = 0
+
+    for it, item in enumerate(items, start=1):
+        if it < start:
+            continue
+        if end != 0 and it > end:
+            break
+
+        print(f"Claim {it}/{n_items}, {item['claim_name']}")
+        blob_info = count_blobs(cid=item["claim_id"],
+                                blobfiles=blobfiles,
+                                print_each=print_each,
+                                server=server)
+
+        info = {"num": it,
+                "blob_info": blob_info}
+        blob_all_info.append(info)
+
+        if info["blob_info"] and info["blob_info"]["all_present"]:
+            blobs_complete += 1
+        elif info["blob_info"] and not info["blob_info"]["all_present"]:
+            blobs_incomplete += 1
+        else:
+            claim_missing += 1
+        print()
+
+    print(f"claims with complete blobs: {blobs_complete}")
+    print(f"claims with incomplete blobs: {blobs_incomplete}")
+    print(f"missing: {claim_missing} ('sd_hash' missing, or invalid claim)")
+    print(8*"-")
+    total = blobs_complete + blobs_incomplete + claim_missing
+    print(f"total claims processed: {total}")
+
+    return blob_all_info

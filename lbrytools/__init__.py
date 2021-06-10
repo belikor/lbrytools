@@ -59,6 +59,7 @@ from lbrytools.funcs import check_lbry
 from lbrytools.blobs import blob_get
 from lbrytools.blobs import blobs_action
 from lbrytools.blobs import count_blobs
+from lbrytools.blobs import count_blobs_all
 
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
@@ -89,6 +90,7 @@ True if check_lbry else False
 True if blob_get else False
 True if blobs_action else False
 True if count_blobs else False
+True if count_blobs_all else False
 
 True if check_repost else False
 True if search_item else False
