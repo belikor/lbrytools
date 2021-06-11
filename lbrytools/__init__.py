@@ -62,6 +62,7 @@ from lbrytools.blobs import count_blobs
 from lbrytools.blobs import count_blobs_all
 from lbrytools.blobs import redownload_blobs
 from lbrytools.blobs import blobs_move
+from lbrytools.blobs import blobs_move_all
 
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
@@ -95,6 +96,7 @@ True if count_blobs else False
 True if count_blobs_all else False
 True if redownload_blobs else False
 True if blobs_move else False
+True if blobs_move_all else False
 
 True if check_repost else False
 True if search_item else False
