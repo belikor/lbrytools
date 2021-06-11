@@ -296,11 +296,22 @@ def count_blobs(uri=None, cid=None, name=None,
     if not item:
         return False
 
-    sd_hash = item["value"]["source"]["sd_hash"]
     c_uri = item["canonical_url"]
     c_cid = item["claim_id"]
+    c_name = item["name"]
+
+    if "signing_channel" in item and "name" in item["signing_channel"]:
+        ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
+        c_channel = ch_full.replace("#", ":")
+    else:
+        c_channel = "@_Unknown_"
+
+    sd_hash = item["value"]["source"]["sd_hash"]
+
     print(f"canonical_url: {c_uri}")
     print(f"claim_id: {c_cid}")
+    print(f"name: {c_name}")
+    print(f"channel: {c_channel}")
     print(f"sd_hash: {sd_hash}")
 
     # list_all_blobs = os.listdir(blobfiles)
@@ -349,6 +360,8 @@ def count_blobs(uri=None, cid=None, name=None,
 
     blob_info = {"canonical_url": c_uri,
                  "claim_id": c_cid,
+                 "name": c_name,
+                 "channel": c_channel,
                  "sd_hash": sd_hash,
                  "all_present": all_present,
                  "blobs": blob_list,
