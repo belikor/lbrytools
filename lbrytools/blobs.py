@@ -399,6 +399,21 @@ def count_blobs_all(blobfiles=None, print_each=False,
           If there is a problem with a claim, this will be a single boolean
           value `False`.
     """
+    if (not blobfiles or not isinstance(blobfiles, str)
+            or not os.path.exists(blobfiles)):
+        print("Get blobs from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
+        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
+
+        home = os.path.expanduser("~")
+        blobfiles = os.path.join(home,
+                                 ".local", "share",
+                                 "lbry", "lbrynet", "blobfiles")
+
+        if not os.path.exists(blobfiles):
+            print(f"Blobfiles directory does not exist: {blobfiles}")
+            return False
+
     items = srch.sort_items(server=server)
     n_items = len(items)
     print()
