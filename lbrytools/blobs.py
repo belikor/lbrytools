@@ -175,7 +175,7 @@ def blobs_action(blobfiles=None, action="get",
     """
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Get blobs from the blobfiles directory")
+        print("Perform an action with the blobs from the blobfiles directory")
         print(f"blobfiles={blobfiles}, action={action}")
         print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
@@ -278,7 +278,7 @@ def count_blobs(uri=None, cid=None, name=None,
     """
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Get blobs from the blobfiles directory")
+        print("Count the blobs of the claim from the blobfiles directory")
         print(f"blobfiles={blobfiles}")
         print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
@@ -414,7 +414,7 @@ def count_blobs_all(blobfiles=None, print_each=False,
     """
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Get blobs from the blobfiles directory")
+        print("Count the blobs of the claim from the blobfiles directory")
         print(f"blobfiles={blobfiles}")
         print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
