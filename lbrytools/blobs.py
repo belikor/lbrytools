@@ -140,10 +140,10 @@ def blobs_action(blobfiles=None, action="get",
     Parameters
     ----------
     blobfiles: str
-        The path to the directory that stores all blob files.
-        In Linux this is normally
-        `'$HOME/.locals/share/lbry/lbrynet/blobfiles'`
-        but it can be any other directory if it is symbolically linked
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
         to it, such as `'/opt/lbryblobfiles'`
     action: str, optional
         It defaults to `'get'`, in which case it re-downloads all blobs
@@ -237,10 +237,12 @@ def count_blobs(uri=None, cid=None, name=None,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
-    blobfiles: str
+    blobfiles: str, optional
         It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
-        The path to the directory where the blobs are downloaded.
-        This is normally seen with `lbrynet settings get`, under `'data_dir'`
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
     print_each: bool, optional
         It defaults to `True`, in which case it will print all blobs
         that belong to the claim, and whether each of them is already
@@ -322,7 +324,7 @@ def count_blobs(uri=None, cid=None, name=None,
     # if not os.path.exists(sd_hash_f) or sd_hash not in list_all_blobs:
     if not os.path.exists(sd_hash_f):
         print(f">>> 'sd_hash' blob not in directory: {blobfiles}")
-        print(">>> Redownload the claim")
+        print(">>> Start downloading the claim, or redownload it.")
         return False
 
     fd = open(sd_hash_f)
@@ -378,8 +380,10 @@ def count_blobs_all(blobfiles=None, print_each=False,
     ----------
     blobfiles: str
         It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
-        The path to the directory where the blobs are downloaded.
-        This is normally seen with `lbrynet settings get`, under `'data_dir'`
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
     print_each: bool, optional
         It defaults to `False`.
         If it is `True` it will print all blobs
@@ -507,10 +511,12 @@ def redownload_blobs(uri=None, cid=None, name=None,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
-    blobfiles: str
+    blobfiles: str, optional
         It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
-        The path to the directory where the blobs are downloaded.
-        This is normally seen with `lbrynet settings get`, under `'data_dir'`
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
     print_each: bool, optional
         It defaults to `False`.
         If it is `True` it will not print all blobs
