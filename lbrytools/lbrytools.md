@@ -27,6 +27,8 @@ from lbrytools import ch_cleanup_multi
 from lbrytools import measure_usage
 from lbrytools import cleanup_space
 from lbrytools import remove_media
+from lbrytools import blobs_move
+from lbrytools import blobs_move_all
 ```
 
 # Download
@@ -340,6 +342,60 @@ only seed it should be avoided.
 k = lbryt.remove_media(never_delete=never_delete)
 ```
 
+# Blobs
+
+When a claim is downloaded a group of binary blobs is downloaded into
+the `blobfiles` directory. All blobs from all claims are dumped
+into this directory without organization.
+
+If you wish to organize the blobs better you may copy or move the blobs
+to a different location. This can be done to backup the claim data
+in an external hard drive. However, to seed the file, the blobs must be
+in the `blobfiles` directory.
+
+Define the path of the directory where the blobs will be placed,
+and of the original `blobfiles` directory.
+```py
+mdir = /home/user/Downloads
+bdir = /home/user/.local/share/lbry/lbrynet/blobfiles
+```
+
+The `blobfiles` directory is located inside the `'data_dir'`
+as indicated by `lbrynet settings get`.
+
+To specify a claim use the canonical URL, the claim ID, or the claim name.
+You can specify whether to copy the blobs (default) or move the blobs.
+Moving the blobs will free space in `blobfiles`.
+```py
+f = lbryt.blobs_move(uri="can-you-turn-a-samsung-into-a-blackberry:0", move_dir=mdir, blobfiles=bdir)
+f = lbryt.blobs_move(cid="5bc30d93445070581fc10e44e4e96e6d23f0ab87", move_dir=mdir, blobfiles=bdir, action="copy")
+f = lbryt.blobs_move(name="new-stimulus-approved-only-with-crypto", move_dir=mdir, blobfiles=bdir, action="move")
+```
+
+The function will copy or move the blobs that actually exist in
+the `blobfiles` directory. Missing blobs will be skipped; this usually means
+that the claim was not downloaded fully; in this case, redownload the claim.
+
+To see which blobs are missing, pass the `print_missing=True` argument.
+```py
+f = lbryt.blobs_move(name="new-stimulus-approved-only-with-crypto", move_dir=mdir, blobfiles=bdir, print_missing=True)
+```
+
+We can copy or move the blobs from all downloaded claims.
+```py
+g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, print_missing=True)
+g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, action="copy")
+g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, action="move")
+```
+
+The number of claims can be limited by a range of indices, by a channel name,
+or by both.
+```py
+g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, start=100, end=200)
+g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, channel="@ragreynolds")
+g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, channel="@ragreynolds", start=5, end=10)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -363,4 +419,6 @@ lbryt.ch_cleanup_multi(..., server=server)
 lbryt.measure_usage(...)
 lbryt.cleanup_space(..., server=server)
 lbryt.remove_media(..., server=server)
+lbryt.blobs_move(..., server=server)
+lbryt.blobs_move_all(..., server=server)
 ```

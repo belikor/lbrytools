@@ -77,6 +77,8 @@ lbryt.ch_cleanup_multi(...)
 lbryt.measure_usage(...)
 lbryt.cleanup_space(...)
 lbryt.remove_media()
+lbryt.blobs_move(...)
+lbryt.blobs_move_all(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation
