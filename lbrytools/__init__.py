@@ -86,6 +86,7 @@ from lbrytools.clean import ch_cleanup_multi
 from lbrytools.clean import measure_usage
 from lbrytools.clean import cleanup_space
 from lbrytools.clean import remove_media
+from lbrytools.clean import remove_claims
 
 # Use of the modules so that code checkers don't complain (flake8)
 True if check_lbry else False
@@ -120,3 +121,4 @@ True if ch_cleanup_multi else False
 True if measure_usage else False
 True if cleanup_space else False
 True if remove_media else False
+True if remove_claims else False

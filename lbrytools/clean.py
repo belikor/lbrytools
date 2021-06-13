@@ -809,3 +809,99 @@ def remove_media(never_delete=None,
 
     print("Media files deleted")
     return True
+
+
+def remove_claims(start=1, end=0, file=None,
+                  what="media",
+                  server="http://localhost:5279"):
+    """Delete claims from a file, or delete the ones already present.
+
+    Parameters
+    ----------
+    start: int, optional
+        It defaults to 1.
+        Operate on the item starting from this index in the internal list
+        of claims or in the claims provided by `file`.
+    end: int, optional
+        It defaults to 0.
+        Operate until and including this index in the internal list of claims
+        or in the claims provided by `file`.
+        If it is 0, it is the same as the last index.
+    file: str, optional
+        It defaults to `None`.
+        The file to read claims from. It is a comma-separated value (CSV)
+        list of claims, in which each row represents a claim,
+        and one element is the `'claim_id'` which can be used
+        with `delete_single` to delete that claim.
+
+        If `file=None` it will delete the claims obtained
+        from `search.sort_items` which should already be present
+        in the system fully or partially.
+    what: str, optional
+        It defaults to `'media'`, in which case only the full media file
+        (mp4, mp3, mkv, etc.) is deleted.
+        If it is `'blobs'`, it will delete only the blobs.
+        If it is `'both'`, it will delete both the media file
+        and the blobs.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of bool
+        It returns a list of booleans, where each boolean represents
+        a deleted item; `True` if the claim was deleted successfully,
+        and `False` if it was not.
+    False
+        If there is a problem, non-existing claims, or non-existing file,
+        it will return `False`.
+    """
+    print(80 * "-")
+
+    if not file:
+        print("Remove claims from existing list")
+        sorted_items = srch.sort_items(server=server)
+
+        if not sorted_items:
+            print(">>> Error: no claims previously downloaded.")
+            return False
+    else:
+        if file and not isinstance(file, str) or not os.path.exists(file):
+            print("The file path must exist.")
+            print(f"file={file}")
+            return False
+
+        print("Remove claims from existing file")
+        sorted_items = srch.parse_claim_file(file=file)
+        print()
+
+        if not sorted_items:
+            print(">>> Error: the file must have a 'claim_id' "
+                  "(40-character alphanumeric string); "
+                  "could not parse the file.")
+            print(f"file={file}")
+            return False
+
+    n_items = len(sorted_items)
+    print(80 * "-")
+    print(f"Effective claims: {n_items}")
+
+    list_del_info = []
+
+    for it, item in enumerate(sorted_items, start=1):
+        if it < start:
+            continue
+        if end != 0 and it > end:
+            break
+
+        print("{:4d}/{:4d}".format(it, n_items))
+        del_info = delete_single(cid=item["claim_id"], what=what,
+                                 server=server)
+        list_del_info.append(del_info)
+        print()
+
+    return list_del_info
