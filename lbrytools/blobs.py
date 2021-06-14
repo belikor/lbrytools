@@ -464,11 +464,11 @@ def count_blobs_all(blobfiles=None, print_each=False,
     print(80 * "-")
 
     blob_all_info = []
-    blobs_complete = 0
-    blobs_incomplete = 0
-    claim_no_sd_hash = 0
-    claim_not_found = 0
-    claim_other_error = 0
+    claims_blobs_complete = 0
+    claims_blobs_incomplete = 0
+    claims_no_sd_hash = 0
+    claims_not_found = 0
+    claims_other_error = 0
 
     for it, item in enumerate(items, start=1):
         if it < start:
@@ -488,29 +488,30 @@ def count_blobs_all(blobfiles=None, print_each=False,
 
         if blob_info:
             if "all_present" in blob_info and blob_info["all_present"]:
-                blobs_complete += 1
+                claims_blobs_complete += 1
             elif "all_present" in blob_info and not blob_info["all_present"]:
-                blobs_incomplete += 1
+                claims_blobs_incomplete += 1
 
             if "error_no_sd_hash" in blob_info:
-                claim_no_sd_hash += 1
+                claims_no_sd_hash += 1
             if "error_not_found" in blob_info:
-                claim_not_found += 1
+                claims_not_found += 1
         else:
-            claim_other_error += 1
+            claims_other_error += 1
         print()
 
-    print(f"claims with complete blobs: {blobs_complete}")
-    print(f"claims with incomplete blobs: {blobs_incomplete}")
-    print(f"claims with no 'sd_hash' present: {claim_no_sd_hash} "
+    print(f"claims with complete blobs: {claims_blobs_complete}")
+    print(f"claims with incomplete blobs: {claims_blobs_incomplete}")
+    print(f"claims with no 'sd_hash' present: {claims_no_sd_hash} "
           "(start download)")
-    print(f"invalid claim: {claim_not_found} "
+    print(f"invalid claims: {claims_not_found} "
           "(no valid URI or claim_id, maybe removed from the network)")
-    print(f"other error: {claim_other_error}")
+    print(f"claims with other errors: {claims_other_error}")
     print(8*"-")
-    total = (blobs_complete + blobs_incomplete
-             + claim_no_sd_hash + claim_not_found + claim_other_error)
-    print(f"total claims processed: {total}")
+    total = (claims_blobs_complete + claims_blobs_incomplete
+             + claims_no_sd_hash + claims_not_found + claims_other_error)
+    print(f"total claims processed: {total} "
+          "(minimum number of 'sd_hash' blobs that must exist)")
 
     return blob_all_info
 
