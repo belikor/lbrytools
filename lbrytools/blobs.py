@@ -260,8 +260,8 @@ def count_blobs(uri=None, cid=None, name=None,
     dict
         A dictionary with several keys with information about the claim,
         and its blobs.
-        - `'canonical_url'`, `'claim_id'`, `'sd_hash'`: strings with
-          the appropriate information of the claim.
+        - `'canonical_url'`, `'claim_id'`, `'name'`, `'channel'`, `'sd_hash'`:
+          strings with the appropriate information of the claim.
         - `'all_present'`: a boolean value that is `True` if all blobs
           exist in the `blobfiles` path. It will be `False` if at least
           one blob is missing.
@@ -271,12 +271,28 @@ def count_blobs(uri=None, cid=None, name=None,
           the 96-alphanumeric hash of the blob, and the third is a boolean
           value indicating if the blob is present `True` or not `False`
           in the `blobfiles` path.
+          ::
+              [0, "21d4258adcdde04c1f6416fdb537076ad54eb1...", True]
         - `'missing'`: a list of lists, similar to the `'blobs'` key.
           However, this list will only contain those sublists for missing
           blobs. If all blobs are already present, this is an empty list.
+    dict
+        If `uri`, `cid`, or `name` do not resolve to a valid claim
+        that exists in the network, it will return a dictionary that holds
+        the key `'error_not_found'`, and also keys for the input
+        arguments, `'canonical_url'`, `'claim_id'`, and `'name'`.
+        This may be the case if a mispelled URI or claim ID was input, or
+        if a previously existing claim was removed from the network,
+        which can be checked with the blockchain explorer.
+    dict
+        If the input resolves to a valid claim but the `'sd_hash'`
+        is not present in the system, it will return a dictionary that holds
+        the key `'error_no_sd_hash'`, and also keys for `'canonical_url'`,
+        `'claim_id'`, `'name'`, `'channel'`, and `'sd_hash'`.
+        This may be the case if for a previously downloaded claim
+        the `'sd_hash'` blob was deleted.
     False
         If there is a problem, like non existing blobfiles directory,
-        or non existent claim, or non existent `'sd_hash'` blob,
         it will return `False`.
     """
     if (not blobfiles or not isinstance(blobfiles, str)
@@ -297,7 +313,10 @@ def count_blobs(uri=None, cid=None, name=None,
     item = srch.search_item(uri=uri, cid=cid, name=name,
                             server=server)
     if not item:
-        return False
+        return {"error_not_found": "item was not found in the network",
+                "canonical_url": uri,
+                "claim_id": cid,
+                "name": name}
 
     c_uri = item["canonical_url"]
     c_cid = item["claim_id"]
@@ -326,7 +345,13 @@ def count_blobs(uri=None, cid=None, name=None,
     if not os.path.exists(sd_hash_f):
         print(f">>> 'sd_hash' blob not in directory: {blobfiles}")
         print(">>> Start downloading the claim, or redownload it.")
-        return False
+        return {"error_no_sd_hash": "'sd_hash' blob not in directory "
+                                    f"{blobfiles}",
+                "canonical_url": c_uri,
+                "claim_id": c_cid,
+                "name": c_name,
+                "channel": c_channel,
+                "sd_hash": sd_hash}
 
     fd = open(sd_hash_f)
     lines = fd.readlines()
@@ -412,10 +437,9 @@ def count_blobs_all(blobfiles=None, print_each=False,
         It returns a list of dicts where each dictionary corresponds
         to the information from a single claim.
         The dictionary contains two keys
-        - `'num'`: an integer from 1 up to the last item saved in the system.
+        - `'num'`: an integer from 1 up to the last item processed.
         - `'blob_info'`: the dictionary output from the `count_blobs` method.
-          If there is a problem with a claim, this will be a single boolean
-          value `False`.
+          In rare cases this may be a single boolean value `False`.
     """
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
@@ -442,7 +466,9 @@ def count_blobs_all(blobfiles=None, print_each=False,
     blob_all_info = []
     blobs_complete = 0
     blobs_incomplete = 0
-    claim_missing = 0
+    claim_no_sd_hash = 0
+    claim_not_found = 0
+    claim_other_error = 0
 
     for it, item in enumerate(items, start=1):
         if it < start:
@@ -460,19 +486,30 @@ def count_blobs_all(blobfiles=None, print_each=False,
                 "blob_info": blob_info}
         blob_all_info.append(info)
 
-        if info["blob_info"] and info["blob_info"]["all_present"]:
-            blobs_complete += 1
-        elif info["blob_info"] and not info["blob_info"]["all_present"]:
-            blobs_incomplete += 1
+        if blob_info:
+            if "all_present" in blob_info and blob_info["all_present"]:
+                blobs_complete += 1
+            elif "all_present" in blob_info and not blob_info["all_present"]:
+                blobs_incomplete += 1
+
+            if "error_no_sd_hash" in blob_info:
+                claim_no_sd_hash += 1
+            if "error_not_found" in blob_info:
+                claim_not_found += 1
         else:
-            claim_missing += 1
+            claim_other_error += 1
         print()
 
     print(f"claims with complete blobs: {blobs_complete}")
     print(f"claims with incomplete blobs: {blobs_incomplete}")
-    print(f"missing: {claim_missing} ('sd_hash' missing, or invalid claim)")
+    print(f"claims with no 'sd_hash' present: {claim_no_sd_hash} "
+          "(start download)")
+    print(f"invalid claim: {claim_not_found} "
+          "(no valid URI or claim_id, maybe removed from the network)")
+    print(f"other error: {claim_other_error}")
     print(8*"-")
-    total = blobs_complete + blobs_incomplete + claim_missing
+    total = (blobs_complete + blobs_incomplete
+             + claim_no_sd_hash + claim_not_found + claim_other_error)
     print(f"total claims processed: {total}")
 
     return blob_all_info
@@ -553,14 +590,20 @@ def redownload_blobs(uri=None, cid=None, name=None,
     blob_info = count_blobs(uri=uri, cid=cid, name=name,
                             blobfiles=blobfiles, print_each=print_each,
                             server=server)
-    print(80 * "-")
 
-    if not blob_info:
+    if "error_not_found" in blob_info:
         return False
 
-    if blob_info["all_present"]:
+    print(80 * "-")
+    if "error_no_sd_hash" in blob_info:
+        print(blob_info["error_no_sd_hash"]
+              + "; start download from the start.")
+    elif blob_info["all_present"]:
         print("All blobs files present, nothing to download.")
         return True
+    else:
+        print("Blobs missing; redownload claim.")
+    print()
 
     # If the bug #2070 is solved, this could be run.
     # print("Blobs missing; redownload blobs")
@@ -571,9 +614,11 @@ def redownload_blobs(uri=None, cid=None, name=None,
 
     # The missing blobs will only be downloaded if the media file
     # is not present so we must make sure it is deleted.
-    print("Blobs missing; redownload claim")
+    # print("Blobs missing; redownload claim")
+    print("Ensure the media file is deleted.")
     clean.delete_single(cid=blob_info["claim_id"], what="media",
                         server=server)
+    print()
     dld.download_single(cid=blob_info["claim_id"],
                         ddir=ddir, own_dir=own_dir,
                         server=server)
@@ -677,10 +722,11 @@ def blobs_move(uri=None, cid=None, name=None,
     blob_info = count_blobs(uri=uri, cid=cid, name=name,
                             blobfiles=blobfiles, print_each=False,
                             server=server)
-    if not blob_info:
-        return False
 
     print(80 * "-")
+    if "error_not_found" in blob_info or "error_no_sd_hash" in blob_info:
+        print("Not copying or moving blobs.")
+        return False
 
     name = blob_info["name"]
     channel = blob_info["channel"]
