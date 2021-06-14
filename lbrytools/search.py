@@ -133,7 +133,7 @@ def search_item_uri(uri=None,
             print(">>> Error: {}, {}".format(error["name"], error["text"]))
         else:
             print(">>> Error: {}".format(error))
-        print(f">>> Check that the URI is correct, "
+        print(">>> Check that the URI is correct, "
               "or that the claim hasn't been removed from the network.")
         return False
 
@@ -224,11 +224,11 @@ def search_item_cid(cid=None, name=None,
     if data["total_items"] <= 0:
         if cid:
             print(">>> No item found.")
-            print(f">>> Check that the claim ID is correct, "
+            print(">>> Check that the claim ID is correct, "
                   "or that the claim hasn't been removed from the network.")
         elif name:
             print(">>> No item found.")
-            print(f">>> Check that the name is correct, "
+            print(">>> Check that the name is correct, "
                   "or that the claim hasn't been removed from the network.")
         return False
 
