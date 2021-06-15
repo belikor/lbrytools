@@ -471,9 +471,7 @@ def find_channel(uri=None, cid=None, name=None,
 
     item = search_item(uri=uri, cid=cid, name=name,
                        server=server)
-
     if not item:
-        print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
     if ("signing_channel" not in item

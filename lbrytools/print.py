@@ -399,6 +399,7 @@ def print_items(items=None, show="all",
             _channel = srch.find_channel(cid=item["claim_id"], full=True,
                                          server=server)
             if not _channel:
+                print()
                 continue
 
             out += f"{_channel}, "
