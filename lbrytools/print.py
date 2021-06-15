@@ -89,10 +89,17 @@ def print_info_pre_get(item=None):
 
     rem_min = 0
     rem_s = 0
+    length_s = 0
+
     if "video" in item["value"]:
-        length_s = item["value"]["video"]["duration"]
-        rem_s = length_s % 60
-        rem_min = (length_s - rem_s)/60
+        if "duration" in item["value"]["video"]:
+            length_s = item["value"]["video"]["duration"]
+    if "audio" in item["value"]:
+        if "duration" in item["value"]["audio"]:
+            length_s = item["value"]["audio"]["duration"]
+
+    rem_s = length_s % 60
+    rem_min = (length_s - rem_s)/60
 
     info.append(f"duration: {rem_min} min {rem_s} s")
 
