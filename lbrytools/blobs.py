@@ -503,15 +503,21 @@ def count_blobs_all(blobfiles=None, print_each=False,
     print(f"claims with complete blobs: {claims_blobs_complete}")
     print(f"claims with incomplete blobs: {claims_blobs_incomplete}")
     print(f"claims with no 'sd_hash' present: {claims_no_sd_hash} "
-          "(start download)")
+          "(restart download)")
     print(f"invalid claims: {claims_not_found} "
           "(no valid URI or claim_id, maybe removed from the network)")
     print(f"claims with other errors: {claims_other_error}")
     print(8*"-")
     total = (claims_blobs_complete + claims_blobs_incomplete
              + claims_no_sd_hash + claims_not_found + claims_other_error)
-    print(f"total claims processed: {total} "
+    total_valid = (claims_blobs_complete + claims_blobs_incomplete
+                   + claims_no_sd_hash)
+    total_invalid = claims_not_found + claims_other_error
+    print(f"total claims processed: {total}")
+    print(f"total valid claims: {total_valid} "
           "(minimum number of 'sd_hash' blobs that must exist)")
+    print(f"invalid claims: {total_invalid} "
+          "(should be deleted including all their blobs)")
 
     return blob_all_info
 
