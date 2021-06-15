@@ -152,7 +152,9 @@ def delete_single(uri=None, cid=None, name=None,
     cmd_name = ["lbrynet",
                 "file",
                 "delete",
-                "--claim_name=" + _name]
+                "--claim_name=" + "'" + _name + "'"]
+    if "'" in _name:
+        cmd_name[3] = "--claim_name=" + '"' + _name + '"'
     cmd_id = cmd_name[:]
     cmd_id[3] = "--claim_id=" + _claim_id
 
