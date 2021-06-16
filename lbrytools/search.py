@@ -632,6 +632,78 @@ def sort_items(channel=None,
     return sorted_items
 
 
+def invalid_claims(channel=None,
+                   server="http://localhost:5279"):
+    """Return a list of invalid claims that were previously downloaded.
+
+    Certain claims that were downloaded in the past may be invalid now because
+    they were removed by their authors from the network after
+    they were initially downloaded. This can be confirmed by looking up
+    the claim ID in the blockchain explorer, and finding the 'unspent'
+    transaction.
+
+    Parameters
+    ----------
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of dict
+        A list of dictionaries that represent 'invalid claims'
+        that were previously downloaded fully or partially.
+
+        Each dictionary is filled with information from the standard output
+        of the `lbrynet file list` command, but filtered in such a way
+        that it only includes claims which are no longer searchable online
+        by `lbrynet resolve` or `lbrynet claim search`.
+
+        The dictionaries are ordered by `'release_time'`, with older claims
+        appearing first.
+        Certain claims don't have `'release_time'` so for them we add
+        this key, and use the value of `'timestamp'` for it.
+    False
+        If there is a problem it will return False.
+    """
+    items = sort_items(channel=channel,
+                       server=server)
+    if not items:
+        return False
+
+    n_items = len(items)
+
+    invalid_items = []
+
+    for it, item in enumerate(items, start=1):
+        online_item = search_item(cid=item["claim_id"], print_error=False,
+                                  server=server)
+        if not online_item:
+            claim_id = item["claim_id"]
+            claim_name = item["claim_name"]
+            channel = item["channel_name"]
+            print(f"Claim {it:4d}/{n_items:4d}, "
+                  f"{claim_id}, {channel}, {claim_name}")
+            invalid_items.append(item)
+
+    n_invalid = len(invalid_items)
+    print(f"Invalid items found: {n_invalid} "
+          "(possibly deleted from the network)")
+
+    return invalid_items
+
+
 def parse_claim_file(file=None, start=1, end=0):
     """Parse a CSV file containing claim_ids.
 
