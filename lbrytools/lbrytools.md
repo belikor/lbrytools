@@ -163,13 +163,43 @@ p = lbryt.print_summary(channel="NaomiBrockwell", ch_online=False)
 ```
 
 In the first case (default) we will obtain a full channel name
-without ambiguity (in case two channels have the same name).
+without ambiguity (in case two channels have the same base name).
 However, this is slow because it has to resolve the item online first.
 
 The second case uses the locally stored database to get the channel name,
 and thus it is very fast. However, if that channel name has not been properly
 resolved, it may not return an actual name, in which case it will just
 print `_None_`.
+
+# Printing invalid claims
+
+Invalid claims are those that were downloaded at some point, but which now
+cannot be resolved anymore from the online database (blockchain).
+This probably means that the author decided to remove the claims
+after they were downloaded originally.
+This can be verified with the blockchain explorer, by following the claim ID
+and looking for an `unspent` transaction.
+
+Print only the invalid claims by using the `invalid=True` parameter
+of `print_summary`. This will be slower than with `invalid=False`
+as it needs to resolve each claim online, to see if it's still valid or not.
+```py
+p = lbryt.print_summary(invalid=True)
+p = lbryt.print_summary(file="/opt/summary_invalid.txt", invalid=True)
+```
+
+If `ch=True` or `channel=` is used, this will automatically
+set `ch_online=False` because for invalid claims the channel name
+can only be resolved from the offline database.
+```py
+p = lbryt.print_summary(invalid=True, ch=True)
+p = lbryt.print_summary(invalid=True, channel="mises")
+```
+
+Invalid claims cannot be redownloaded, as the information about them is no
+longer online. Therefore, for these invalid claims the media files
+can be saved in a secure location, and the binary blobs can be deleted
+to free space in the disk.
 
 # Download from file
 

@@ -460,7 +460,7 @@ def print_items(items=None, show="all",
 def print_summary(show="all",
                   title=False, typ=False, path=False,
                   cid=True, blobs=True, ch=False, ch_online=True, name=True,
-                  start=1, end=0, channel=None,
+                  start=1, end=0, channel=None, invalid=False,
                   file=None, fdate=False,
                   server="http://localhost:5279"):
     """Print a summary of the items downloaded from the LBRY network.
@@ -527,8 +527,21 @@ def print_summary(show="all",
         It must be a channel's name, in which case it shows
         only the claims published by this channel.
 
-        Using this parameter sets `ch=True`, and is slow because
-        it needs to perform an additional search for the channel.
+        Using this parameter sets `ch=True`.
+    invalid: bool, optional
+        It defaults to `False`, in which case it prints every single claim
+        previously downloaded.
+
+        If it is `True` it will only print those claims that are 'invalid',
+        that is, those that cannot be resolved anymore from the online
+        database. This probably means that the author decided to remove
+        the claims at some point after they were downloaded originally.
+        This can be verified with the blockchain explorer, by following
+        the claim ID for an 'unspent' transaction.
+
+        Using this parameter sets `ch_online=False` as the channel name
+        of invalid claims cannot be resolved online, only from the offline
+        database.
     file: str, optional
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
@@ -549,12 +562,23 @@ def print_summary(show="all",
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
-    items = srch.sort_items(server=server)
-    status = print_items(items, show=show,
-                         title=title, typ=typ, path=path,
-                         cid=cid, blobs=blobs, ch=ch, ch_online=ch_online,
-                         name=name,
-                         start=start, end=end, channel=channel,
-                         file=file, fdate=fdate,
-                         server=server)
+    if not invalid:
+        items = srch.sort_items(server=server)
+        status = print_items(items, show=show,
+                             title=title, typ=typ, path=path,
+                             cid=cid, blobs=blobs, ch=ch, ch_online=ch_online,
+                             name=name,
+                             start=start, end=end, channel=channel,
+                             file=file, fdate=fdate,
+                             server=server)
+    else:
+        items = srch.sort_invalid(server=server)
+        print()
+        status = print_items(items, show=show,
+                             title=title, typ=typ, path=path,
+                             cid=cid, blobs=blobs, ch=ch, ch_online=False,
+                             name=name,
+                             start=start, end=end, channel=channel,
+                             file=file, fdate=fdate,
+                             server=server)
     return status
