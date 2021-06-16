@@ -139,6 +139,7 @@ if __name__ == "__main__":
                             cid=cfg.sm_cid,
                             blobs=cfg.sm_blobs,
                             ch=cfg.sm_ch,
+                            ch_online=cfg.sm_ch_online,
                             name=cfg.sm_name,
                             file=cfg.sm_file,
                             fdate=cfg.sm_fdate,

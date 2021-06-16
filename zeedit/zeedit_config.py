@@ -135,8 +135,15 @@ sm_cid = 1
 sm_blobs = 1
 
 # Print the name of the channel.
-# This is slow because it needs to perform a reverse search.
+# Slow: sm_ch=1, sm_ch_online=1
+# Fast: sm_ch=1, sm_ch_online=0
 sm_ch = 0
+
+# If set to 1 (True) it will resolve the claim online, which will be slow.
+# If set to 0 (False) it will resolve the claim from the local database,
+# which will be fast but may not show the full name of the channel.
+# It only has effect with `sm_ch=1`
+sm_ch_online = 1
 
 # Print the name of the claim.
 sm_name = 1
