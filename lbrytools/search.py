@@ -62,7 +62,7 @@ def check_repost(item):
     return item
 
 
-def search_item_uri(uri=None,
+def search_item_uri(uri=None, print_error=True,
                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the URI.
 
@@ -77,6 +77,12 @@ def search_item_uri(uri=None,
             uri = 'some-video-name'
 
         The URI is also called the `'canonical_url'` of the claim.
+    print_error: bool, optional
+        It defaults to `True`, in which case it will print the error message
+        that `lbrynet resolve` returns.
+        By setting this value to `False` no messages will be printed;
+        this is useful inside other functions when we want to limit
+        the terminal output.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -128,13 +134,14 @@ def search_item_uri(uri=None,
     item = output["result"][uri]
 
     if "error" in item:
-        error = item["error"]
-        if "name" in error:
-            print(">>> Error: {}, {}".format(error["name"], error["text"]))
-        else:
-            print(">>> Error: {}".format(error))
-        print(">>> Check that the URI is correct, "
-              "or that the claim hasn't been removed from the network.")
+        if print_error:
+            error = item["error"]
+            if "name" in error:
+                print(">>> Error: {}, {}".format(error["name"], error["text"]))
+            else:
+                print(">>> Error: {}".format(error))
+            print(">>> Check that the URI is correct, "
+                  "or that the claim hasn't been removed from the network.")
         return False
 
     # The found item may be a repost so we check it,
@@ -143,7 +150,7 @@ def search_item_uri(uri=None,
     return item
 
 
-def search_item_cid(cid=None, name=None,
+def search_item_cid(cid=None, name=None, print_error=True,
                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the claim id or name.
 
@@ -160,6 +167,12 @@ def search_item_cid(cid=None, name=None,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    print_error: bool, optional
+        It defaults to `True`, in which case it will print the error message
+        that `lbrynet claim search` returns.
+        By setting this value to `False` no messages will be printed;
+        this is useful inside other functions when we want to limit
+        the terminal output.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -222,14 +235,17 @@ def search_item_cid(cid=None, name=None,
     data = output["result"]
 
     if data["total_items"] <= 0:
-        if cid:
-            print(">>> No item found.")
-            print(">>> Check that the claim ID is correct, "
-                  "or that the claim hasn't been removed from the network.")
-        elif name:
-            print(">>> No item found.")
-            print(">>> Check that the name is correct, "
-                  "or that the claim hasn't been removed from the network.")
+        if print_error:
+            if cid:
+                print(">>> No item found.")
+                print(">>> Check that the claim ID is correct, "
+                      "or that the claim hasn't been removed from "
+                      "the network.")
+            elif name:
+                print(">>> No item found.")
+                print(">>> Check that the name is correct, "
+                      "or that the claim hasn't been removed from "
+                      "the network.")
         return False
 
     # The list of items may include various reposts;
@@ -241,7 +257,7 @@ def search_item_cid(cid=None, name=None,
     return item
 
 
-def search_item(uri=None, cid=None, name=None,
+def search_item(uri=None, cid=None, name=None, print_error=True,
                 server="http://localhost:5279"):
     """Find a single item in the LBRY network resolving URI, claim id, or name.
 
@@ -268,6 +284,12 @@ def search_item(uri=None, cid=None, name=None,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    print_error: bool, optional
+        It defaults to `True`, in which case it will print the error message
+        that `lbrynet resolve` or `lbrynet claim search` returns.
+        By setting this value to `False` no messages will be printed;
+        this is useful inside other functions when we want to limit
+        the terminal output.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -292,11 +314,13 @@ def search_item(uri=None, cid=None, name=None,
         return False
 
     if uri and not cid:
-        item = search_item_uri(uri=uri, server=server)
+        item = search_item_uri(uri=uri, print_error=print_error,
+                               server=server)
     else:
-        item = search_item_cid(cid=cid, name=name, server=server)
+        item = search_item_cid(cid=cid, name=name, print_error=print_error,
+                               server=server)
 
-    if not item:
+    if not item and print_error:
         print(f">>> uri={uri}")
         print(f">>> cid={cid}")
         print(f">>> name={name}")
