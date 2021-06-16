@@ -109,7 +109,7 @@ sm_summary = 1
 sm_file = "/home/user/Documents/lbry_summary.txt"
 
 # Add the day and time to the summary filename.
-sm_date = 1
+sm_fdate = 1
 
 # Which downloaded claims will be printed in the summary?
 # "all", print all items

@@ -231,7 +231,7 @@ def print_items(items=None, show="all",
                 title=False, typ=False, path=False,
                 cid=True, blobs=True, ch=False, ch_online=True, name=True,
                 start=1, end=0, channel=None,
-                file=None, date=False,
+                file=None, fdate=False,
                 server="http://localhost:5279"):
     """Print information on each claim in the given list of claims.
 
@@ -307,7 +307,7 @@ def print_items(items=None, show="all",
         It defaults to `None`.
         It must be a user writable path to which the summary will be written.
         Otherwise the summary will be printed to the terminal.
-    date: bool, optional
+    fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
     server: str, optional
@@ -359,12 +359,12 @@ def print_items(items=None, show="all",
         dirn = os.path.dirname(file)
         base = os.path.basename(file)
 
-        if date:
-            date = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+        if fdate:
+            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
         else:
-            date = ""
+            fdate = ""
 
-        file = os.path.join(dirn, date + base)
+        file = os.path.join(dirn, fdate + base)
 
         try:
             fd = open(file, "w")
@@ -461,7 +461,7 @@ def print_summary(show="all",
                   title=False, typ=False, path=False,
                   cid=True, blobs=True, ch=False, ch_online=True, name=True,
                   start=1, end=0, channel=None,
-                  file=None, date=False,
+                  file=None, fdate=False,
                   server="http://localhost:5279"):
     """Print a summary of the items downloaded from the LBRY network.
 
@@ -533,7 +533,7 @@ def print_summary(show="all",
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
         Otherwise the summary will be printed to the terminal.
-    date: bool, optional
+    fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
     server: str, optional
@@ -555,6 +555,6 @@ def print_summary(show="all",
                          cid=cid, blobs=blobs, ch=ch, ch_online=ch_online,
                          name=name,
                          start=start, end=end, channel=channel,
-                         file=file, date=date,
+                         file=file, fdate=fdate,
                          server=server)
     return status
