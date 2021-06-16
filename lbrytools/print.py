@@ -229,7 +229,7 @@ def print_multi_list(list_ch_info=None):
 
 def print_items(items=None, show="all",
                 title=False, typ=False, path=False,
-                cid=True, blobs=True, ch=False, name=True,
+                cid=True, blobs=True, ch=False, ch_online=True, name=True,
                 start=1, end=0, channel=None,
                 file=None, date=False,
                 server="http://localhost:5279"):
@@ -272,8 +272,20 @@ def print_items(items=None, show="all",
         It defaults to `False`.
         Show the name of the channel that published the claim.
 
-        This is slow as it needs to perform an additional search
-        for the channel.
+        This is slow if `ch_online=True`.
+    ch_online: bool, optional
+        It defaults to `True`, in which case it searches for the channel name
+        by doing a reverse search of the item online. This makes the search
+        slow.
+
+        By setting it to `False` it will consider the channel name
+        stored in the input dictionary itself, which will be faster
+        but it won't be the full name of the channel. If no channel is found
+        offline, then it will set a default value `'_None_'` just so
+        it can be printed with no error.
+
+        This parameter only has effect if `ch=True`, or if `channel`
+        is used, as it internally sets `ch=True`.
     name: bool, optional
         It defaults to `True`.
         Show the name of the claim.
@@ -403,12 +415,21 @@ def print_items(items=None, show="all",
         if blobs:
             out += "{:3d}/{:3d}, ".format(_blobs, _blobs_in_stream)
         if ch:
-            _channel = srch.find_channel(cid=item["claim_id"], full=True,
-                                         server=server)
-            if not _channel:
-                print(out + _claim_name)
-                print()
-                continue
+            if ch_online:
+                # Searching online is slower but it gets the full channel name
+                _channel = srch.find_channel(cid=item["claim_id"], full=True,
+                                             server=server)
+                if not _channel:
+                    print(out + _claim_name)
+                    print()
+                    continue
+            else:
+                # Searching offline is necessary for "invalid" claims
+                # that no longer exist as active claims online.
+                # We don't want to skip this item so we force a channel name.
+                _channel = item["channel_name"]
+                if not _channel:
+                    _channel = "_None_"
 
             out += f"{_channel}, "
 
@@ -438,7 +459,7 @@ def print_items(items=None, show="all",
 
 def print_summary(show="all",
                   title=False, typ=False, path=False,
-                  cid=True, blobs=True, ch=False, name=True,
+                  cid=True, blobs=True, ch=False, ch_online=True, name=True,
                   start=1, end=0, channel=None,
                   file=None, date=False,
                   server="http://localhost:5279"):
@@ -477,8 +498,20 @@ def print_summary(show="all",
         It defaults to `False`.
         Show the name of the channel that published the claim.
 
-        This is slow as it needs to perform an additional search
-        for the channel.
+        This is slow if `ch_online=True`.
+    ch_online: bool, optional
+        It defaults to `True`, in which case it searches for the channel name
+        by doing a reverse search of the item online. This makes the search
+        slow.
+
+        By setting it to `False` it will consider the channel name
+        stored in the input dictionary itself, which will be faster
+        but it won't be the full name of the channel. If no channel is found
+        offline, then it will set a default value `'_None_'` just so
+        it can be printed with no error.
+
+        This parameter only has effect if `ch=True`, or if `channel`
+        is used, as it internally sets `ch=True`.
     name: bool, optional
         It defaults to `True`.
         Show the name of the claim.
@@ -519,7 +552,8 @@ def print_summary(show="all",
     items = srch.sort_items(server=server)
     status = print_items(items, show=show,
                          title=title, typ=typ, path=path,
-                         cid=cid, blobs=blobs, ch=ch, name=name,
+                         cid=cid, blobs=blobs, ch=ch, ch_online=ch_online,
+                         name=name,
                          start=start, end=end, channel=channel,
                          file=file, date=date,
                          server=server)
