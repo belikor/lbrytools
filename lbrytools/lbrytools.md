@@ -112,15 +112,16 @@ Certain items don't have `'release time'`, so for these
 the `'timestamp'` is used.
 
 Specify a filename to print to that file, otherwise it will print to
-the terminal. Optionally add the date to the filename.
+the terminal. Optionally add the date to the filename to better keep track
+of the written files.
 ```py
 p = lbryt.print_summary()
 p = lbryt.print_summary(file="/opt/summary.txt")
-p = lbryt.print_summary(file="/opt/summary.txt", date=True)
+p = lbryt.print_summary(file="/opt/summary.txt", fdate=True)
 ```
 
 Various options control which claims are actually printed.
-Print all files,
+Print all files (default),
 or only those which have incomplete blobs,
 or only those which have all their blobs,
 or only those for which the full media file (mp4, mp3, mkv, etc.) exists,
@@ -136,23 +137,39 @@ p = lbryt.print_summary(show="missing")
 Normally only items that have all blobs also have a media file; however,
 if the claim is currently being downloaded a partial media file may be present.
 
-Various options control what type of information is printed, including title,
-type, download path, claim id, number of blobs, name of channel,
-and name of claim.
-Printing the channel's name is slow as it needs to perform an additional search
-for the channel.
+Various options control the type of information that is printed,
+including title, type, download path, claim id, number of blobs,
+name of channel, and name of claim.
 ```py
 p = lbryt.print_summary(title=True, typ=False, path=False,
                         cid=True, blobs=True, ch=False,
                         name=True)
 ```
- 
-Print only a range of items, or only the claims by a specific channel
-(it implies `ch=True` and is slow).
+
+We can also restrict printing only a range of items, or only the claims
+by a specific channel (it implies `ch=True`).
 ```py
-p = lbryt.print_summary(start=20, end=40)
+p = lbryt.print_summary(start=20)  # From this index until the end
+p = lbryt.print_summary(end=40)  # From the beginning until this index
+p = lbryt.print_summary(start=100, end=500)  # Delimited range
 p = lbryt.print_summary(channel="Veritasium")
 ```
+
+When printing the channel's name we can choose whether to find
+the name by resolving the claim online or not.
+```py
+p = lbryt.print_summary(ch=True, ch_online=True)
+p = lbryt.print_summary(channel="NaomiBrockwell", ch_online=False)
+```
+
+In the first case (default) we will obtain a full channel name
+without ambiguity (in case two channels have the same name).
+However, this is slow because it has to resolve the item online first.
+
+The second case uses the locally stored database to get the channel name,
+and thus it is very fast. However, if that channel name has not been properly
+resolved, it may not return an actual name, in which case it will just
+print `_None_`.
 
 # Download from file
 
