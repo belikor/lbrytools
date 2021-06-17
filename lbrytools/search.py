@@ -632,8 +632,8 @@ def sort_items(channel=None,
     return sorted_items
 
 
-def invalid_claims(channel=None,
-                   server="http://localhost:5279"):
+def sort_invalid(channel=None,
+                 server="http://localhost:5279"):
     """Return a list of invalid claims that were previously downloaded.
 
     Certain claims that were downloaded in the past may be invalid now because

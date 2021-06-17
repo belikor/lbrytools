@@ -69,6 +69,7 @@ from lbrytools.search import search_item
 from lbrytools.search import ch_search_latest
 from lbrytools.search import find_channel
 from lbrytools.search import sort_items
+from lbrytools.search import sort_invalid
 from lbrytools.search import parse_claim_file
 
 from lbrytools.print import print_summary
@@ -104,6 +105,7 @@ True if search_item else False
 True if ch_search_latest else False
 True if find_channel else False
 True if sort_items else False
+True if sort_invalid else False
 True if parse_claim_file else False
 
 True if print_summary else False
