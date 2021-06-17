@@ -76,6 +76,8 @@ percent = 90
 
 # The content from these channels will not be deleted when the script
 # tries to cleanup older files.
+# If you have many configuration files, make sure this list of channels
+# is in all of them so that their content is always preserved.
 never_delete = [
     "@Odysee",
     "@RobBraxmanTech",
