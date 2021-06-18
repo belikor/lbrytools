@@ -262,6 +262,20 @@ As long as the blobs are present, the content can be seeded to the network,
 and the full file can be restored.
 That is, while the blobs exist the file is not completely deleted.
 
+# Delete invalid claims
+
+By default, before a claim is deleted with `delete_single`, every claim
+is checked in the online database (blockchain) to get more information
+about it.
+
+For 'invalid' claims, those that have been removed by their authors,
+they won't be able to be found online anymore. Therefore, the `invalid=True`
+parameter must be used in order to resolve the claims in the offline database,
+and be able to delete them.
+```py
+s = lbryt.delete_single(uri="right-to-repair-introduced-federally-for:7", invalid=True)
+```
+
 # Delete claims from channel
 
 Delete all downloaded claims from a single channel with the exception
@@ -333,6 +347,14 @@ previously downloaded.
 ```py
 q = lbryt.remove_claims()  # Deletes media files by default.
 q = lbryt.remove_claims(what="both")  # Deletes everything!
+```
+
+The `invalid ` argument must be used if the file being processed is a list
+of 'invalid' items.
+```py
+p = lbryt.print_summary(file="summary_invalid.txt", invalid=True)
+
+q = lbryt.remove_claims(file="summary_invalid.txt", invalid=True)
 ```
 
 # Measure disk usage
