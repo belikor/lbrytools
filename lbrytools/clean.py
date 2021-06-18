@@ -31,7 +31,7 @@ import shutil
 import lbrytools.search as srch
 
 
-def delete_single(uri=None, cid=None, name=None,
+def delete_single(uri=None, cid=None, name=None, offline=False,
                   what="media",
                   server="http://localhost:5279"):
     """Delete a single file, and optionally the downloaded blobs.
@@ -60,6 +60,15 @@ def delete_single(uri=None, cid=None, name=None,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    offline: bool, optional
+        It defaults to `False`, in which case it will use
+        `lbrynet claim search` to search `cid` or `name` in the online
+        database.
+
+        If it is `True` it will use `lbrynet file list` to search
+        `cid` or `name` in the offline database.
+        This is required for 'invalid' claims, which have been removed from
+        the online database and only exist locally.
     what: str, optional
         It defaults to `'media'`, in which case only the full media file
         (mp4, mp3, mkv, etc.) is deleted.
@@ -90,52 +99,42 @@ def delete_single(uri=None, cid=None, name=None,
         print(f"what={what}")
         return False
 
-    item = srch.search_item(uri=uri, cid=cid, name=name,
+    # Searching online, with `offline=False`, will allow us to get the
+    # `canonical_url` and full channel's name, otherwise we can only obtain
+    # the `claim_name` and a simple channel name.
+    item = srch.search_item(uri=uri, cid=cid, name=name, offline=offline,
                             server=server)
     if not item:
         return False
 
-    _uri = item["canonical_url"]
     _claim_id = item["claim_id"]
-    _name = item["name"]
-    # channel = item["signing_channel"]["canonical_url"]
 
-    cmd = ["lbrynet",
-           "file",
-           "list",
-           "--claim_id=" + _claim_id]
-    # output = subprocess.run(cmd,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
+    if offline:
+        _name = item["claim_name"]
+        channel = item["channel_name"]
+    else:
+        _uri = item["canonical_url"]
+        _name = item["name"]
+        if ("signing_channel" in item
+                and "canonical_url" in item["signing_channel"]):
+            channel = item["signing_channel"]["canonical_url"]
+            channel = channel.lstrip("lbry://")
+        else:
+            channel = "@_Unknown_"
 
-    # data = json.loads(output.stdout)
-
-    msg = {"method": cmd[1] + "_" + cmd[2],
-           "params": {"claim_id": _claim_id}}
-    output = requests.post(server, json=msg).json()
-
-    if "error" in output:
-        print(">>> No 'result' in the JSON-RPC server output")
-        return False
-
-    data = output["result"]
-
-    if not data["items"] or data["total_items"] < 1:
-        print("No item found locally, probably already deleted.")
-        print(f"uri={uri}, cid={cid}, name={name}")
-        return False
-
-    item = data["items"][0]
+    # Searching offline is necessary to get the download path,
+    # and blob information.
+    item = srch.search_item(cid=_claim_id, offline=True,
+                            server=server)
 
     path = item["download_path"]
     blobs = int(item["blobs_completed"])
     blobs_full = int(item["blobs_in_stream"])
 
-    print(f"canonical_url: {_uri}")
+    if offline:
+        print(f"claim_name: {_name}")
+    else:
+        print(f"canonical_url: {_uri}")
     print(f"claim_id: {_claim_id}")
     print(f"Blobs found: {blobs} of {blobs_full}")
 
