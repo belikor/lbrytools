@@ -31,6 +31,76 @@ import shutil
 import lbrytools.search as srch
 
 
+def lbrynet_del(claim_id=None, claim_name=None, what="blobs",
+                server="http://localhost:5279"):
+    """Run the lbrynet file delete command on the given claim ID.
+
+    Parameters
+    ----------
+    claim_id: str
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    claim_name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    bool
+        It returns `True` if the files were deleted successfully.
+        It returns `False` if there is an error.
+    """
+    if not claim_id:
+        print("No input claim ID, using default value.")
+        claim_id = "70dfefa510ca6eee7023a2a927e34d385b5a18bd"
+        claim_name = "04-S"
+
+    cmd_name = ["lbrynet",
+                "file",
+                "delete",
+                "--claim_name=" + "'" + claim_name + "'"]
+    if "'" in claim_name:
+        cmd_name[3] = "--claim_name=" + '"' + claim_name + '"'
+
+    cmd_id = cmd_name[:]
+    cmd_id[3] = "--claim_id=" + claim_id
+
+    if what in "blobs":
+        print("Remove blobs")
+    elif what in "both":
+        print("Remove both, blobs and file")
+        cmd_id.append("--delete_from_download_dir")
+        cmd_name.append("--delete_from_download_dir")
+
+    print("Remove: " + " ".join(cmd_id))
+    print("Remove: " + " ".join(cmd_name))
+
+    msg = {"method": cmd_id[1] + "_" + cmd_id[2],
+           "params": {"claim_id": claim_id}}
+
+    if what in "both":
+        msg["params"]["delete_from_download_dir"] = True
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    print("Blobs deleted")
+
+    return True
+
+
 def delete_single(uri=None, cid=None, name=None, offline=False,
                   what="media",
                   server="http://localhost:5279"):
@@ -107,14 +177,14 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
     if not item:
         return False
 
-    _claim_id = item["claim_id"]
+    claim_id = item["claim_id"]
 
     if offline:
-        _name = item["claim_name"]
+        claim_name = item["claim_name"]
         channel = item["channel_name"]
     else:
-        _uri = item["canonical_url"]
-        _name = item["name"]
+        claim_uri = item["canonical_url"]
+        claim_name = item["name"]
         if ("signing_channel" in item
                 and "canonical_url" in item["signing_channel"]):
             channel = item["signing_channel"]["canonical_url"]
@@ -124,7 +194,7 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
 
     # Searching offline is necessary to get the download path,
     # and blob information.
-    item = srch.search_item(cid=_claim_id, offline=True,
+    item = srch.search_item(cid=claim_id, offline=True,
                             server=server)
 
     path = item["download_path"]
@@ -132,10 +202,10 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
     blobs_full = int(item["blobs_in_stream"])
 
     if offline:
-        print(f"claim_name: {_name}")
+        print(f"claim_name: {claim_name}")
     else:
-        print(f"canonical_url: {_uri}")
-    print(f"claim_id: {_claim_id}")
+        print(f"canonical_url: {claim_uri}")
+    print(f"claim_id: {claim_id}")
     print(f"Blobs found: {blobs} of {blobs_full}")
 
     if what in "media":
@@ -148,50 +218,9 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
             print("No media found locally, probably already deleted.")
         return True
 
-    cmd_name = ["lbrynet",
-                "file",
-                "delete",
-                "--claim_name=" + "'" + _name + "'"]
-    if "'" in _name:
-        cmd_name[3] = "--claim_name=" + '"' + _name + '"'
-    cmd_id = cmd_name[:]
-    cmd_id[3] = "--claim_id=" + _claim_id
-
-    if what in "blobs":
-        print("Remove blobs")
-    elif what in "both":
-        print("Remove both, blobs and file")
-        cmd_id.append("--delete_from_download_dir")
-        cmd_name.append("--delete_from_download_dir")
-
-    print("Remove: " + " ".join(cmd_id))
-    print("Remove: " + " ".join(cmd_name))
-
-    # output = subprocess.run(cmd_id,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
-
-    # data = json.loads(output.stdout)
-
-    msg = {"method": cmd_id[1] + "_" + cmd_id[2],
-           "params": {"claim_id": _claim_id}}
-
-    if what in "both":
-        msg["params"]["delete_from_download_dir"] = True
-
-    output = requests.post(server, json=msg).json()
-
-    if "error" in output:
-        print(">>> No 'result' in the JSON-RPC server output")
-        return False
-
-    print("Blobs deleted")
-
-    return True
+    status = lbrynet_del(claim_id, claim_name=claim_name, what=what,
+                         server=server)
+    return status
 
 
 def ch_cleanup(channel=None, number=2, what="media",
