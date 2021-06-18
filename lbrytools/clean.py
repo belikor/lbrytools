@@ -101,7 +101,7 @@ def lbrynet_del(claim_id=None, claim_name=None, what="blobs",
     return True
 
 
-def delete_single(uri=None, cid=None, name=None, offline=False,
+def delete_single(uri=None, cid=None, name=None, invalid=False,
                   what="media",
                   server="http://localhost:5279"):
     """Delete a single file, and optionally the downloaded blobs.
@@ -130,15 +130,19 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
-    offline: bool, optional
-        It defaults to `False`, in which case it will use
-        `lbrynet claim search` to search `cid` or `name` in the online
-        database.
+    invalid: bool, optional
+        It defaults to `False`, in which case it will assume the claim
+        is still valid in the online database.
+        It will use `lbrynet claim search` to search `cid` or `name`.
 
-        If it is `True` it will use `lbrynet file list` to search
-        `cid` or `name` in the offline database.
-        This is required for 'invalid' claims, which have been removed from
-        the online database and only exist locally.
+        If it is `True` it will assume the claim is no longer valid,
+        that is, that the claim has been removed from the online database
+        and only exists locally.
+        In this case, it will use `lbrynet file list` to resolve
+        `cid` or `name`.
+
+        This has no effect on `uri`, so if this input is used,
+        it will always try to resolve it from the online database.
     what: str, optional
         It defaults to `'media'`, in which case only the full media file
         (mp4, mp3, mkv, etc.) is deleted.
@@ -172,14 +176,14 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
     # Searching online, with `offline=False`, will allow us to get the
     # `canonical_url` and full channel's name, otherwise we can only obtain
     # the `claim_name` and a simple channel name.
-    item = srch.search_item(uri=uri, cid=cid, name=name, offline=offline,
+    item = srch.search_item(uri=uri, cid=cid, name=name, offline=invalid,
                             server=server)
     if not item:
         return False
 
     claim_id = item["claim_id"]
 
-    if offline:
+    if invalid:
         claim_name = item["claim_name"]
         channel = item["channel_name"]
     else:
@@ -201,7 +205,7 @@ def delete_single(uri=None, cid=None, name=None, offline=False,
     blobs = int(item["blobs_completed"])
     blobs_full = int(item["blobs_in_stream"])
 
-    if offline:
+    if invalid:
         print(f"claim_name: {claim_name}")
     else:
         print(f"canonical_url: {claim_uri}")
