@@ -150,7 +150,7 @@ def search_item_uri(uri=None, print_error=True,
     return item
 
 
-def search_item_cid(cid=None, name=None, print_error=True,
+def search_item_cid(cid=None, name=None, offline=False, print_error=True,
                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the claim id or name.
 
@@ -167,12 +167,21 @@ def search_item_cid(cid=None, name=None, print_error=True,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    offline: bool, optional
+        It defaults to `False`, in which case it will use
+        `lbrynet claim search` to search `cid` or `name` in the online
+        database.
+
+        If it is `True` it will use `lbrynet file list` to search
+        `cid` or `name` in the offline database.
+        This is required for 'invalid' claims, which have been removed from
+        the online database and only exist locally.
     print_error: bool, optional
-        It defaults to `True`, in which case it will print the error message
-        that `lbrynet claim search` returns.
+        It defaults to `True`, in which case it will print an error message
+        if the claim is not found.
         By setting this value to `False` no messages will be printed;
-        this is useful inside other functions when we want to limit
-        the terminal output.
+        this is helpful if this function is used inside other functions,
+        and we want to limit the terminal output.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -203,26 +212,27 @@ def search_item_cid(cid=None, name=None, print_error=True,
         print(f"name={name}")
         return False
 
-    funcs.check_lbry(server=server)
-    cmd = ["lbrynet",
-           "claim",
-           "search",
-           "--name={}".format(name)]
-    if cid:
-        cmd[3] = "--claim_ids=" + cid
+    if offline:
+        cmd = ["lbrynet",
+               "file",
+               "list",
+               "--claim_name='{}'".format(name)]
+        if cid:
+            cmd[3] = "--claim_id=" + cid
 
-    # output = subprocess.run(cmd,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
+        msg = {"method": cmd[1] + "_" + cmd[2],
+               "params": {"claim_name": name}}
+    else:
+        cmd = ["lbrynet",
+               "claim",
+               "search",
+               "--name={}".format(name)]
+        if cid:
+            cmd[3] = "--claim_ids=" + cid
 
-    # data = json.loads(output.stdout)
+        msg = {"method": cmd[1] + "_" + cmd[2],
+               "params": {"name": name}}
 
-    msg = {"method": cmd[1] + "_" + cmd[2],
-           "params": {"name": name}}
     if cid:
         msg["params"] = {"claim_id": cid}
 
@@ -257,7 +267,8 @@ def search_item_cid(cid=None, name=None, print_error=True,
     return item
 
 
-def search_item(uri=None, cid=None, name=None, print_error=True,
+def search_item(uri=None, cid=None, name=None, offline=False,
+                print_error=True,
                 server="http://localhost:5279"):
     """Find a single item in the LBRY network resolving URI, claim id, or name.
 
@@ -284,6 +295,15 @@ def search_item(uri=None, cid=None, name=None, print_error=True,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    offline: bool, optional
+        It defaults to `False`, in which case it will use
+        `lbrynet claim search` to search `cid` or `name` in the online
+        database.
+
+        If it is `True` it will use `lbrynet file list` to search
+        `cid` or `name` in the offline database.
+        This is required for 'invalid' claims, which have been removed from
+        the online database and only exist locally.
     print_error: bool, optional
         It defaults to `True`, in which case it will print the error message
         that `lbrynet resolve` or `lbrynet claim search` returns.
@@ -313,11 +333,12 @@ def search_item(uri=None, cid=None, name=None, print_error=True,
         print(f"name={name}")
         return False
 
-    if uri and not cid:
+    if uri:
         item = search_item_uri(uri=uri, print_error=print_error,
                                server=server)
     else:
-        item = search_item_cid(cid=cid, name=name, print_error=print_error,
+        item = search_item_cid(cid=cid, name=name, offline=offline,
+                               print_error=print_error,
                                server=server)
 
     if not item and print_error:
