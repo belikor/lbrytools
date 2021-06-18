@@ -28,29 +28,28 @@ import os
 import random
 import requests
 
-import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.print as prnt
 
 
-def lbrynet_get(get_cmd=None,
+def lbrynet_get(uri=None, ddir=None,
                 server="http://localhost:5279"):
     """Run the lbrynet get command and return the information that it shows.
 
     Parameters
     ----------
-    get_cmd: list of str
-        A list of strings that defines a command to get a claim.
-        This list has at least three elements
+    uri: str
+        A unified resource identifier (URI) to a claim on the LBRY network.
+        It can be full or partial.
         ::
-            get_cmd = ['lbrynet', 'get', 'lbry://@asaaa#5/a#b']
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            uri = '@MyChannel#3/some-video-name#2'
+            uri = 'some-video-name'
 
-        The third element is the `'canonical_url'` of the claim
-        which will be used to download the claim.
-
-        A fourth element can be the download directory parameter.
-        ::
-            get_cmd = [..., ..., ..., '--download_directory=/opt']
+        The URI is also called the `'canonical_url'` of the claim.
+    ddir: str, optional
+        It defaults to `$HOME`.
+        The path to the download directory.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -64,32 +63,28 @@ def lbrynet_get(get_cmd=None,
         Returns the dictionary that represents the standard output
         of the get command.
     """
-    if not get_cmd:
-        print("No input command, using default value.")
-        get_cmd = ["lbrynet",
-                   "get",
-                   "lbry://@asaaa#5/a#b"]
-        get_cmd2 = get_cmd[:]
-        get_cmd2[2] = "'" + get_cmd2[2] + "'"
-        print("Download: " + " ".join(get_cmd2))
+    if not uri:
+        print("No input claim, using default value.")
+        uri = "lbry://@ElectroSwing#4/04-S#7"
 
-    funcs.check_lbry(server=server)
-    # output = subprocess.run(get_cmd,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
-
-    # info_get = json.loads(output.stdout)
-
-    uri = get_cmd[2]
-    try:
-        ddir = get_cmd[3]
-        ddir = ddir.lstrip("--download_directory=")
-    except IndexError:
+    if (not ddir or not isinstance(ddir, str)
+            or ddir == "~" or not os.path.exists(ddir)):
         ddir = os.path.expanduser("~")
+        print(f"Download directory should exist; set to ddir='{ddir}'")
+
+    get_cmd = ["lbrynet",
+               "get",
+               uri,
+               "--download_directory=" + "'" + ddir + "'"]
+
+    # This is just to print the command that can be used on the terminal.
+    # The URI is surrounded by single or double quotes.
+    if "'" in uri:
+        get_cmd[2] = '"' + uri + '"'
+    else:
+        get_cmd[2] = "'" + uri + "'"
+
+    print("Download: " + " ".join(get_cmd))
 
     msg = {"method": "get",
            "params": {"uri": uri,
@@ -201,29 +196,6 @@ def download_single(uri=None, cid=None, name=None,
     else:
         channel = "@_Unknown_"
 
-    # claim_id = item["claim_id"]
-
-    get_cmd = ["lbrynet",
-               "get",
-               uri]
-
-    # This is just to print the command that can be used on the terminal.
-    # The URI is surrounded by single or double quotes.
-    if "'" in get_cmd[2]:
-        get_cmd2 = ["lbrynet",
-                    "get",
-                    '"' + get_cmd[2] + '"']
-    else:
-        get_cmd2 = ["lbrynet",
-                    "get",
-                    "'" + get_cmd[2] + "'"]
-
-    # At the moment we cannot download a claim by `'claim_id'` directly.
-    # Hopefully in the future `lbrynet` will be extended in this way.
-    # get_cmd_id = ["lbrynet",
-    #               "get",
-    #               "--claim_id=" + claim_id]
-
     subdir = os.path.join(ddir, channel)
     if own_dir:
         if not os.path.exists(subdir):
@@ -234,13 +206,14 @@ def download_single(uri=None, cid=None, name=None,
                 return False
         ddir = subdir
 
-    get_cmd.append("--download_directory=" + ddir)
-    get_cmd2.append("--download_directory=" + "'" + ddir + "'")
-
-    print("Download: " + " ".join(get_cmd2))
     prnt.print_info_pre_get(item)
 
-    info_get = lbrynet_get(get_cmd,
+    # At the moment we cannot download a claim by `'claim_id'` directly.
+    # Hopefully in the future `lbrynet` will be extended in this way.
+    # get_cmd_id = ["lbrynet",
+    #               "get",
+    #               "--claim_id=" + claim_id]
+    info_get = lbrynet_get(uri=uri, ddir=ddir,
                            server=server)
 
     if not info_get:
