@@ -845,7 +845,7 @@ def remove_media(never_delete=None,
     return True
 
 
-def remove_claims(start=1, end=0, file=None,
+def remove_claims(start=1, end=0, file=None, invalid=False,
                   what="media",
                   server="http://localhost:5279"):
     """Delete claims from a file, or delete the ones already present.
@@ -871,6 +871,20 @@ def remove_claims(start=1, end=0, file=None,
         If `file=None` it will delete the claims obtained
         from `search.sort_items` which should already be present
         in the system fully or partially.
+    invalid: bool, optional
+        It defaults to `False`, in which case it will assume
+        the processed claims are still valid in the online database.
+        It will use `lbrynet claim search` to resolve the `claim_id`.
+
+        If it is `True` it will assume the claims are no longer valid,
+        that is, that the claims have been removed from the online database
+        and only exist locally.
+        In this case, it will use `lbrynet file list` to resolve
+        the `claim_id`.
+
+        Therefore this parameter is required if `file` is a document
+        containing 'invalid' claims, otherwise the claims won't be found
+        and won't be deleted.
     what: str, optional
         It defaults to `'media'`, in which case only the full media file
         (mp4, mp3, mkv, etc.) is deleted.
@@ -932,8 +946,9 @@ def remove_claims(start=1, end=0, file=None,
         if end != 0 and it > end:
             break
 
-        print("{:4d}/{:4d}".format(it, n_items))
-        del_info = delete_single(cid=item["claim_id"], what=what,
+        print(f"Item {it}/{n_items}")
+        del_info = delete_single(cid=item["claim_id"], invalid=invalid,
+                                 what=what,
                                  server=server)
         list_del_info.append(del_info)
         print()
