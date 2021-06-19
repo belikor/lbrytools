@@ -80,30 +80,28 @@ def print_info_pre_get(item=None):
     if "stream_type" in item["value"]:
         _type = item["value"]["stream_type"]
 
+    length_s = 0
+    rem_s = 0
+    rem_min = 0
+
+    if "video" in item["value"] and "duration" in item["value"]["video"]:
+        length_s = item["value"]["video"]["duration"]
+    if "audio" in item["value"] and "duration" in item["value"]["audio"]:
+        length_s = item["value"]["audio"]["duration"]
+
+    rem_s = length_s % 60
+    rem_min = (length_s - rem_s)/60
+
     info = ["canonical_url: " + item["canonical_url"],
             "claim_id: " + item["claim_id"],
             "release_time: " + _time,
             "title: " + _title,
             "stream_type: " + _type,
-            "size: {:.4f} MB".format(_size)]
+            "size: {:.4f} MB".format(_size),
+            "duration: {} min {} s".format(rem_min, rem_s)]
 
-    rem_min = 0
-    rem_s = 0
-    length_s = 0
-
-    if "video" in item["value"]:
-        if "duration" in item["value"]["video"]:
-            length_s = item["value"]["video"]["duration"]
-    if "audio" in item["value"]:
-        if "duration" in item["value"]["audio"]:
-            length_s = item["value"]["audio"]["duration"]
-
-    rem_s = length_s % 60
-    rem_min = (length_s - rem_s)/60
-
-    info.append(f"duration: {rem_min} min {rem_s} s")
-
-    [print(line) for line in info]
+    for line in info:
+        print(line)
     return info
 
 
