@@ -329,8 +329,9 @@ def print_items(items=None, show="all",
         print(f"items={items}, "
               f"show={show}, "
               f"title={title}, typ={typ}, path={path}, "
-              f"cid={cid}, ch={ch}, name={name}, "
-              f"start={start}, end={end}, file={file}")
+              f"cid={cid}, blobs={blobs}, ch={ch}, ch_online={ch_online}, "
+              f"name={name}, start={start}, end={end}, "
+              f"channel={channel}, file={file}, fdate={fdate}")
         return False
 
     n_items = len(items)
@@ -562,21 +563,22 @@ def print_summary(show="all",
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
-    if not invalid:
-        items = srch.sort_items(server=server)
-        status = print_items(items, show=show,
-                             title=title, typ=typ, path=path,
-                             cid=cid, blobs=blobs, ch=ch, ch_online=ch_online,
-                             name=name,
-                             start=start, end=end, channel=channel,
-                             file=file, fdate=fdate,
-                             server=server)
-    else:
+    if invalid:
         items = srch.sort_invalid(server=server)
         print()
         status = print_items(items, show=show,
                              title=title, typ=typ, path=path,
                              cid=cid, blobs=blobs, ch=ch, ch_online=False,
+                             name=name,
+                             start=start, end=end, channel=channel,
+                             file=file, fdate=fdate,
+                             server=server)
+    else:
+        items = srch.sort_items(server=server)
+        print()
+        status = print_items(items, show=show,
+                             title=title, typ=typ, path=path,
+                             cid=cid, blobs=blobs, ch=ch, ch_online=ch_online,
                              name=name,
                              start=start, end=end, channel=channel,
                              file=file, fdate=fdate,
