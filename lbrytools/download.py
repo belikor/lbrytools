@@ -61,11 +61,12 @@ def lbrynet_get(uri=None, ddir=None,
     -------
     dict
         Returns the dictionary that represents the standard output
-        of the get command.
+        of the `lbrynet get` command.
     """
     if not uri:
-        print("No input claim, using default value.")
-        uri = "lbry://@ElectroSwing#4/04-S#7"
+        print("No input claim by canonical url (URI).")
+        print(f"uri={uri}")
+        return False
 
     if (not ddir or not isinstance(ddir, str)
             or ddir == "~" or not os.path.exists(ddir)):
@@ -223,6 +224,84 @@ def download_single(uri=None, cid=None, name=None,
     prnt.print_info_post_get(info_get)
 
     return info_get
+
+
+def lbrynet_save(claim_id=None, claim_name=None, ddir=None,
+                 server="http://localhost:5279"):
+    """Run the lbrynet file save command and return the information.
+
+    This is mostly intended to be used with 'invalid' claims, that is,
+    those which have been removed from the online database (blockchain),
+    and thus cannot be redownloaded.
+
+    Parameters
+    ----------
+    claim_id: str
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    claim_name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            claim_name = 'some-video-name'
+    ddir: str, optional
+        It defaults to `$HOME`.
+        The path to the download directory.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        Returns the dictionary that represents the standard output
+        of the `lbrynet file save` command.
+    """
+    if not (claim_id or claim_name):
+        print("No input claim by 'claim_id' or 'claim_name'.")
+        print(f"claim_id={claim_id}, claim_name={claim_name}")
+        return False
+
+    if (not ddir or not isinstance(ddir, str)
+            or ddir == "~" or not os.path.exists(ddir)):
+        ddir = os.path.expanduser("~")
+        print(f"Download directory should exist; set to ddir='{ddir}'")
+
+    cmd_name = ["lbrynet",
+                "file",
+                "save",
+                "--claim_name=" + claim_name,
+                "--download_directory=" + "'" + ddir + "'"]
+
+    # This is just to print the command that can be used on the terminal.
+    # The URI is surrounded by single or double quotes.
+    if "'" in claim_name:
+        cmd_name[3] = "--claim_name=" + '"' + claim_name + '"'
+    else:
+        cmd_name[3] = "--claim_name=" + "'" + claim_name + "'"
+
+    cmd_id = cmd_name[:]
+    cmd_id[3] = "--claim_id=" + claim_id
+
+    print("Download: " + " ".join(cmd_id))
+    print("Download: " + " ".join(cmd_name))
+
+    msg = {"method": cmd_id[1] + "_" + cmd_id[2],
+           "params": {"claim_id": claim_id,
+                      "download_directory": ddir}}
+
+    output = requests.post(server, json=msg).json()
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    info_save = output["result"]
+
+    return info_save
 
 
 def ch_download_latest(channel=None, number=2,
