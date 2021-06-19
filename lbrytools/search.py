@@ -708,9 +708,12 @@ def sort_invalid(channel=None,
     invalid_items = []
 
     for it, item in enumerate(items, start=1):
-        online_item = search_item(cid=item["claim_id"], print_error=False,
+        online_item = search_item(cid=item["claim_id"], offline=False,
+                                  print_error=False,
                                   server=server)
         if not online_item:
+            if len(invalid_items) == 0:
+                print()
             claim_id = item["claim_id"]
             claim_name = item["claim_name"]
             channel = item["channel_name"]
