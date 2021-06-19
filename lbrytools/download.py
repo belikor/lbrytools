@@ -632,7 +632,7 @@ def download_claims(ddir=None, own_dir=True,
         if end != 0 and it > end:
             break
 
-        print("{:4d}/{:4d}".format(it, n_items))
+        print(f"Item {it}/{n_items}")
         info_get = download_single(cid=item["claim_id"],
                                    ddir=ddir, own_dir=own_dir,
                                    server=server)
