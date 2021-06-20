@@ -739,7 +739,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
 
 
 def download_claims(ddir=None, own_dir=True,
-                    start=1, end=0, file=None,
+                    start=1, end=0, file=None, invalid=False,
                     server="http://localhost:5279"):
     """Download claims from a file, or redownload the ones already present.
 
@@ -770,6 +770,22 @@ def download_claims(ddir=None, own_dir=True,
         If `file=None` it will re-download the claims obtained
         from `search.sort_items` which should already be present
         in the system fully or partially.
+    invalid: bool, optional
+        It defaults to `False`, in which case it will assume
+        the processed claims are still valid in the online database.
+        It will use `lbrynet claim search` to resolve the `claim_id`.
+
+        If it is `True` it will assume the claims are no longer valid,
+        that is, that the claims have been removed from the online database
+        and only exist locally.
+        In this case, it will use `lbrynet file list` to resolve
+        the `claim_id`.
+
+        Therefore this parameter is required if `file` is a document
+        containing 'invalid' claims, otherwise the claims won't be found.
+        For 'invalid' claims they cannot be downloaded anymore from the online
+        database; if their binary blobs are complete, the media files
+        (mp4, mp3, mkv, etc.) will simply be recreated in `ddir`.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -784,7 +800,7 @@ def download_claims(ddir=None, own_dir=True,
         the standard output of the `lbrynet_get` command for each
         downloaded claim.
     False
-        If there is a problem, or no existing file,
+        If there is a problem, non-existing claims, or non-existing file,
         it will return `False`.
     """
     print(80 * "-")
@@ -814,8 +830,6 @@ def download_claims(ddir=None, own_dir=True,
             return False
 
     n_items = len(sorted_items)
-    print(80 * "-")
-    print(f"Effective claims: {n_items}")
 
     list_info_get = []
 
@@ -826,7 +840,7 @@ def download_claims(ddir=None, own_dir=True,
             break
 
         print(f"Item {it}/{n_items}")
-        info_get = download_single(cid=item["claim_id"],
+        info_get = download_single(cid=item["claim_id"], invalid=invalid,
                                    ddir=ddir, own_dir=own_dir,
                                    server=server)
         list_info_get.append(info_get)

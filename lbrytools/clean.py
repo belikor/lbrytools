@@ -935,8 +935,6 @@ def remove_claims(start=1, end=0, file=None, invalid=False,
             return False
 
     n_items = len(sorted_items)
-    print(80 * "-")
-    print(f"Effective claims: {n_items}")
 
     list_del_info = []
 
