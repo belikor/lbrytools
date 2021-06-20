@@ -304,6 +304,99 @@ def lbrynet_save(claim_id=None, claim_name=None, ddir=None,
     return info_save
 
 
+def download_invalid(cid=None, name=None,
+                     ddir=None, own_dir=True,
+                     server="http://localhost:5279"):
+    """Download a claim that is invalid, no longer online, only offline.
+
+    This will no longer download new blobs, only reconstitute the media file
+    (mp4, mp3, mkv, etc.) if all blobs are present offline.
+    This is necessary for 'invalid' claims that can no longer be found online
+    because they were removed by its author.
+
+    This only works for claim IDs and claim names, it does not work with
+    full canonical URLs, as these need to be resolved online.
+
+    Parameters
+    ----------
+    cid: str, optional
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    ddir: str, optional
+        It defaults to `$HOME`.
+        The path to the download directory.
+    own_dir: bool, optional
+        It defaults to `True`, in which case it places the downloaded
+        content inside a subdirectory named after the channel in `ddir`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        Returns the dictionary that represents the standard output
+        of the `lbrynet_save` function.
+    False
+        If there is a problem or non existing claim, it will return `False`.
+    """
+    if not (cid or name):
+        print("No input claim by 'claim_id' or 'name'.")
+        print(f"cid={cid}, name={name}")
+        return False
+
+    if (not ddir or not isinstance(ddir, str)
+            or ddir == "~" or not os.path.exists(ddir)):
+        ddir = os.path.expanduser("~")
+        print(f"Download directory should exist; set to ddir='{ddir}'")
+
+    # It also checks if it's a reposted claim, although 'invalid' claims
+    # cannot be reposts, as the original claim is already downloaded.
+    item = srch.search_item(cid=cid, name=name, offline=True,
+                            server=server)
+    if not item:
+        return False
+
+    claim_id = item["claim_id"]
+    claim_name = item["claim_name"]
+    channel = item["channel_name"]
+
+    if not channel:
+        channel = "@_Unknown_"
+
+    subdir = os.path.join(ddir, channel)
+    if own_dir:
+        if not os.path.exists(subdir):
+            try:
+                os.mkdir(subdir)
+            except (FileNotFoundError, PermissionError) as err:
+                print(f"Cannot open directory for writing; {err}")
+                return False
+        ddir = subdir
+
+    prnt.print_info_pre_get(item, offline=True)
+    info_save = lbrynet_save(claim_id=claim_id, claim_name=claim_name,
+                             ddir=ddir,
+                             server=server)
+
+    if not info_save:
+        print(">>> Empty information from `lbrynet file save`")
+        return False
+
+    prnt.print_info_post_get(info_save)
+
+    return info_save
+
+
 def ch_download_latest(channel=None, number=2,
                        ddir=None, own_dir=True,
                        server="http://localhost:5279"):
