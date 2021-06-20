@@ -73,6 +73,12 @@ def lbrynet_get(uri=None, ddir=None,
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
+    # At the moment we cannot download a claim by `'claim_id'` directly.
+    # Hopefully in the future `lbrynet` will be extended in this way.
+    # get_cmd_id = ["lbrynet",
+    #               "get",
+    #               "--claim_id=" + claim_id]
+
     get_cmd = ["lbrynet",
                "get",
                uri,
@@ -101,7 +107,7 @@ def lbrynet_get(uri=None, ddir=None,
     return info_get
 
 
-def download_single(uri=None, cid=None, name=None,
+def download_single(uri=None, cid=None, name=None, invalid=False,
                     ddir=None, own_dir=True,
                     server="http://localhost:5279"):
     """Download a single item and place it in the download directory.
@@ -138,6 +144,19 @@ def download_single(uri=None, cid=None, name=None,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    invalid: bool, optional
+        It defaults to `False`, in which case it will assume the claim
+        is still valid in the online database.
+        It will use `lbrynet claim search` to search `cid` or `name`.
+
+        If it is `True` it will assume the claim is no longer valid,
+        that is, that the claim has been removed from the online database
+        and only exists locally.
+        In this case, it will use `lbrynet file list` to resolve
+        `cid` or `name`.
+
+        This has no effect on `uri`, so if this input is used,
+        it will always try to resolve it from the online database.
     ddir: str, optional
         It defaults to `$HOME`.
         The path to the download directory.
@@ -155,12 +174,12 @@ def download_single(uri=None, cid=None, name=None,
     -------
     dict
         Returns the dictionary that represents the standard output
-        of the `lbrynet_get` command.
+        of the `lbrynet_get` function.
     False
         If there is a problem or non existing claim, it will return `False`.
     """
     if not (uri or cid or name):
-        print("Download item by 'URI', 'claim_id', or 'name'.")
+        print("No input claim by 'URI', 'claim_id', or 'name'.")
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
@@ -169,8 +188,16 @@ def download_single(uri=None, cid=None, name=None,
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
-    # It also checks if it's a reposted claim
-    item = srch.search_item(uri=uri, cid=cid, name=name,
+    # Canonical URLs cannot be treated as 'invalid', they are resolved online
+    if not uri and invalid:
+        info_get = download_invalid(cid=cid, name=name, ddir=ddir,
+                                    own_dir=own_dir,
+                                    server=server)
+        return info_get
+
+    # It also checks if it's a reposted claim, and returns the original
+    # claim in case it is.
+    item = srch.search_item(uri=uri, cid=cid, name=name, offline=False,
                             server=server)
     if not item:
         return False
@@ -207,18 +234,12 @@ def download_single(uri=None, cid=None, name=None,
                 return False
         ddir = subdir
 
-    prnt.print_info_pre_get(item)
-
-    # At the moment we cannot download a claim by `'claim_id'` directly.
-    # Hopefully in the future `lbrynet` will be extended in this way.
-    # get_cmd_id = ["lbrynet",
-    #               "get",
-    #               "--claim_id=" + claim_id]
+    prnt.print_info_pre_get(item, offline=False)
     info_get = lbrynet_get(uri=uri, ddir=ddir,
                            server=server)
 
     if not info_get:
-        print(">>> Error: empty information from `lbrynet get`")
+        print(">>> Empty information from `lbrynet get`")
         return False
 
     prnt.print_info_post_get(info_get)
