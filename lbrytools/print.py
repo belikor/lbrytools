@@ -30,7 +30,7 @@ import time
 import lbrytools.search as srch
 
 
-def print_info_pre_get(item=None):
+def print_info_pre_get(item=None, offline=False):
     """Print information about the item found in the LBRY network.
 
     Parameters
@@ -40,13 +40,22 @@ def print_info_pre_get(item=None):
         from `search_item`.
         ::
             item = search_item(uri="some-video-name")
+    offline: bool, optional
+        It defaults to `False`, in which case it assumes the item was
+        resolved online through `lbrynet resolve` or `lbrynet claim search`.
+
+        If it is `True` it assumes the item was resolved offline
+        through `lbrynet file list`.
+        This is required for 'invalid' claims, that is,
+        those that have been removed from the online database
+        and only exists locally.
 
     Returns
     -------
     list of 7 elements (str)
         If the item is valid, it will return a list of strings
         with information on that item.
-        The information is `'canonical_url'`, `'claim_id'`,
+        The information is `'canonical_url'` or `'claim_name'`, `'claim_id'`,
         `'release_time'` including date and time,
         `'title'`, `'stream_type'` (video, audio, document, etc.),
         `'size'` in MB, and `'duration'` in minutes and seconds.
@@ -62,6 +71,9 @@ def print_info_pre_get(item=None):
         print("Error: no item. Get one item with `search_item(uri)`")
         return False
 
+    if offline:
+        item["value"] = item["metadata"]
+
     _time = "0"
     if "release_time" in item["value"]:
         _time = int(item["value"]["release_time"])
@@ -72,11 +84,17 @@ def print_info_pre_get(item=None):
     if "source" in item["value"] and "size" in item["value"]["source"]:
         _size = float(item["value"]["source"]["size"])/(1024*1024)
 
-    _title = item["name"]
+    if offline:
+        _title = item["claim_name"]
+    else:
+        _title = item["name"]
     if "title" in item["value"]:
         _title = item["value"]["title"]
 
-    _type = item["type"]
+    if offline:
+        _type = item["mime_type"]
+    else:
+        _type = item["type"]
     if "stream_type" in item["value"]:
         _type = item["value"]["stream_type"]
 
@@ -92,13 +110,18 @@ def print_info_pre_get(item=None):
     rem_s = length_s % 60
     rem_min = (length_s - rem_s)/60
 
-    info = ["canonical_url: " + item["canonical_url"],
-            "claim_id: " + item["claim_id"],
-            "release_time: " + _time,
-            "title: " + _title,
-            "stream_type: " + _type,
-            "size: {:.4f} MB".format(_size),
-            "duration: {} min {} s".format(rem_min, rem_s)]
+    if offline:
+        info = ["claim_name: " + item["claim_name"]]
+    else:
+        info = ["canonical_url: " + item["canonical_url"]]
+
+    _info = ["claim_id: " + item["claim_id"],
+             "release_time: " + _time,
+             "title: " + _title,
+             "stream_type: " + _type,
+             "size: {:.4f} MB".format(_size),
+             "duration: {} min {} s".format(rem_min, rem_s)]
+    info.extend(_info)
 
     for line in info:
         print(line)
