@@ -39,13 +39,42 @@ Define the download directory.
 ddir = "/opt/download"
 ```
 
-Download a single item from the LBRY network by URI (`'canonical_url'`)
-or `'claim_id'`.
+Download a single item from the LBRY network by URI (`'canonical_url'`),
+`'claim_id'`, or `'claim_name'` (portion of the URI).
 Place the file in a subdirectory in the download directory.
 ```py
 d = lbryt.download_single(uri="RoboCopOS#c", ddir=ddir, own_dir=True)
 d = lbryt.download_single(cid="c8e8bb0029f6cb7d1b4d287b6e040339aa8b7f3e", ddir=ddir, own_dir=True)
+d = lbryt.download_single(name="RoboCopOS", ddir=ddir, own_dir=True)
 ```
+
+# Download invalid claims
+
+Invalid claims are those that were downloaded at some point but which now
+cannot be resolved anymore from the online database (blockchain).
+This probably means that the author decided to remove the claims
+after they were downloaded originally.
+This can be verified with the blockchain explorer, by following the claim ID,
+and looking for the `unspent` transaction.
+
+Invalid claims cannot actually be downloaded or redownloaded anymore
+as the information about them is no longer online. However,
+if their binary blobs are still in our system, then the media files
+(mp4, mp3, mkv, etc.) can still be recreated from these offline blobs,
+and placed in the download directory.
+```py
+d = lbryt.download_single(cid="2a6c48346ca2064a9c53dd129ad942fa01bb125a", ddir=ddir, invalid=True)
+d = lbryt.download_single(name="firenvim-embed-neovim-into-every-textbox", ddir=ddir, invalid=True)
+```
+
+The `invalid=True` parameter only has an effect if `cid` or `name`
+are used as inputs. If `uri` is used, it will always try to resolve the claim
+by looking at the online database.
+
+Since invalid claims cannot be redownloaded, once we have recreated
+the media files, these can be saved to a secure location,
+and then we could decide to completely delete the corresponding blobs
+in order to free space on the disk.
 
 # Multiple downloads
 
@@ -173,13 +202,6 @@ print `_None_`.
 
 # Printing invalid claims
 
-Invalid claims are those that were downloaded at some point, but which now
-cannot be resolved anymore from the online database (blockchain).
-This probably means that the author decided to remove the claims
-after they were downloaded originally.
-This can be verified with the blockchain explorer, by following the claim ID
-and looking for an `unspent` transaction.
-
 Print only the invalid claims by using the `invalid=True` parameter
 of `print_summary`. This will be slower than with `invalid=False`
 as it needs to resolve each claim online, to see if it's still valid or not.
@@ -195,11 +217,6 @@ can only be resolved from the offline database.
 p = lbryt.print_summary(invalid=True, ch=True)
 p = lbryt.print_summary(invalid=True, channel="mises")
 ```
-
-Invalid claims cannot be redownloaded, as the information about them is no
-longer online. Therefore, for these invalid claims the media files
-can be saved in a secure location, and the binary blobs can be deleted
-to free space in the disk.
 
 # Download from file
 
@@ -219,6 +236,14 @@ q = lbryt.download_claims(ddir=ddir, start=20, end=80, file="summary.txt")
 
 Sharing a list of claims in this way allows different systems to download,
 and seed the same content.
+
+The `invalid` argument must be used if the file being processed is a list
+of invalid items.
+```py
+p = lbryt.print_summary(file="summary_invalid.txt", invalid=True)
+
+q = lbryt.download_claims(file="summary_invalid.txt", invalid=True)
+```
 
 # Re-download
 
