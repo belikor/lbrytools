@@ -145,8 +145,8 @@ the terminal. Optionally add the date to the filename to better keep track
 of the written files.
 ```py
 p = lbryt.print_summary()
-p = lbryt.print_summary(file="/opt/summary.txt")
-p = lbryt.print_summary(file="/opt/summary.txt", fdate=True)
+p = lbryt.print_summary(file="summary.txt")
+p = lbryt.print_summary(file="summary.txt", fdate=True)
 ```
 
 Various options control which claims are actually printed.
@@ -207,10 +207,10 @@ of `print_summary`. This will be slower than with `invalid=False`
 as it needs to resolve each claim online, to see if it's still valid or not.
 ```py
 p = lbryt.print_summary(invalid=True)
-p = lbryt.print_summary(file="/opt/summary_invalid.txt", invalid=True)
+p = lbryt.print_summary(file="summary_invalid.txt", invalid=True)
 ```
 
-If `ch=True` or `channel=` is used, this will automatically
+If `invalid=True` and `ch=True` or `channel` is used, this will automatically
 set `ch_online=False` because for invalid claims the channel name
 can only be resolved from the offline database.
 ```py
@@ -293,7 +293,7 @@ By default, before a claim is deleted with `delete_single`, every claim
 is checked in the online database (blockchain) to get more information
 about it.
 
-For 'invalid' claims, those that have been removed by their authors,
+For invalid claims, those that have been removed by their authors,
 they won't be able to be found online anymore. Therefore, the `invalid=True`
 parameter must be used in order to resolve the claims in the offline database,
 and be able to delete them.
@@ -375,7 +375,7 @@ q = lbryt.remove_claims(what="both")  # Deletes everything!
 ```
 
 The `invalid ` argument must be used if the file being processed is a list
-of 'invalid' items.
+of invalid items.
 ```py
 p = lbryt.print_summary(file="summary_invalid.txt", invalid=True)
 
