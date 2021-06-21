@@ -345,14 +345,16 @@ def print_items(items=None, show="all",
         If there is any error it will return `False`.
     """
     if not items or not isinstance(items, (list, tuple)):
-        print("Print information from a list of items "
-              "obtained from `lbrynet file list`.")
+        print("No input item list. "
+              "A list of items must be obtained from `lbrynet file list`.")
         print(f"items={items}, "
               f"show={show}, "
               f"title={title}, typ={typ}, path={path}, "
               f"cid={cid}, blobs={blobs}, ch={ch}, ch_online={ch_online}, "
               f"name={name}, start={start}, end={end}, "
               f"channel={channel}, file={file}, fdate={fdate}")
+        if file:
+            print("No file written.")
         return False
 
     n_items = len(items)
@@ -586,6 +588,11 @@ def print_summary(show="all",
     """
     if invalid:
         items = srch.sort_invalid(server=server)
+        if len(items) < 1:
+            if file:
+                print("No file written.")
+            return False
+
         print()
         status = print_items(items, show=show,
                              title=title, typ=typ, path=path,
@@ -596,6 +603,11 @@ def print_summary(show="all",
                              server=server)
     else:
         items = srch.sort_items(server=server)
+        if len(items) < 1:
+            if file:
+                print("No file written.")
+            return False
+
         print()
         status = print_items(items, show=show,
                              title=title, typ=typ, path=path,

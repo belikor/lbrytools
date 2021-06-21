@@ -635,7 +635,7 @@ def sort_items(channel=None,
             print("No items found; at least one item must be downloaded.")
         return False
 
-    print(f"Number of items {n_items}")
+    print(f"Number of items: {n_items}")
 
     new_items = []
 
