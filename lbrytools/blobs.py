@@ -472,6 +472,7 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
 
     print("Count all blob files")
     print(80 * "-")
+    print(f"Blobfiles: {blobfiles}")
 
     blob_all_info = []
     claims_blobs_complete = 0
@@ -492,7 +493,7 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
                                 blobfiles=blobfiles, print_msg=print_msg,
                                 print_each=print_each,
                                 server=server)
-        if print_msg:
+        if print_msg or "error_not_found" in blob_info:
             print()
 
         info = {"num": it,
