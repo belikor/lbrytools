@@ -214,7 +214,7 @@ def blobs_action(blobfiles=None, action="get",
 
 
 def count_blobs(uri=None, cid=None, name=None,
-                blobfiles=None, print_each=True,
+                blobfiles=None, print_msg=True, print_each=True,
                 server="http://localhost:5279"):
     """Count blobs that have been downloaded from a claim.
 
@@ -244,6 +244,10 @@ def count_blobs(uri=None, cid=None, name=None,
         This is normally seen with `lbrynet settings get`, under `'data_dir'`.
         It can be any other directory if it is symbolically linked
         to it, such as `'/opt/lbryblobfiles'`
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print information
+        on the found claim.
+        If `print_msg=False`, it also implies `print_each=False`.
     print_each: bool, optional
         It defaults to `True`, in which case it will print all blobs
         that belong to the claim, and whether each of them is already
@@ -330,14 +334,12 @@ def count_blobs(uri=None, cid=None, name=None,
 
     sd_hash = item["value"]["source"]["sd_hash"]
 
-    print(f"canonical_url: {c_uri}")
-    print(f"claim_id: {c_cid}")
-    print(f"name: {c_name}")
-    print(f"channel: {c_channel}")
-    print(f"sd_hash: {sd_hash}")
-
-    # list_all_blobs = os.listdir(blobfiles)
-    # n_all_blobs = len(list_all_blobs)
+    if print_msg:
+        print(f"canonical_url: {c_uri}")
+        print(f"claim_id: {c_cid}")
+        print(f"name: {c_name}")
+        print(f"channel: {c_channel}")
+        print(f"sd_hash: {sd_hash}")
 
     sd_hash_f = os.path.join(blobfiles, sd_hash)
 
@@ -359,7 +361,9 @@ def count_blobs(uri=None, cid=None, name=None,
 
     blobs = json.loads(lines[0])
     n_blobs = len(blobs["blobs"]) - 1
-    print(f"Total blobs: {n_blobs}")
+
+    if print_msg:
+        print(f"Total blobs: {n_blobs}")
 
     present_list = []
     blob_list = []
@@ -378,13 +382,15 @@ def count_blobs(uri=None, cid=None, name=None,
         if not present:
             blob_missing.append([num, blob_hash, present])
 
-        if print_each:
+        if print_msg and print_each:
             print("{:3d}/{:3d}, {}, {}".format(num, n_blobs,
                                                blob_hash,
                                                present))
 
     all_present = all(present_list)
-    print(f"All blob files present: {all_present}")
+
+    if print_msg:
+        print(f"All blob files present: {all_present}")
 
     blob_info = {"canonical_url": c_uri,
                  "claim_id": c_cid,
