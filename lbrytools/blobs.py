@@ -403,7 +403,7 @@ def count_blobs(uri=None, cid=None, name=None,
     return blob_info
 
 
-def count_blobs_all(blobfiles=None, print_each=False,
+def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
                     start=1, end=0,
                     server="http://localhost:5279"):
     """Count all blobs from all downloaded claims.
@@ -416,6 +416,10 @@ def count_blobs_all(blobfiles=None, print_each=False,
         This is normally seen with `lbrynet settings get`, under `'data_dir'`.
         It can be any other directory if it is symbolically linked
         to it, such as `'/opt/lbryblobfiles'`
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print information
+        on the found claim.
+        If `print_msg=False`, it also implies `print_each=False`.
     print_each: bool, optional
         It defaults to `False`.
         If it is `True` it will print all blobs
@@ -482,11 +486,14 @@ def count_blobs_all(blobfiles=None, print_each=False,
         if end != 0 and it > end:
             break
 
-        print(f"Claim {it}/{n_items}, {item['claim_name']}")
+        if print_msg:
+            print(f"Claim {it}/{n_items}, {item['claim_name']}")
         blob_info = count_blobs(cid=item["claim_id"],
-                                blobfiles=blobfiles,
+                                blobfiles=blobfiles, print_msg=print_msg,
                                 print_each=print_each,
                                 server=server)
+        if print_msg:
+            print()
 
         info = {"num": it,
                 "blob_info": blob_info}
@@ -504,7 +511,6 @@ def count_blobs_all(blobfiles=None, print_each=False,
                 claims_not_found += 1
         else:
             claims_other_error += 1
-        print()
 
     print(f"claims with complete blobs: {claims_blobs_complete}")
     print(f"claims with incomplete blobs: {claims_blobs_incomplete}")
