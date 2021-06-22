@@ -568,6 +568,226 @@ def count_blobs_all(blobfiles=None, channel=None,
     return blob_all_info
 
 
+def analyze_blobs(blobfiles=None, channel=None,
+                  start=1, end=0,
+                  print_msg=False, print_each=False,
+                  server="http://localhost:5279"):
+    """Perform an analysis of all existing blobs in blobfiles directory.
+
+    Parameters
+    ----------
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+    start: int, optional
+        It defaults to 1.
+        Count the blobs from claims starting from this index
+        in the list of items.
+    end: int, optional
+        It defaults to 0.
+        Count the blobs from claims until and including this index
+        in the list of items.
+        If it is 0, it is the same as the last index in the list.
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print information
+        on the found claim.
+        If `print_msg=False`, it also implies `print_each=False`.
+    print_each: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print all blobs
+        that belong to the claim, and whether each of them is already
+        in `blobfiles`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of dict, list of dict, list of dict, list of dict, list of dict
+        A tuple of five lists.
+        - The first list contains blob information for claims
+          that are complete.
+        - The second list contains blob information for claims
+          that have missing blobs. These claims need to be redownloaded
+          in order to have all blobs.
+        - The third list contains blob information for claims
+          whose `'sd_hash'` is missing so it is impossible to determine
+          how many blobs they are supposed to have. These claims need to be
+          redownloaded at least to get their `'sd_hash'`.
+        - The fourth list contains blob information for claims
+          that were not found in the online database (blockchain).
+          These are 'invalid' claims, that is, claims that were donwloaded
+          in the past, but then they were removed by their authors.
+        - The fifth list contains blob information for claims
+          that had other errors like a connectivity problem with the server.
+
+        If all claims have been properly downloaded all lists must be empty
+        except for the first one.
+        The claims of the second and third lists indicate incomplete downloads,
+        or manually moved blobs, so the claims just need to be redownloaded.
+
+        In each list, the blob information is a dictionary containing two keys
+        - `'num'`: an integer from 1 up to the last item processed.
+        - `'blob_info'`: the dictionary output from the `count_blobs` method.
+          In rare cases this may be a single boolean value `False`
+          if there was an unexpected error like a connectivity problem
+          with the server.
+    False
+        If there is a problem, like non existing blobfiles directory,
+        it will return `False`.
+    """
+    if (not blobfiles or not isinstance(blobfiles, str)
+            or not os.path.exists(blobfiles)):
+        print("Count the blobs of the claim from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
+        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
+
+        home = os.path.expanduser("~")
+        blobfiles = os.path.join(home,
+                                 ".local", "share",
+                                 "lbry", "lbrynet", "blobfiles")
+
+        if not os.path.exists(blobfiles):
+            print(f"Blobfiles directory does not exist: {blobfiles}")
+            return False
+
+    if channel and not isinstance(channel, str):
+        print("Channel must be a string. Set to 'None'.")
+        print(f"channel={channel}")
+        channel = None
+
+    if channel:
+        if not channel.startswith("@"):
+            channel = "@" + channel
+
+    blob_all_info = count_blobs_all(blobfiles=blobfiles, channel=channel,
+                                    start=start, end=end,
+                                    print_msg=print_msg,
+                                    print_each=print_each,
+                                    server=server)
+    if not blob_all_info:
+        return False
+    print()
+
+    if channel:
+        print(f"Analysis of existing blob files for: {channel}")
+    else:
+        print("Analysis of existing blob files")
+    print(80 * "-")
+    print(f"Blobfiles: {blobfiles}")
+
+    all_existing_blobs = os.listdir(blobfiles)
+    n_all_existing = len(all_existing_blobs)
+
+    claims_blobs_complete = []
+    claims_blobs_incomplete = []
+    claims_no_sd_hash = []
+    claims_not_found = []
+    claims_other_error = []
+
+    for info in blob_all_info:
+        blob_info = info["blob_info"]
+
+        if blob_info:
+            if "all_present" in blob_info and blob_info["all_present"]:
+                claims_blobs_complete.append(info)
+            elif "all_present" in blob_info and not blob_info["all_present"]:
+                claims_blobs_incomplete.append(info)
+
+            if "error_no_sd_hash" in blob_info:
+                claims_no_sd_hash.append(info)
+            if "error_not_found" in blob_info:
+                claims_not_found.append(info)
+        else:
+            claims_other_error.append(info)
+
+    # Assemble existing blobs in a single list
+    all_blobs = []
+    counted_data_blobs = []
+    counted_sd_hash_blobs = []
+
+    for info in claims_blobs_complete:
+        blob_info = info["blob_info"]
+        all_blobs.append(blob_info["sd_hash"])
+        counted_sd_hash_blobs.append(blob_info["sd_hash"])
+
+        for blob in blob_info["blobs"]:
+            all_blobs.append(blob[1])
+            counted_data_blobs.append(blob[1])
+
+    for info in claims_blobs_incomplete:
+        blob_info = info["blob_info"]
+        all_blobs.append(blob_info["sd_hash"])
+        counted_sd_hash_blobs.append(blob_info["sd_hash"])
+
+        existing = blob_info["blobs"][:]
+        for blob in existing:
+            all_blobs.append(blob[1])
+
+        for missing_blob in blob_info["missing"]:
+            existing.remove(missing_blob)
+
+        for blob in existing:
+            counted_data_blobs.append(blob[1])
+
+    n_all_blobs = len(all_blobs)
+    n_data = len(counted_data_blobs)
+
+    minus_data_blobs = all_existing_blobs[:]
+    for data_blob in counted_data_blobs:
+        minus_data_blobs.remove(data_blob)
+
+    n_minus_data = len(minus_data_blobs)
+
+    n_sd_hash = len(counted_sd_hash_blobs)
+    n_sum = n_data + n_sd_hash
+
+    minus_data_sd_blobs = minus_data_blobs[:]
+    for sd_blob in counted_sd_hash_blobs:
+        minus_data_sd_blobs.remove(sd_blob)
+
+    n_minus_data_sd = len(minus_data_sd_blobs)
+
+    print("Total blobs that should exist: "
+          f"[{n_all_blobs:7d}] (with complete claims)")
+    print(40 * "-")
+    print(f"Total files in directory: {n_all_existing:7d} | remaining")
+    print()
+    print(f" - Data blobs             {n_data:7d} | {n_minus_data:7d}")
+    print(f" - 'sd_hash' blobs        {n_sd_hash:7d} | {n_minus_data_sd:7d}")
+    if n_all_blobs == n_sum:
+        print(f" - Sum                  >[{n_sum:7d}]")
+    else:
+        print(f" - Sum                  *[{n_sum:7d}]")
+
+    if channel:
+        print(f"Files that don't belong to {channel}: {n_minus_data_sd}")
+    else:
+        print("Files that don't belong to any downloaded claim: "
+              f"{n_minus_data_sd} (orphaned blobs from invalid claims)")
+
+    for rem_blob in minus_data_sd_blobs:
+        if len(rem_blob) != 96:
+            print(rem_blob)
+
+    return (claims_blobs_complete, claims_blobs_incomplete,
+            claims_no_sd_hash, claims_not_found, claims_other_error)
+
+
 def redownload_blobs(uri=None, cid=None, name=None,
                      ddir=None, own_dir=True,
                      blobfiles=None, print_each=False,

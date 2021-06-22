@@ -33,6 +33,7 @@ from lbrytools import count_blobs
 from lbrytools import count_blobs_all
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
+from lbrytools import analyze_blobs
 ```
 
 # Download
@@ -566,6 +567,25 @@ c = lbryt.count_blobs_all(blobfiles=bdir, print_msg=True)
 c = lbryt.count_blobs_all(blobfiles=bdir, print_msg=True, print_each=False)
 ```
 
+# Analyze blobs
+
+If we manually do something with the blobs in the `blobfiles` directory,
+we may want to count all files in this directory to see if they match
+the blobs that each claim is supposed to have.
+This information is contained in the first blob of each claim,
+called the "manifest" blob, whose name corresponds to the claim's `'sd_hash'`.
+```py
+a = lbryt.analyze_blobs(blobfiles=bdir)
+```
+
+This function wraps around the `count_blobs_all` function so it has the same
+input parameters.
+```py
+a = lbryt.analyze_blobs(blobfiles=bdir, channel="Odysee")
+a = lbryt.analyze_blobs(blobfiles=bdir, start=5, end=33)
+a = lbryt.analyze_blobs(blobfiles=bdir, print_msg=True, print_each=False)
+```
+
 # Move blobs
 
 If you wish to organize the blobs better you may copy or move the blobs
@@ -643,6 +663,7 @@ lbryt.cleanup_space(..., server=server)
 lbryt.remove_media(..., server=server)
 lbryt.count_blobs(..., server=server)
 lbryt.count_blobs_all(..., server=server)
+lbryt.analyze_blobs(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 ```
