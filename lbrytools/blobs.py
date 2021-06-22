@@ -404,7 +404,7 @@ def count_blobs(uri=None, cid=None, name=None,
 
 
 def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
-                    start=1, end=0,
+                    start=1, end=0, channel=None,
                     server="http://localhost:5279"):
     """Count all blobs from all downloaded claims.
 
@@ -434,6 +434,14 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
         Count the blobs from claims until and including this index
         in the list of items.
         If it is 0, it is the same as the last index in the list.
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -466,7 +474,20 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
             print(f"Blobfiles directory does not exist: {blobfiles}")
             return False
 
-    items = srch.sort_items(server=server)
+    if channel and not isinstance(channel, str):
+        print("Channel must be a string. Set to 'None'.")
+        print(f"channel={channel}")
+        channel = None
+
+    if channel:
+        if not channel.startswith("@"):
+            channel = "@" + channel
+
+    items = srch.sort_items(channel=channel,
+                            server=server)
+    if not items:
+        return False
+
     n_items = len(items)
     print()
 
