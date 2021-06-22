@@ -28,6 +28,8 @@ from lbrytools import remove_claims
 from lbrytools import measure_usage
 from lbrytools import cleanup_space
 from lbrytools import remove_media
+from lbrytools import count_blobs
+from lbrytools import count_blobs_all
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 ```
@@ -467,7 +469,40 @@ k = lbryt.remove_media(never_delete=never_delete)
 
 When a claim is downloaded a group of binary blobs is downloaded into
 the `blobfiles` directory. All blobs from all claims are dumped
-into this directory without organization.
+into this directory without much organization.
+```py
+bdir = /home/user/.local/share/lbry/lbrynet/blobfiles
+```
+
+Count the blobs that exist for a particular claim.
+Use the canonical URL, the claim ID, or the claim name.
+```py
+c = lbryt.count_blobs(uri="how-monero-works-and-why-its-a-better", blobfiles=bdir)
+c = lbryt.count_blobs(cid="b4f73ad1e09e21457e18e4b3f8da0cc4319f8688", blobfiles=bdir)
+```
+
+Print each of the blobs, indicating whether they are present
+or not in `blobfiles`.
+```py
+c = lbryt.count_blobs(uri="The-Essence-of-Money-(2009)", blobfiles=bdir, print_each=True)
+```
+
+Count all blobs in the system, or consider only the claims by a specific
+channel, or by a range of items.
+```py
+c = lbryt.count_blobs_all(blobfiles=bdir)
+c = lbryt.count_blobs_all(blobfiles=bdir, channel="AfterSkool")
+c = lbryt.count_blobs_all(blobfiles=bdir, start=10, end=100)
+```
+
+By default only a summary is printed. Two parameters control whether
+to display more information on each claim and its blobs.
+```py
+c = lbryt.count_blobs_all(blobfiles=bdir, print_msg=True)
+c = lbryt.count_blobs_all(blobfiles=bdir, print_msg=True, print_each=False)
+```
+
+# Move blobs
 
 If you wish to organize the blobs better you may copy or move the blobs
 to a different location. This can be done to backup the claim data
@@ -541,6 +576,8 @@ lbryt.remove_claims(..., server=server)
 lbryt.measure_usage(...)
 lbryt.cleanup_space(..., server=server)
 lbryt.remove_media(..., server=server)
+lbryt.count_blobs(..., server=server)
+lbryt.count_blobs_all(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 ```

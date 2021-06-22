@@ -78,6 +78,8 @@ lbryt.remove_claims(...)
 lbryt.measure_usage(...)
 lbryt.cleanup_space(...)
 lbryt.remove_media()
+lbryt.count_blobs(...)
+lbryt.count_blobs_all(...)
 lbryt.blobs_move(...)
 lbryt.blobs_move_all(...)
 ```
