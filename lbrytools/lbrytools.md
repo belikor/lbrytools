@@ -31,9 +31,10 @@ from lbrytools import cleanup_space
 from lbrytools import remove_media
 from lbrytools import count_blobs
 from lbrytools import count_blobs_all
+from lbrytools import analyze_blobs
+from lbrytools import download_missing_blobs
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
-from lbrytools import analyze_blobs
 ```
 
 # Download
@@ -586,6 +587,22 @@ a = lbryt.analyze_blobs(blobfiles=bdir, start=5, end=33)
 a = lbryt.analyze_blobs(blobfiles=bdir, print_msg=True, print_each=False)
 ```
 
+# Download missing blobs
+
+We can identify claims with missing blobs, either data blobs
+or the initial `'sd_hash'` blob, and automatically redownload the claims.
+```py
+b = download_missing_blobs(blobfiles=bdir, ddir=ddir)
+```
+
+If we already have many claims in our system this may take a while,
+so we may decide to restrict this to only a single channel,
+or a range of items.
+```py
+b = download_missing_blobs(blobfiles=bdir, ddir=ddir, channel="@EatMoreVegans")
+b = download_missing_blobs(blobfiles=bdir, ddir=ddir, start=20, end=50)
+```
+
 # Move blobs
 
 If you wish to organize the blobs better you may copy or move the blobs
@@ -664,6 +681,7 @@ lbryt.remove_media(..., server=server)
 lbryt.count_blobs(..., server=server)
 lbryt.count_blobs_all(..., server=server)
 lbryt.analyze_blobs(..., server=server)
+lbryt.download_missing_blobs(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 ```

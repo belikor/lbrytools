@@ -788,6 +788,176 @@ def analyze_blobs(blobfiles=None, channel=None,
             claims_no_sd_hash, claims_not_found, claims_other_error)
 
 
+def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
+                           start=1, end=0,
+                           print_msg=False, print_each=False,
+                           server="http://localhost:5279"):
+    """Download the missing blobfiles from the downloaded claims.
+
+    It will finish downloading incomplete claims, and claims without
+    the `'sd_hash'` blob.
+
+    Parameters
+    ----------
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
+    ddir: str, optional
+        It defaults to `$HOME`.
+        The path to the download directory.
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+    start: int, optional
+        It defaults to 1.
+        Count the blobs from claims starting from this index
+        in the list of items.
+    end: int, optional
+        It defaults to 0.
+        Count the blobs from claims until and including this index
+        in the list of items.
+        If it is 0, it is the same as the last index in the list.
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print information
+        on the found claim.
+        If `print_msg=False`, it also implies `print_each=False`.
+    print_each: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print all blobs
+        that belong to the claim, and whether each of them is already
+        in `blobfiles`.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list, list
+        A tuple of two lists.
+        The first list has the return information of the downloaded claims
+        that were missing blobs.
+        The second list has the return information of the downloaded claims
+        that were missing the `'sd_hash'` blob.
+    """
+    if (not blobfiles or not isinstance(blobfiles, str)
+            or not os.path.exists(blobfiles)):
+        print("Count the blobs of the claim from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
+        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
+
+        home = os.path.expanduser("~")
+        blobfiles = os.path.join(home,
+                                 ".local", "share",
+                                 "lbry", "lbrynet", "blobfiles")
+
+        if not os.path.exists(blobfiles):
+            print(f"Blobfiles directory does not exist: {blobfiles}")
+            return False
+
+    if channel and not isinstance(channel, str):
+        print("Channel must be a string. Set to 'None'.")
+        print(f"channel={channel}")
+        channel = None
+
+    if channel:
+        if not channel.startswith("@"):
+            channel = "@" + channel
+
+    output = analyze_blobs(blobfiles=blobfiles, channel=channel,
+                           start=start, end=end,
+                           print_msg=print_msg,
+                           print_each=print_each,
+                           server=server)
+    if not output:
+        return False
+
+    # claims_complete = output[0]
+    claims_incomplete = output[1]
+    claims_no_sd_hash = output[2]
+    # claims_not_found = output[3]
+    # claims_other_error = output[4]
+    print()
+
+    if not (claims_incomplete or claims_no_sd_hash):
+        if channel:
+            print(f"All claims from {channel} have complete blobs "
+                  "(data and 'sd_hash'). "
+                  "Nothing will be downloaded.")
+        else:
+            print("All claims have complete blobs (data and 'sd_hash'). "
+                  "Nothing will be downloaded.")
+        return False
+
+    n_claims_incomplete = len(claims_incomplete)
+    n_claims_no_sd_hash = len(claims_no_sd_hash)
+
+    info_get_incomplete = []
+    info_get_no_sd = []
+
+    if n_claims_incomplete:
+        print("Claims with incomplete blobs: "
+              f"{n_claims_incomplete} (will be redownloaded)")
+    else:
+        print("Claims with incomplete blobs: "
+              f"{n_claims_incomplete} (nothing to redownload)")
+
+    for it, info in enumerate(claims_incomplete, start=1):
+        blob_info = info["blob_info"]
+        uri = blob_info["canonical_url"]
+        cid = blob_info["claim_id"]
+        name = blob_info["name"]
+
+        print(f"Claim {it}/{n_claims_incomplete}")
+        # The missing blobs will only be downloaded if the media file
+        # is not present so we must make sure it is deleted.
+        print("Ensure the media file is deleted.")
+        clean.delete_single(uri=uri, cid=cid, name=name, what="media",
+                            server=server)
+        print()
+        info = dld.download_single(uri=uri, cid=cid, name=name, ddir=ddir,
+                                   server=server)
+        info_get_incomplete.append(info)
+        print()
+
+    if n_claims_no_sd_hash:
+        print("Claims with no 'sd_hash' blobs: "
+              f"{n_claims_no_sd_hash} (will be redownloaded)")
+    else:
+        print("Claims with no 'sd_hash' blobs: "
+              f"{n_claims_no_sd_hash} (nothing to redownload)")
+
+    for it, info in enumerate(claims_no_sd_hash, start=1):
+        blob_info = info["blob_info"]
+        uri = blob_info["canonical_url"]
+        cid = blob_info["claim_id"]
+        name = blob_info["name"]
+
+        print(f"Claim {it}/{n_claims_no_sd_hash}")
+        # The missing blobs will only be downloaded if the media file
+        # is not present so we must make sure it is deleted.
+        print("Ensure the media file is deleted.")
+        clean.delete_single(uri=uri, cid=cid, name=name, what="media",
+                            server=server)
+        print()
+        info = dld.download_single(uri=uri, cid=cid, name=name, ddir=ddir,
+                                   server=server)
+        info_get_no_sd.append(info)
+        print()
+
+    return info_get_incomplete, info_get_no_sd
+
+
 def redownload_blobs(uri=None, cid=None, name=None,
                      ddir=None, own_dir=True,
                      blobfiles=None, print_each=False,
