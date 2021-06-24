@@ -401,8 +401,9 @@ def count_blobs(uri=None, cid=None, name=None,
     return blob_info
 
 
-def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
-                    start=1, end=0, channel=None,
+def count_blobs_all(blobfiles=None, channel=None,
+                    start=1, end=0,
+                    print_msg=False, print_each=False,
                     server="http://localhost:5279"):
     """Count all blobs from all downloaded claims.
 
@@ -414,6 +415,14 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
         This is normally seen with `lbrynet settings get`, under `'data_dir'`.
         It can be any other directory if it is symbolically linked
         to it, such as `'/opt/lbryblobfiles'`
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
     print_msg: bool, optional
         It defaults to `True`, in which case it will print information
         on the found claim.
@@ -432,14 +441,6 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
         Count the blobs from claims until and including this index
         in the list of items.
         If it is 0, it is the same as the last index in the list.
-    channel: str, optional
-        It defaults to `None`.
-        A channel's name, full or partial:
-        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
-
-        If a simplified name is used, and there are various channels
-        with the same name, the one with the highest LBC bid will be selected.
-        Enter the full name to choose the right one.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -456,6 +457,9 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
         - `'num'`: an integer from 1 up to the last item processed.
         - `'blob_info'`: the dictionary output from the `count_blobs` method.
           In rare cases this may be a single boolean value `False`.
+    False
+        If there is a problem, like non existing blobfiles directory,
+        it will return `False`.
     """
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
@@ -489,7 +493,10 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
     n_items = len(items)
     print()
 
-    print("Count all blob files")
+    if channel:
+        print(f"Count all blob files for: {channel}")
+    else:
+        print("Count all blob files")
     print(80 * "-")
     print(f"Blobfiles: {blobfiles}")
 
@@ -499,6 +506,7 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
     claims_no_sd_hash = 0
     claims_not_found = 0
     claims_other_error = 0
+    n_blobs = 0
 
     for it, item in enumerate(items, start=1):
         if it < start:
@@ -522,8 +530,12 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
         if blob_info:
             if "all_present" in blob_info and blob_info["all_present"]:
                 claims_blobs_complete += 1
+                n_blobs += 1  # for the 'sd_hash'
+                n_blobs += len(blob_info["blobs"])
             elif "all_present" in blob_info and not blob_info["all_present"]:
                 claims_blobs_incomplete += 1
+                n_blobs += 1  # for the 'sd_hash'
+                n_blobs += len(blob_info["blobs"])
 
             if "error_no_sd_hash" in blob_info:
                 claims_no_sd_hash += 1
@@ -533,11 +545,12 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
             claims_other_error += 1
 
     print(f"claims with complete blobs: {claims_blobs_complete}")
-    print(f"claims with incomplete blobs: {claims_blobs_incomplete}")
+    print(f"claims with incomplete blobs: {claims_blobs_incomplete} "
+          "(continue download)")
     print(f"claims with no 'sd_hash' present: {claims_no_sd_hash} "
           "(restart download)")
     print(f"invalid claims: {claims_not_found} "
-          "(no valid URI or claim_id, maybe removed from the network)")
+          "(no valid URI or claim ID; possibly removed from the network)")
     print(f"claims with other errors: {claims_other_error}")
     print(8*"-")
     total = (claims_blobs_complete + claims_blobs_incomplete
@@ -550,6 +563,7 @@ def count_blobs_all(blobfiles=None, print_msg=False, print_each=False,
           "(minimum number of 'sd_hash' blobs that must exist)")
     print(f"invalid claims: {total_invalid} "
           "(should be deleted including all their blobs)")
+    print(f"blobs that should exist for these claims: {n_blobs}")
 
     return blob_all_info
 
