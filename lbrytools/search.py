@@ -108,7 +108,6 @@ def search_item_uri(uri=None, print_error=True,
         print(f"uri={uri}")
         return False
 
-    funcs.check_lbry(server=server)
     cmd = ["lbrynet",
            "resolve",
            uri]
@@ -394,7 +393,6 @@ def ch_search_latest(channel=None, number=2,
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    funcs.check_lbry(server=server)
     search_cmd = ["lbrynet",
                   "claim",
                   "search",
@@ -575,7 +573,6 @@ def sort_items(channel=None,
     False
         If there is a problem it will return False.
     """
-    funcs.check_lbry(server=server)
     page_size = 99000
     list_cmd = ["lbrynet",
                 "file",
@@ -862,7 +859,6 @@ def resolve_channel(channel=None,
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    funcs.check_lbry(server=server)
     cmd = ["lbrynet",
            "resolve",
            channel]

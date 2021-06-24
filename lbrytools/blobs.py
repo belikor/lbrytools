@@ -195,7 +195,6 @@ def blobs_action(blobfiles=None, action="get",
         print(f"action={action}")
         return False
 
-    funcs.check_lbry(server=server)
     list_blobs = os.listdir(blobfiles)
     n_blobs = len(list_blobs)
 
