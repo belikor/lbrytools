@@ -67,6 +67,7 @@ from lbrytools.blobs import blobs_move_all
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
 from lbrytools.search import ch_search_latest
+from lbrytools.search import resolve_channel
 from lbrytools.search import find_channel
 from lbrytools.search import sort_items
 from lbrytools.search import sort_invalid
@@ -74,6 +75,7 @@ from lbrytools.search import parse_claim_file
 
 from lbrytools.print import print_summary
 from lbrytools.print import print_multi_list
+from lbrytools.print import print_channels
 
 from lbrytools.download import download_single
 from lbrytools.download import ch_download_latest
@@ -103,6 +105,7 @@ True if blobs_move_all else False
 True if check_repost else False
 True if search_item else False
 True if ch_search_latest else False
+True if resolve_channel else False
 True if find_channel else False
 True if sort_items else False
 True if sort_invalid else False
@@ -110,6 +113,7 @@ True if parse_claim_file else False
 
 True if print_summary else False
 True if print_multi_list else False
+True if print_channels else False
 
 True if download_single else False
 True if ch_download_latest else False

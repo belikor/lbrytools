@@ -21,6 +21,7 @@ from lbrytools import ch_download_latest_multi
 from lbrytools import redownload_latest
 from lbrytools import download_claims
 from lbrytools import print_summary
+from lbrytools import print_channels
 from lbrytools import delete_single
 from lbrytools import ch_cleanup
 from lbrytools import ch_cleanup_multi
@@ -218,6 +219,69 @@ can only be resolved from the offline database.
 ```py
 p = lbryt.print_summary(invalid=True, ch=True)
 p = lbryt.print_summary(invalid=True, channel="mises")
+```
+
+# Printing channels
+
+Print a list of all unique channels that published the downloaded claims
+that we have.
+```py
+o = lbryt.print_channels()
+```
+
+Since LBRY allows channels to have the same "base" name, by default
+channels are printed in their "full" form (`@MyChannel#3`, `@MyChannel#c6`)
+in order to avoid ambiguity.
+Two parameters control whether to use the full name or the canonical name.
+```py
+o = lbryt.print_channels(full=False)
+o = lbryt.print_channels(canonical=True)
+```
+
+By default, channel names are printed in three columns for clarity.
+Use the `simple` parameter to print all channels in a single string,
+each channel separated from another by a comma.
+```py
+o = lbryt.print_channels(simple=True)
+```
+
+By default, each claim is resolved online in order to get the channel
+information from the online database (blockchain).
+This takes significant time, so the function may take several minutes
+to return if there are thousands of downloaded claims.
+With `offline=True` we can resolve the claims from the offline database;
+this is quicker but may not print all existing channels
+as some of them might have not been resolved when the claims were originally
+downloaded.
+
+If `offline=True` is used, `full` and `canonical` have no effect,
+and only the base name is printed.
+The reason is that the offline database stores only the base name.
+```py
+o = lbryt.print_channels(offline=True)
+```
+
+If we wish to print only channels from invalid claims
+we can use `invalid=True`. This implies `offline=True` as well,
+as invalid claims cannot be resolved online.
+```py
+o = lbryt.print_channels(invalid=True)
+```
+
+Notice that only channels that can be successfully resolved will be
+included in the list. If a channel cannot be resolved online or offline
+for any reason, it will be set to `None`, and it will not be counted
+nor printed.
+Thus, even if we have claims from a particular channel, if it hasn't
+been resolved, it may not appear in the output.
+
+The channel name resolution is affected by a bug in the SDK,
+which is documented in
+[lbry-sdk issue #3316](https://github.com/lbryio/lbry-sdk/issues/3316).
+
+If you wish to manually resolve a channel you can use the following function.
+```py
+ch = lbryt.resolve_channel("@MyChannel")
 ```
 
 # Download from file
@@ -569,6 +633,7 @@ lbryt.ch_download_latest_multi(..., server=server)
 lbryt.redownload_latest(..., server=server)
 lbryt.download_claims(..., server=server)
 lbryt.print_summary(..., server=server)
+lbryt.print_channels(..., server=server)
 lbryt.delete_single(..., server=server)
 lbryt.ch_cleanup(..., server=server)
 lbryt.ch_cleanup_multi(..., server=server)

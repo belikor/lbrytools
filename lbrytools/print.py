@@ -617,3 +617,171 @@ def print_summary(show="all",
                              file=file, fdate=fdate,
                              server=server)
     return status
+
+
+def print_channels(full=True, canonical=False,
+                   simple=False, invalid=False, offline=False,
+                   server="http://localhost:5279"):
+    """Print a unique list of channels by inspecting all downloaded claims.
+
+    Certain claims were published anonymously, so for these the channel
+    is `@_Unknown_`.
+
+    Parameters
+    ----------
+    full: bool, optional
+        It defaults to `True`, in which case the returned
+        name includes the digits after `'#'` or `':'` that uniquely identify
+        that channel in the network.
+        If it is `False` it will return just the base name.
+        This parameter only works with `invalid=False` and `offline=False`,
+        as the full name always needs to be resolved online.
+        This value is ignored if `canonical=True`.
+    canonical: bool, optional
+        It defaults to `False`.
+        If it is `True` the `'canonical_url'` of the channel is returned
+        regardless of the value of `full`.
+        This parameter only works with `invalid=False` and `offline=False`,
+        as the canonical name always needs to be resolved online.
+    simple: bool, optional
+        It defaults to `False`, in which case the channels are printed
+        in three columns.
+        If it is `True` the channels will be printed as a single,
+        long string, each channel separated from another by a comma.
+    invalid: bool, optional
+        It defaults to `False`, in which case it will try to resolve
+        the list of claims from the online database (blockchain),
+        and will also try to resolve the channel name online, unless
+        `offline=True`.
+
+        If it is `True` it will assume the claims are no longer valid,
+        that is, that the claims have been removed from the online database
+        and only exist locally.
+        This also implies `offline=True`, meaning that the channel name
+        will be determined from the offline database.
+    offline: bool, optional
+        It defaults to `False`, in which case it will try to resolve
+        the channel name from the online database (blockchain).
+
+        If it is `True` it will try to resolve the channel name
+        from the offline database. This will be faster but may not
+        print all known channels, only those that have been resolved
+        when the claims were initially downloaded.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of str
+        It returns a list with all channel names found.
+    False
+        If there is a problem like non existing channels,
+        it will return `False`.
+    """
+    if invalid:
+        items = srch.sort_invalid(server=server)
+    else:
+        items = srch.sort_items(server=server)
+
+    if not items:
+        if invalid:
+            print("No invalid claims found. No channels will be listed.")
+        else:
+            print("No items found. No channels will be listed.")
+        return False
+
+    if invalid:
+        offline = True
+
+    all_channels = []
+
+    for item in items:
+        channel = srch.find_channel(cid=item["claim_id"],
+                                    full=full, canonical=canonical,
+                                    offline=offline,
+                                    server=server)
+        if channel:
+            all_channels.append(channel)
+
+    if not all_channels:
+        print("No unique channels could be determined.")
+        if invalid:
+            print("It is possible that the channels "
+                  "were not resolved when the claims "
+                  "were initially downloaded.")
+        else:
+            print("It is possible that the claims are now invalid, "
+                  "or that the channels were not resolved when "
+                  "the claims were initially downloaded.")
+        return False
+    print()
+
+    all_channels = list(set(all_channels))
+    all_channels.sort()
+
+    n_channels = len(all_channels)
+
+    if invalid or offline:
+        print(f"Original channels found: {n_channels} "
+              "(does not include unresolved channels)")
+    else:
+        print(f"Original channels found: {n_channels} "
+              "(does not include invalid claims, or unresolved channels)")
+    print(80 * "-")
+
+    if simple:
+        out = ", ".join(all_channels)
+        print(out)
+        return all_channels
+
+    # Maximum channel length can be used to evenly space all channels
+    # in columns. How do we integrate this into the format specifier?
+    # print(f"{c1:<length>s}")
+    #
+    # length = 0
+    # for ch in all_channels:
+    #     if len(ch) > length:
+    #         length = len(ch)
+
+    # Determine how many rows are required to display
+    # all channels in three columns
+    # c1    c2     c3
+    # c4    c5
+    res = n_channels % 3
+    if res == 0:
+        rows = n_channels/3
+    else:
+        rows = n_channels/3 + 1
+
+    index = 0
+    row = 1
+
+    # Print rows that are full, only if the number of rows is more than 1
+    if rows > 1:
+        for u in range(int(rows)-1):
+            c1 = all_channels[index + 0]
+            c2 = all_channels[index + 1]
+            c3 = all_channels[index + 2]
+            print(f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}")
+            index += 3
+            row += 3
+
+    # Print the last row, which may be the only row if row=1
+    if res == 1:
+        c1 = all_channels[index + 0]
+        print(f"{row:3d}: {c1:33s}")
+    if res == 2:
+        c1 = all_channels[index + 0]
+        c2 = all_channels[index + 1]
+        print(f"{row:3d}: {c1:33s} {c2:33s}")
+    if res == 0:
+        c1 = all_channels[index + 0]
+        c2 = all_channels[index + 1]
+        c3 = all_channels[index + 2]
+        print(f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}")
+
+    return all_channels
