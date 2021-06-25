@@ -719,8 +719,11 @@ def sort_invalid(channel=None,
             invalid_items.append(item)
 
     n_invalid = len(invalid_items)
-    print(f"Invalid items found: {n_invalid} "
-          "(possibly deleted from the network)")
+    if n_invalid > 0:
+        print(f"Invalid items found: {n_invalid} "
+              "(possibly deleted from the network)")
+    else:
+        print(f"Invalid items found: {n_invalid}")
 
     return invalid_items
 
