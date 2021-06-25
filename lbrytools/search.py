@@ -446,7 +446,7 @@ def ch_search_latest(channel=None, number=2,
 
 
 def find_channel(uri=None, cid=None, name=None,
-                 full=True, canonical=False,
+                 full=True, canonical=False, offline=False,
                  server="http://localhost:5279"):
     """Return the channel's name to which the given claim belongs.
 
@@ -483,6 +483,14 @@ def find_channel(uri=None, cid=None, name=None,
         It defaults to `False`.
         If it is `True`, the `'canonical_url'` of the channel is returned
         regardless of the value of `full`.
+    offline: bool, optional
+        It defaults to `False`, in which case it will try to resolve
+        the channel name from the online database (blockchain).
+
+        If it is `True` it will try to resolve the channel name
+        from the offline database. This will be faster but may not
+        find a name if the channel was not resolved when the claim
+        was initially downloaded.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -512,10 +520,13 @@ def find_channel(uri=None, cid=None, name=None,
         print(f"uri={uri}, cid={cid}, name={name}")
         return False
 
-    item = search_item(uri=uri, cid=cid, name=name,
+    item = search_item(uri=uri, cid=cid, name=name, offline=offline,
                        server=server)
     if not item:
         return False
+
+    if offline:
+        return item["channel_name"]
 
     if ("signing_channel" not in item
             or "canonical_url" not in item["signing_channel"]):
