@@ -27,8 +27,6 @@
 import os
 import requests
 
-import lbrytools.funcs as funcs
-
 
 def check_repost(item):
     """Check if the item is a repost, and return the original item.

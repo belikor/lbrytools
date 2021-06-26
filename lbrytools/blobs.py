@@ -31,7 +31,6 @@ import shutil
 
 import lbrytools.clean as clean
 import lbrytools.download as dld
-import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
