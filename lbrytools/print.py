@@ -621,6 +621,7 @@ def print_summary(show="all",
 
 def print_channels(full=True, canonical=False,
                    simple=False, invalid=False, offline=False,
+                   file=None, fdate=False,
                    server="http://localhost:5279"):
     """Print a unique list of channels by inspecting all downloaded claims.
 
@@ -667,6 +668,13 @@ def print_channels(full=True, canonical=False,
         from the offline database. This will be faster but may not
         print all known channels, only those that have been resolved
         when the claims were initially downloaded.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -733,9 +741,34 @@ def print_channels(full=True, canonical=False,
               "(does not include invalid claims, or unresolved channels)")
     print(80 * "-")
 
+    fd = 0
+
+    if file:
+        dirn = os.path.dirname(file)
+        base = os.path.basename(file)
+
+        if fdate:
+            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+        else:
+            fdate = ""
+
+        file = os.path.join(dirn, fdate + base)
+
+        try:
+            fd = open(file, "w")
+        except (FileNotFoundError, PermissionError) as err:
+            print(f"Cannot open file for writing; {err}")
+
     if simple:
         out = ", ".join(all_channels)
-        print(out)
+
+        if file and fd:
+            print(out, file=fd)
+            fd.close()
+            print(f"Summary written: {file}")
+        else:
+            print(out)
+
         return all_channels
 
     # Maximum channel length can be used to evenly space all channels
@@ -766,22 +799,33 @@ def print_channels(full=True, canonical=False,
             c1 = all_channels[index + 0]
             c2 = all_channels[index + 1]
             c3 = all_channels[index + 2]
-            print(f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}")
+            out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
+            if file and fd:
+                print(out, file=fd)
+            else:
+                print(out)
             index += 3
             row += 3
 
     # Print the last row, which may be the only row if row=1
     if res == 1:
         c1 = all_channels[index + 0]
-        print(f"{row:3d}: {c1:33s}")
+        out = f"{row:3d}: {c1:33s}"
     if res == 2:
         c1 = all_channels[index + 0]
         c2 = all_channels[index + 1]
-        print(f"{row:3d}: {c1:33s} {c2:33s}")
+        out = f"{row:3d}: {c1:33s} {c2:33s}"
     if res == 0:
         c1 = all_channels[index + 0]
         c2 = all_channels[index + 1]
         c3 = all_channels[index + 2]
-        print(f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}")
+        out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
+
+    if file and fd:
+        print(out, file=fd)
+        fd.close()
+        print(f"Summary written: {file}")
+    else:
+        print(out)
 
     return all_channels

@@ -270,8 +270,13 @@ as invalid claims cannot be resolved online.
 o = lbryt.print_channels(invalid=True)
 ```
 
+Print the list of channels to a file. Optionally add the date to the name of the file.
+```py
+o = lbryt.print_channels(file="channels.txt", fdate=True)
+```
+
 Notice that only channels that can be successfully resolved will be
-included in the list. If a channel cannot be resolved online or offline
+printed. If a channel cannot be resolved online or offline
 for any reason, it will be set to `None`, and it will not be counted
 nor printed.
 Thus, even if we have claims from a particular channel, if it hasn't
