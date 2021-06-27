@@ -33,6 +33,7 @@ import time
 import lbrytools.clean as clean
 import lbrytools.download as dld
 import lbrytools.search as srch
+import lbrytools.print as prnt
 
 
 def blob_get(blob=None, action="get", out="",
@@ -1130,6 +1131,207 @@ def analyze_channel(blobfiles=None, channel=None,
             "incomplete_blobs": n_blobs_incomplete,
             "incomplete_usage": size_incomplete}
     return info
+
+
+def print_channel_analysis(blobfiles=None, split=True, bar=False,
+                           start=1, end=0,
+                           sort=False, reverse=False,
+                           file=None, fdate=False,
+                           server="http://localhost:5279"):
+    """Print a summary of all blobs of all channels.
+
+    Parameters
+    ----------
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
+    split: bool, optional
+        It defaults to `True`, in which case the summary for each channel
+        will be split into claims that are complete and incomplete.
+        If it is `False` it will print the summary with the claims combined.
+    bar: bool, optional
+        It defaults to `False`, in which case no bar is printed.
+        If it is `True` it will display a bar indicated the usage
+        of a channel.
+        The parameter `bar=True` overrides the `split` parameter.
+    start: int, optional
+        It defaults to 1.
+        Count the channels starting from this index in the list of channels.
+    end: int, optional
+        It defaults to 0.
+        Count the channels until and including this index
+        in the list of channels.
+        If it is 0, it is the same as the last index in the list.
+    sort: bool, optional
+        It defaults to `True`, in which case the channels will be ordered
+        by the amount of space their claims take on the system.
+        If it is `False` the channels will be in alphabetical order.
+    reverse: bool, optional
+        It defaults to `False`, in which case the channels will be ordered
+        in ascending order of usage, that is, how much hard drive space
+        their blobs take.
+        If it is `True` it will be ordered in descending order.
+        This parameter only works in combination with `sort=True`.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    bool
+        It returns `True` if it printed the summary successfully.
+        If there is any error it will return `False`.
+    """
+    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    channels = prnt.print_channels(full=False, canonical=False,
+                                   invalid=False, offline=False,
+                                   file=None,
+                                   server=server)
+    if not channels:
+        return False
+
+    print()
+    n_channels = len(channels)
+
+    out = []
+    claims = []
+    blobs = []
+    sizes = []
+    msg = []
+
+    if split and not bar:
+        out.append("{:43s}  completed (incomplete)".format(""))
+    elif bar:
+        out.append("{:83}  claims,   blobs,    use".format(""))
+
+    for it, channel in enumerate(channels, start=1):
+        if it < start:
+            continue
+        if end != 0 and it > end:
+            break
+
+        print(f"Channel {it}/{n_channels}")
+        info = analyze_channel(blobfiles=blobfiles, channel=channel,
+                               print_msg=False,
+                               server=server)
+        if not info:
+            continue
+
+        n_c_complete = info["complete_claims"]
+        n_c_blobs = info["complete_blobs"]
+        n_c_size = info["complete_usage"]
+
+        n_i_complete = info["incomplete_claims"]
+        n_i_blobs = info["incomplete_blobs"]
+        n_i_size = info["incomplete_usage"]
+
+        n_claims = n_c_complete + n_i_complete
+        n_blobs_all = n_c_blobs + n_i_blobs
+        n_size_all = n_c_size + n_i_size
+        claims.append(n_claims)
+        blobs.append(n_blobs_all)
+        sizes.append(n_size_all)
+
+        ch = channel + ","
+        head = f"{it:3d}/{n_channels:3d}, {ch:34s}  "
+
+        if split and not bar:
+            text = (f"claims: {n_c_complete:4d} ({n_i_complete:4d}),  "
+                    f"blobs: {n_c_blobs:7d} ({n_i_blobs:7d}),  "
+                    f"use: {n_c_size:7.2f} GB ({n_i_size:7.2f} GB)")
+        elif not split and not bar:
+            text = (f"claims: {n_claims:4d},  "
+                    f"blobs: {n_blobs_all:7d},  "
+                    f"use: {n_size_all:7.2f} GB")
+        else:
+            text = ""
+        msg.append(head + text)
+
+    if bar:
+        # Draw a bar indicating the amount of space used.
+        spaces = 40
+        top = max(sizes)
+        sizes_p = [item/top for item in sizes]
+
+        for it in range(len(sizes)):
+            cl = claims[it]
+            bl = blobs[it]
+            sz = sizes[it]
+            percent = sizes_p[it]
+            m = int(percent * spaces)
+
+            msg[it] += "|"
+            if percent > 0.95:
+                msg[it] += (spaces-1)*"="
+            else:
+                msg[it] += m*"="
+                msg[it] += (spaces-1-m)*"."
+
+            msg[it] += "|"
+            msg[it] += f" {cl:4d}, {bl:7d}, {sz:7.2f} GB"
+
+    if sort:
+        # Pair the size and the message that we want to print in a dictionary
+        pair = {}
+        for it in range(len(sizes)):
+            pair[sizes[it]] = msg[it]
+
+        # Sort by the first element of the pair, the size
+        sorted_list = sorted(pair.items(),
+                             reverse=reverse,
+                             key=lambda item: item[0])
+
+        # Just take the second element, the message, into a new list
+        msg = []
+        for first, second in sorted_list:
+            msg.append(second)
+
+    out.extend(msg)
+
+    fd = 0
+
+    if file:
+        dirn = os.path.dirname(file)
+        base = os.path.basename(file)
+
+        if fdate:
+            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+        else:
+            fdate = ""
+
+        file = os.path.join(dirn, fdate + base)
+
+        try:
+            fd = open(file, "w")
+        except (FileNotFoundError, PermissionError) as err:
+            print(f"Cannot open file for writing; {err}")
+
+    if file and fd:
+        print("\n".join(msg), file=fd)
+        fd.close()
+        print(f"Summary written: {file}")
+    else:
+        print("\n".join(out))
+
+    print()
+    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    print(f"start: {s_time}")
+    print(f"end:   {e_time}")
+
+    return True
 
 
 def redownload_blobs(uri=None, cid=None, name=None,

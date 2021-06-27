@@ -34,6 +34,7 @@ from lbrytools import count_blobs_all
 from lbrytools import analyze_blobs
 from lbrytools import download_missing_blobs
 from lbrytools import analyze_channel
+from lbrytools import print_channel_analysis
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 ```
@@ -627,6 +628,40 @@ downloaded claims and blobs, for example, 1000 claims with 100 thousand blobs.
 c = lbryt.analyze_channel(blobfiles=bdir)
 ```
 
+# Print channels analysis
+
+Print a summary for all channels in tabular form.
+It will print the number of claims, the number of blobs, and the disk space
+in gigabytes (GB) that those blobs use.
+```py
+d = print_channel_analysis(blobfiles=bdir)
+```
+
+Print the information split in complete claims, and incomplete claims
+in parentheses.
+```py
+d = print_channel_analysis(blobfiles=bdir, split=True)
+```
+
+Print a bar for each channel representing their disk usage.
+In this case, it will show the numerical values combined as if `split=False`.
+```py
+d = print_channel_analysis(blobfiles=bdir, bar=True)
+```
+
+We can sort the channels by disk usage.
+If `reverse=False` it is ascending order (higher usage last),
+and with `reverse=True` it will be in descending order (higher usage first).
+```py
+d = print_channel_analysis(blobfiles=bdir, bar=True, sort=True, reverse=True)
+```
+
+Print the list of channels to a file.
+Optionally add the date to the name of the file.
+```py
+d = print_channel_analysis(blobfiles=bdir, file="ch_summary.txt", fdate=True)
+```
+
 # Move blobs
 
 If you wish to organize the blobs better you may copy or move the blobs
@@ -707,6 +742,7 @@ lbryt.count_blobs_all(..., server=server)
 lbryt.analyze_blobs(..., server=server)
 lbryt.download_missing_blobs(..., server=server)
 lbryt.analyze_channel(..., server=server)
+lbryt.print_channel_analysis(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 ```

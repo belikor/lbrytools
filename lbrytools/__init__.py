@@ -63,6 +63,7 @@ from lbrytools.blobs import count_blobs_all
 from lbrytools.blobs import analyze_blobs
 from lbrytools.blobs import download_missing_blobs
 from lbrytools.blobs import analyze_channel
+from lbrytools.blobs import print_channel_analysis
 from lbrytools.blobs import redownload_blobs
 from lbrytools.blobs import blobs_move
 from lbrytools.blobs import blobs_move_all
@@ -104,6 +105,7 @@ True if count_blobs_all else False
 True if analyze_blobs else False
 True if download_missing_blobs else False
 True if analyze_channel else False
+True if print_channel_analysis else False
 True if redownload_blobs else False
 True if blobs_move else False
 True if blobs_move_all else False
