@@ -487,7 +487,7 @@ def ch_download_latest(channel=None, number=2,
         print(f"Item {it}/{n_items}")
 
         info_get = download_single(uri=item["canonical_url"],
-                                   ddir=ddir, own_dir=True,
+                                   ddir=ddir, own_dir=own_dir,
                                    server=server)
         list_info_get.append(info_get)
         print()
