@@ -83,6 +83,7 @@ lbryt.count_blobs(...)
 lbryt.count_blobs_all(...)
 lbryt.analyze_blobs(...)
 lbryt.download_missing_blobs(...)
+lbryt.analyze_channel(...)
 lbryt.blobs_move(...)
 lbryt.blobs_move_all(...)
 ```

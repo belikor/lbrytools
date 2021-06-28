@@ -33,6 +33,7 @@ from lbrytools import count_blobs
 from lbrytools import count_blobs_all
 from lbrytools import analyze_blobs
 from lbrytools import download_missing_blobs
+from lbrytools import analyze_channel
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 ```
@@ -598,15 +599,32 @@ a = lbryt.analyze_blobs(blobfiles=bdir, print_msg=True, print_each=False)
 We can identify claims with missing blobs, either data blobs
 or the initial `'sd_hash'` blob, and automatically redownload the claims.
 ```py
-b = download_missing_blobs(blobfiles=bdir, ddir=ddir)
+b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir)
 ```
 
 If we already have many claims in our system this may take a while,
 so we may decide to restrict this to only a single channel,
 or a range of items.
 ```py
-b = download_missing_blobs(blobfiles=bdir, ddir=ddir, channel="@EatMoreVegans")
-b = download_missing_blobs(blobfiles=bdir, ddir=ddir, start=20, end=50)
+b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir, channel="@EatMoreVegans")
+b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir, start=20, end=50)
+```
+
+# Analyze channel
+
+We can display a summary of a particular channel by counting all blobs
+from all its downloaded claims, both complete and incomplete,
+and measure the space that they take in gigabytes (GB).
+```py
+c = lbryt.analyze_channel(blobfiles=bdir, channel="@EatMoreVegans")
+```
+
+If the channel is not specified, it will analyze all blobs from all valid
+claims in the system, and thus provide an overall summary of all downloads.
+Beware that this takes considerable time if there is a large number of
+downloaded claims and blobs, for example, 1000 claims with 100 thousand blobs.
+```py
+c = lbryt.analyze_channel(blobfiles=bdir)
 ```
 
 # Move blobs
@@ -688,6 +706,7 @@ lbryt.count_blobs(..., server=server)
 lbryt.count_blobs_all(..., server=server)
 lbryt.analyze_blobs(..., server=server)
 lbryt.download_missing_blobs(..., server=server)
+lbryt.analyze_channel(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 ```

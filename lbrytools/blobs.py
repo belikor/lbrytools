@@ -28,6 +28,7 @@ import json
 import os
 import requests
 import shutil
+import time
 
 import lbrytools.clean as clean
 import lbrytools.download as dld
@@ -956,6 +957,179 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         print()
 
     return info_get_incomplete, info_get_no_sd
+
+
+def analyze_channel(blobfiles=None, channel=None,
+                    start=1, end=0,
+                    print_msg=True,
+                    server="http://localhost:5279"):
+    """Obtain usage information from a channel by analyzing its blobs.
+
+    If the channel is not specified, it will analyze all blobs from all valid
+    claims in the system, and thus provide an overall summary of all downloads.
+
+    Parameters
+    ----------
+    blobfiles: str
+        It defaults to `'$HOME/.local/share/lbry/lbrynet/blobfiles'`.
+        The path to the directory where the blobs were downloaded.
+        This is normally seen with `lbrynet settings get`, under `'data_dir'`.
+        It can be any other directory if it is symbolically linked
+        to it, such as `'/opt/lbryblobfiles'`
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+
+        If `channel=None` it will go through all valid claims
+        so it will provide a general summary of all downloads.
+    start: int, optional
+        It defaults to 1.
+        Count the blobs from claims starting from this index
+        in the list of items.
+    end: int, optional
+        It defaults to 0.
+        Count the blobs from claims until and including this index
+        in the list of items.
+        If it is 0, it is the same as the last index in the list.
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print the final
+        summary of the channels.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        A dictionary with 7 keys.
+        - `'channel'` the name, or `None` if all channels were inspected.
+        - `'complete_claims'` number of completed claims.
+        - `'complete_blobs'` number of blobs in completed claims.
+        - `'complete_usage'` value in gigabytes (GB) of all blobs
+          from completed claims.
+        - `'incomplete_claims'` number of incomplete claims.
+        - `'incomplete_blobs'` number of blobs in incomplete claims.
+        - `'incomplete_usage'` value in gigabytes (GB) of all blobs
+          from incomplete claims.
+    """
+    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    if (not blobfiles or not isinstance(blobfiles, str)
+            or not os.path.exists(blobfiles)):
+        print("Count the blobs of the claim from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
+        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
+
+        home = os.path.expanduser("~")
+        blobfiles = os.path.join(home,
+                                 ".local", "share",
+                                 "lbry", "lbrynet", "blobfiles")
+
+        if not os.path.exists(blobfiles):
+            print(f"Blobfiles directory does not exist: {blobfiles}")
+            return False
+
+    if channel and not isinstance(channel, str):
+        print("Channel must be a string. Set to 'None'.")
+        print(f"channel={channel}")
+        channel = None
+
+    if channel:
+        if not channel.startswith("@"):
+            channel = "@" + channel
+
+    output = analyze_blobs(blobfiles=blobfiles, channel=channel,
+                           start=start, end=end,
+                           print_msg=False,
+                           print_each=False,
+                           server=server)
+    if not output:
+        return False
+
+    claims_complete = output[0]
+    claims_incomplete = output[1]
+    # claims_no_sd_hash = output[2]
+    # claims_not_found = output[3]
+    # claims_other_error = output[4]
+    print()
+
+    n_claims_complete = len(claims_complete)
+    n_claims_incomplete = len(claims_incomplete)
+
+    size_complete = 0
+    n_blobs_complete = 0
+    size_incomplete = 0
+    n_blobs_incomplete = 0
+
+    for info in claims_complete:
+        blob_info = info["blob_info"]
+        sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
+        size_complete += os.path.getsize(sd_hash)
+        n_blobs_complete += 1
+        n_blobs_complete += len(blob_info["blobs"])
+
+        for blob in blob_info["blobs"]:
+            blob_file = os.path.join(blobfiles, blob[1])
+            size_complete += os.path.getsize(blob_file)
+
+    for info in claims_incomplete:
+        blob_info = info["blob_info"]
+        sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
+        size_incomplete += os.path.getsize(sd_hash)
+        n_blobs_incomplete += 1
+        n_blobs_incomplete += len(blob_info["blobs"])
+        n_blobs_incomplete -= len(blob_info["missing"])
+
+        existing = blob_info["blobs"][:]
+        for missing_blob in blob_info["missing"]:
+            existing.remove(missing_blob)
+        for blob in existing:
+            blob_file = os.path.join(blobfiles, blob[1])
+            size_incomplete += os.path.getsize(blob_file)
+
+    size_complete = size_complete / (1024*1024*1024)
+    size_incomplete = size_incomplete / (1024*1024*1024)
+
+    if print_msg:
+        if channel:
+            print(f"Channel: {channel}")
+
+        print(f"complete:   {n_claims_complete:4d},  "
+              f"blobs: {n_blobs_complete:7d},  "
+              f"usage: {size_complete:9.4f} GB")
+        print(f"incomplete: {n_claims_incomplete:4d},  "
+              f"blobs: {n_blobs_incomplete:7d},  "
+              f"usage: {size_incomplete:9.4f} GB")
+        print(40 * "-")
+
+    n_claims = n_claims_complete + n_claims_incomplete
+    n_blobs_all = n_blobs_complete + n_blobs_incomplete
+    n_size_all = size_complete + size_incomplete
+
+    if print_msg:
+        print(f"all claims: {n_claims:4d},  "
+              f"blobs: {n_blobs_all:7d},  "
+              f"usage: {n_size_all:9.4f} GB")
+        print()
+        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+        print(f"start: {s_time}")
+        print(f"end:   {e_time}")
+
+    info = {"channel": channel,
+            "complete_claims": n_claims_complete,
+            "complete_blobs": n_blobs_complete,
+            "complete_usage": size_complete,
+            "incomplete_claims": n_claims_incomplete,
+            "incomplete_blobs": n_blobs_incomplete,
+            "incomplete_usage": size_incomplete}
+    return info
 
 
 def redownload_blobs(uri=None, cid=None, name=None,
