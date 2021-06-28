@@ -796,9 +796,9 @@ def print_channels(full=True, canonical=False,
     # Print rows that are full, only if the number of rows is more than 1
     if rows > 1:
         for u in range(int(rows)-1):
-            c1 = all_channels[index + 0]
-            c2 = all_channels[index + 1]
-            c3 = all_channels[index + 2]
+            c1 = all_channels[index + 0] + ","
+            c2 = all_channels[index + 1] + ","
+            c3 = all_channels[index + 2] + ","
             out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
             if file and fd:
                 print(out, file=fd)
@@ -812,12 +812,12 @@ def print_channels(full=True, canonical=False,
         c1 = all_channels[index + 0]
         out = f"{row:3d}: {c1:33s}"
     if res == 2:
-        c1 = all_channels[index + 0]
+        c1 = all_channels[index + 0] + ","
         c2 = all_channels[index + 1]
         out = f"{row:3d}: {c1:33s} {c2:33s}"
     if res == 0:
-        c1 = all_channels[index + 0]
-        c2 = all_channels[index + 1]
+        c1 = all_channels[index + 0] + ","
+        c2 = all_channels[index + 1] + ","
         c3 = all_channels[index + 2]
         out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
 
