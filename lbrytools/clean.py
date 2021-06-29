@@ -540,16 +540,20 @@ def pr_bar(size=1000, percent=90, actual_percent=90):
     limit = int(percent/100 * spaces)
     m = int(actual_percent/100 * spaces)
 
-    msg = [limit * " " + "v"]
-    msg.append("|" + m*"=" + (spaces-1-m)*"." + "|" + f" {size:.1f} GB")
+    limit_mark = limit * " " + "v"
 
-    if actual_percent > 100:
+    # Make sure the bar is full if the usage is more than 99%
+    bar = "|"
+    if actual_percent >= 99:
         m = spaces + 13
-        msg[1] = "|" + (spaces-1)*"=" + "|" + f" {size:.1f} GB"
+        bar += (spaces-1)*"="
+    else:
+        bar += m*"=" + (spaces-1-m)*"."
+    bar += f"| {size:.1f} GB"
 
-    msg.append(m*" " + "^")
+    usage_mark = m*" " + "^"
 
-    print("\n".join(msg))
+    print("\n".join([limit_mark, bar, usage_mark]))
 
 
 def measure_usage(main_dir=None, size=1000, percent=90, bar=True):
