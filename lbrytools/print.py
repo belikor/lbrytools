@@ -621,6 +621,8 @@ def print_summary(show="all",
 
 def print_channels(full=True, canonical=False,
                    simple=False, invalid=False, offline=False,
+                   start=1, end=0,
+                   print_msg=True,
                    file=None, fdate=False,
                    server="http://localhost:5279"):
     """Print a unique list of channels by inspecting all downloaded claims.
@@ -668,6 +670,18 @@ def print_channels(full=True, canonical=False,
         from the offline database. This will be faster but may not
         print all known channels, only those that have been resolved
         when the claims were initially downloaded.
+    start: int, optional
+        It defaults to 1.
+        Count the channels starting from this index in the list of channels.
+    end: int, optional
+        It defaults to 0.
+        Count the channels until and including this index
+        in the list of channels.
+        If it is 0, it is the same as the last index in the list.
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print the final time
+        taken to print the channels.
+        If it is `False` it will not print this information.
     file: str, optional
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
@@ -690,6 +704,7 @@ def print_channels(full=True, canonical=False,
         If there is a problem like non existing channels,
         it will return `False`.
     """
+    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if invalid:
         items = srch.sort_invalid(server=server)
     else:
@@ -702,18 +717,26 @@ def print_channels(full=True, canonical=False,
             print("No items found. No channels will be listed.")
         return False
 
+    print()
     if invalid:
         offline = True
 
     all_channels = []
 
-    for item in items:
+    for it, item in enumerate(items, start=1):
+        if it < start:
+            continue
+        if end != 0 and it > end:
+            break
+
         channel = srch.find_channel(cid=item["claim_id"],
                                     full=full, canonical=canonical,
                                     offline=offline,
                                     server=server)
         if channel:
             all_channels.append(channel)
+        else:
+            print()
 
     if not all_channels:
         print("No unique channels could be determined.")
@@ -726,7 +749,6 @@ def print_channels(full=True, canonical=False,
                   "or that the channels were not resolved when "
                   "the claims were initially downloaded.")
         return False
-    print()
 
     all_channels = list(set(all_channels))
     all_channels.sort()
@@ -769,6 +791,11 @@ def print_channels(full=True, canonical=False,
         else:
             print(out)
 
+        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+        if print_msg:
+            print()
+            print(f"start: {s_time}")
+            print(f"end:   {e_time}")
         return all_channels
 
     # Maximum channel length can be used to evenly space all channels
@@ -827,5 +854,11 @@ def print_channels(full=True, canonical=False,
         print(f"Summary written: {file}")
     else:
         print(out)
+
+    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    if print_msg:
+        print()
+        print(f"start: {s_time}")
+        print(f"end:   {e_time}")
 
     return all_channels

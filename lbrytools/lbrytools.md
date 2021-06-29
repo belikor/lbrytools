@@ -270,7 +270,8 @@ as invalid claims cannot be resolved online.
 o = lbryt.print_channels(invalid=True)
 ```
 
-Print the list of channels to a file. Optionally add the date to the name of the file.
+Print the list of channels to a file.
+Optionally add the date to the name of the file.
 ```py
 o = lbryt.print_channels(file="channels.txt", fdate=True)
 ```
