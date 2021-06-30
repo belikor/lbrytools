@@ -27,10 +27,10 @@
 import os
 import random
 
-import lbrytools.download as dld
 import lbrytools.search as srch
 import lbrytools.search_ch as srch_ch
 import lbrytools.sort as sort
+import lbrytools.download as dld
 
 
 def ch_download_latest(channel=None, number=2,

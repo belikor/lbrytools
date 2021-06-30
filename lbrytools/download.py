@@ -27,9 +27,9 @@
 import os
 import requests
 
-import lbrytools.print as prnt
 import lbrytools.search as srch
 import lbrytools.search_ch as srch_ch
+import lbrytools.print as prnt
 
 
 def lbrynet_get(uri=None, ddir=None,
