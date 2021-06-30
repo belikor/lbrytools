@@ -220,7 +220,9 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
         srch.resolve_channel(channel=channel, server=server)
         srch.resolve_channel(channel=ch_full, server=server)
 
-        channel = ch_full.replace("#", ":")
+        # Windows doesn't like # or : in the subdirectory; use a _
+        # channel = ch_full.replace("#", ":")
+        channel = ch_full.replace("#", "_")
     else:
         channel = "@_Unknown_"
 
