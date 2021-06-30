@@ -29,6 +29,8 @@ import requests
 import shutil
 
 import lbrytools.search as srch
+import lbrytools.search_ch as srch_ch
+import lbrytools.sort as sort
 
 
 def lbrynet_del(claim_id=None, claim_name=None, what="blobs",
@@ -286,7 +288,7 @@ def ch_cleanup(channel=None, number=2, what="media",
         return False
 
     list_info_del = []
-    sorted_items = srch.sort_items(channel=channel,
+    sorted_items = sort.sort_items(channel=channel,
                                    server=server)
     if not sorted_items:
         print()
@@ -736,7 +738,7 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         print("Nothing to clean up.")
         return False
 
-    sorted_items = srch.sort_items(server=server)
+    sorted_items = sort.sort_items(server=server)
     n_items = len(sorted_items)
 
     for it, item in enumerate(sorted_items, start=1):
@@ -744,8 +746,9 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
 
         if never_delete:
-            channel = srch.find_channel(cid=item["claim_id"], full=False,
-                                        server=server)
+            channel = srch_ch.find_channel(cid=item["claim_id"],
+                                           full=False,
+                                           server=server)
             if channel in never_delete:
                 print(out + f"item from {channel} will not be deleted. "
                       "Skipping.")
@@ -814,14 +817,15 @@ def remove_media(never_delete=None,
     print(80 * "-")
     print("Delete all media files")
 
-    items = srch.sort_items(server=server)
+    items = sort.sort_items(server=server)
     n_items = len(items)
 
     for it, item in enumerate(items, start=1):
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
         if never_delete:
-            channel = srch.find_channel(cid=item["claim_id"], full=False,
-                                        server=server)
+            channel = srch_ch.find_channel(cid=item["claim_id"],
+                                           full=False,
+                                           server=server)
             if not channel:
                 continue
 
@@ -873,7 +877,7 @@ def remove_claims(start=1, end=0, file=None, invalid=False,
         with `delete_single` to delete that claim.
 
         If `file=None` it will delete the claims obtained
-        from `search.sort_items` which should already be present
+        from `sort_items` which should already be present
         in the system fully or partially.
     invalid: bool, optional
         It defaults to `False`, in which case it will assume
@@ -916,7 +920,7 @@ def remove_claims(start=1, end=0, file=None, invalid=False,
 
     if not file:
         print("Remove claims from existing list")
-        sorted_items = srch.sort_items(server=server)
+        sorted_items = sort.sort_items(server=server)
 
         if not sorted_items:
             print(">>> Error: no claims previously downloaded.")

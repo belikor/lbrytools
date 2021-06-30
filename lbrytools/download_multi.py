@@ -29,6 +29,8 @@ import random
 
 import lbrytools.download as dld
 import lbrytools.search as srch
+import lbrytools.search_ch as srch_ch
+import lbrytools.sort as sort
 
 
 def ch_download_latest(channel=None, number=2,
@@ -87,9 +89,8 @@ def ch_download_latest(channel=None, number=2,
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
     list_info_get = []
-    items = srch.ch_search_latest(channel=channel, number=number,
-                                  server=server)
-
+    items = srch_ch.ch_search_latest(channel=channel, number=number,
+                                     server=server)
     if not items:
         print()
         return False
@@ -325,7 +326,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
-    sorted_items = srch.sort_items(server=server)
+    sorted_items = sort.sort_items(server=server)
     sorted_items.reverse()
 
     if rand:
@@ -381,7 +382,7 @@ def download_claims(ddir=None, own_dir=True,
         with `download_single` to get that claim.
 
         If `file=None` it will re-download the claims obtained
-        from `search.sort_items` which should already be present
+        from `sort_items` which should already be present
         in the system fully or partially.
     invalid: bool, optional
         It defaults to `False`, in which case it will assume
@@ -420,7 +421,7 @@ def download_claims(ddir=None, own_dir=True,
 
     if not file:
         print("Redownload from existing claims")
-        sorted_items = srch.sort_items(server=server)
+        sorted_items = sort.sort_items(server=server)
 
         if not sorted_items:
             print(">>> Error: no claims previously downloaded.")

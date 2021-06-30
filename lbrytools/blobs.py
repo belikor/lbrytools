@@ -33,6 +33,7 @@ import time
 import lbrytools.clean as clean
 import lbrytools.download as dld
 import lbrytools.search as srch
+import lbrytools.sort as sort
 import lbrytools.print as prnt
 
 
@@ -487,7 +488,7 @@ def count_blobs_all(blobfiles=None, channel=None,
         if not channel.startswith("@"):
             channel = "@" + channel
 
-    items = srch.sort_items(channel=channel,
+    items = sort.sort_items(channel=channel,
                             server=server)
     if not items:
         return False
@@ -1695,7 +1696,7 @@ def blobs_move_all(move_dir=None, blobfiles=None, print_missing=False,
         if not channel.startswith("@"):
             channel = "@" + channel
 
-    items = srch.sort_items(channel=channel,
+    items = sort.sort_items(channel=channel,
                             server=server)
     if not items:
         return False

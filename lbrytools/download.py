@@ -29,6 +29,7 @@ import requests
 
 import lbrytools.print as prnt
 import lbrytools.search as srch
+import lbrytools.search_ch as srch_ch
 
 
 def lbrynet_get(uri=None, ddir=None,
@@ -216,8 +217,8 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
         channel = item["signing_channel"]["name"]
         ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
 
-        srch.resolve_channel(channel=channel, server=server)
-        srch.resolve_channel(channel=ch_full, server=server)
+        srch_ch.resolve_channel(channel=channel, server=server)
+        srch_ch.resolve_channel(channel=ch_full, server=server)
 
         # Windows doesn't like # or : in the subdirectory; use a _
         # channel = ch_full.replace("#", ":")

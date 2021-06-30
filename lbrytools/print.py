@@ -27,7 +27,8 @@
 import os
 import time
 
-import lbrytools.search as srch
+import lbrytools.search_ch as srch_ch
+import lbrytools.sort as sort
 
 
 def print_info_pre_get(item=None, offline=False):
@@ -441,8 +442,9 @@ def print_items(items=None, show="all",
         if ch:
             if ch_online:
                 # Searching online is slower but it gets the full channel name
-                _channel = srch.find_channel(cid=item["claim_id"], full=True,
-                                             server=server)
+                _channel = srch_ch.find_channel(cid=item["claim_id"],
+                                                full=True,
+                                                server=server)
                 if not _channel:
                     print(out + _claim_name)
                     print()
@@ -587,7 +589,7 @@ def print_summary(show="all",
         If there is any error it will return `False`.
     """
     if invalid:
-        items = srch.sort_invalid(server=server)
+        items = sort.sort_invalid(server=server)
         if len(items) < 1:
             if file:
                 print("No file written.")
@@ -602,7 +604,7 @@ def print_summary(show="all",
                              file=file, fdate=fdate,
                              server=server)
     else:
-        items = srch.sort_items(server=server)
+        items = sort.sort_items(server=server)
         if len(items) < 1:
             if file:
                 print("No file written.")
@@ -706,9 +708,9 @@ def print_channels(full=True, canonical=False,
     """
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if invalid:
-        items = srch.sort_invalid(server=server)
+        items = sort.sort_invalid(server=server)
     else:
-        items = srch.sort_items(server=server)
+        items = sort.sort_items(server=server)
 
     if not items:
         if invalid:
@@ -729,10 +731,10 @@ def print_channels(full=True, canonical=False,
         if end != 0 and it > end:
             break
 
-        channel = srch.find_channel(cid=item["claim_id"],
-                                    full=full, canonical=canonical,
-                                    offline=offline,
-                                    server=server)
+        channel = srch_ch.find_channel(cid=item["claim_id"],
+                                       full=full, canonical=canonical,
+                                       offline=offline,
+                                       server=server)
         if channel:
             all_channels.append(channel)
         else:
