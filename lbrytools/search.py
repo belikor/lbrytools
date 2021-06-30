@@ -32,7 +32,7 @@ def check_repost(item):
     """Check if the item is a repost, and return the original item.
 
     A claim that is just the repost of another cannot be downloaded directly,
-    so we replace the input item with the reposted (original) item.
+    so we replace the input item with the original source item.
 
     Parameters
     ----------
@@ -109,15 +109,6 @@ def search_item_uri(uri=None, print_error=True,
     cmd = ["lbrynet",
            "resolve",
            uri]
-    # output = subprocess.run(cmd,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
-
-    # data = json.loads(output.stdout)
 
     msg = {"method": cmd[1],
            "params": {"urls": uri}}
@@ -142,7 +133,7 @@ def search_item_uri(uri=None, print_error=True,
         return False
 
     # The found item may be a repost so we check it,
-    # and return the original item.
+    # and return the original source item.
     item = check_repost(item)
     return item
 
@@ -377,12 +368,13 @@ def parse_claim_file(file=None, start=1, end=0):
         it will return `False`.
     """
     if not file or not isinstance(file, str) or not os.path.exists(file):
-        print("File must exist, and be a valid CSV list of items with claim ids")
+        print("File must exist, and be a valid CSV list of items "
+              "with claim ids")
         print(f"file={file}")
         print("Example file:")
-        print("1/435, 20200609_23:14:47-0500, 70dfefa510ca6eee7023a2a927e34d385b5a18bd,  5/ 5")
-        print("2/435, 20210424_18:01:05-0500, 0298c56e0593b140c231229a065cc1647d4fedae, 24/24")
-        print("3/435, 20210427_18:07:26-0500, d30002fec25bff804f144655b3fe4495e00439de, 15/15")
+        print("1/435, 70dfefa510ca6eee7023a2a927e34d385b5a18bd,  5/ 5")
+        print("2/435, 0298c56e0593b140c231229a065cc1647d4fedae, 24/24")
+        print("3/435, d30002fec25bff804f144655b3fe4495e00439de, 15/15")
         return False
 
     with open(file, "r") as fd:
@@ -399,6 +391,11 @@ def parse_claim_file(file=None, start=1, end=0):
     print(f"Parsing file with claims, {file}")
 
     for it, line in enumerate(lines, start=1):
+        # Skip lines with only whitespace, and starting with # (comments)
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
         if it < start:
             continue
         if end != 0 and it > end:
@@ -407,7 +404,7 @@ def parse_claim_file(file=None, start=1, end=0):
         out = "{:4d}/{:4d}, ".format(it, n_lines)
 
         # Split by using the comma, and remove whitespaces
-        parts = line.strip().split(",")
+        parts = line.split(",")
         clean_parts = [i.strip() for i in parts]
 
         found = True
@@ -431,5 +428,6 @@ def parse_claim_file(file=None, start=1, end=0):
                   "it must be a 40-character alphanumeric string "
                   "without special symbols like '/', '@', '#', ':'")
 
-    print(f"Effective claims found: {len(claims)}")
+    n_claims = len(claims)
+    print(f"Effective claims found: {n_claims}")
     return claims
