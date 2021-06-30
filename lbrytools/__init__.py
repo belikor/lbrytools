@@ -79,9 +79,10 @@ from lbrytools.search_ch import find_channel
 from lbrytools.sort import sort_items
 from lbrytools.sort import sort_invalid
 
-from lbrytools.print import print_summary
 from lbrytools.print import print_multi_list
-from lbrytools.print import print_channels
+
+from lbrytools.printf import print_summary
+from lbrytools.printf import print_channels
 
 from lbrytools.download import download_single
 

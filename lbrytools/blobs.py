@@ -34,7 +34,7 @@ import lbrytools.clean as clean
 import lbrytools.download as dld
 import lbrytools.search as srch
 import lbrytools.sort as sort
-import lbrytools.print as prnt
+import lbrytools.printf as prntf
 
 
 def blob_get(blob=None, action="get", out="",
@@ -1197,10 +1197,11 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         If there is any error it will return `False`.
     """
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
-    channels = prnt.print_channels(full=False, canonical=False,
-                                   invalid=False, offline=False,
-                                   file=None,
-                                   server=server)
+    channels = prntf.print_channels(full=False, canonical=False,
+                                    invalid=False, offline=False,
+                                    print_msg=True,
+                                    file=None, fdate=False,
+                                    server=server)
     if not channels:
         return False
 
