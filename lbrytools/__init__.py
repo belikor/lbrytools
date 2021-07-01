@@ -92,12 +92,15 @@ from lbrytools.download_multi import redownload_latest
 from lbrytools.download_multi import download_claims
 
 from lbrytools.clean import delete_single
-from lbrytools.clean import ch_cleanup
-from lbrytools.clean import ch_cleanup_multi
-from lbrytools.clean import measure_usage
-from lbrytools.clean import cleanup_space
-from lbrytools.clean import remove_media
-from lbrytools.clean import remove_claims
+
+from lbrytools.clean_multi import ch_cleanup
+from lbrytools.clean_multi import ch_cleanup_multi
+from lbrytools.clean_multi import remove_media
+from lbrytools.clean_multi import remove_claims
+
+from lbrytools.space import measure_usage
+from lbrytools.space import cleanup_space
+
 
 # Use of the modules so that code checkers don't complain (flake8)
 True if check_lbry else False
@@ -137,9 +140,11 @@ True if redownload_latest else False
 True if download_claims else False
 
 True if delete_single else False
+
 True if ch_cleanup else False
 True if ch_cleanup_multi else False
-True if measure_usage else False
-True if cleanup_space else False
 True if remove_media else False
 True if remove_claims else False
+
+True if measure_usage else False
+True if cleanup_space else False
