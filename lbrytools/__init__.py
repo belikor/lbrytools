@@ -89,15 +89,16 @@ from lbrytools.clean_multi import remove_claims
 from lbrytools.space import measure_usage
 from lbrytools.space import cleanup_space
 
-from lbrytools.blobs import blob_get
-from lbrytools.blobs import blobs_action
 from lbrytools.blobs import count_blobs
 from lbrytools.blobs import count_blobs_all
 from lbrytools.blobs import analyze_blobs
 from lbrytools.blobs import download_missing_blobs
 from lbrytools.blobs import analyze_channel
 from lbrytools.blobs import print_channel_analysis
-from lbrytools.blobs import redownload_blobs
+
+from lbrytools.blobs_act import blob_get
+from lbrytools.blobs_act import blobs_action
+from lbrytools.blobs_act import redownload_blobs
 
 from lbrytools.blobs_move import blobs_move
 from lbrytools.blobs_move import blobs_move_all
@@ -138,14 +139,15 @@ True if remove_claims else False
 True if measure_usage else False
 True if cleanup_space else False
 
-True if blob_get else False
-True if blobs_action else False
 True if count_blobs else False
 True if count_blobs_all else False
 True if analyze_blobs else False
 True if download_missing_blobs else False
 True if analyze_channel else False
 True if print_channel_analysis else False
+
+True if blob_get else False
+True if blobs_action else False
 True if redownload_blobs else False
 
 True if blobs_move else False
