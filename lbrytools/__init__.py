@@ -56,18 +56,6 @@ Developed and tested with Python 3.8.
 """
 from lbrytools.funcs import check_lbry
 
-from lbrytools.blobs import blob_get
-from lbrytools.blobs import blobs_action
-from lbrytools.blobs import count_blobs
-from lbrytools.blobs import count_blobs_all
-from lbrytools.blobs import analyze_blobs
-from lbrytools.blobs import download_missing_blobs
-from lbrytools.blobs import analyze_channel
-from lbrytools.blobs import print_channel_analysis
-from lbrytools.blobs import redownload_blobs
-from lbrytools.blobs import blobs_move
-from lbrytools.blobs import blobs_move_all
-
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
 from lbrytools.search import parse_claim_file
@@ -101,21 +89,21 @@ from lbrytools.clean_multi import remove_claims
 from lbrytools.space import measure_usage
 from lbrytools.space import cleanup_space
 
+from lbrytools.blobs import blob_get
+from lbrytools.blobs import blobs_action
+from lbrytools.blobs import count_blobs
+from lbrytools.blobs import count_blobs_all
+from lbrytools.blobs import analyze_blobs
+from lbrytools.blobs import download_missing_blobs
+from lbrytools.blobs import analyze_channel
+from lbrytools.blobs import print_channel_analysis
+from lbrytools.blobs import redownload_blobs
+
+from lbrytools.blobs_move import blobs_move
+from lbrytools.blobs_move import blobs_move_all
 
 # Use of the modules so that code checkers don't complain (flake8)
 True if check_lbry else False
-
-True if blob_get else False
-True if blobs_action else False
-True if count_blobs else False
-True if count_blobs_all else False
-True if analyze_blobs else False
-True if download_missing_blobs else False
-True if analyze_channel else False
-True if print_channel_analysis else False
-True if redownload_blobs else False
-True if blobs_move else False
-True if blobs_move_all else False
 
 True if check_repost else False
 True if search_item else False
@@ -128,8 +116,9 @@ True if find_channel else False
 True if sort_items else False
 True if sort_invalid else False
 
-True if print_summary else False
 True if print_multi_list else False
+
+True if print_summary else False
 True if print_channels else False
 
 True if download_single else False
@@ -148,3 +137,16 @@ True if remove_claims else False
 
 True if measure_usage else False
 True if cleanup_space else False
+
+True if blob_get else False
+True if blobs_action else False
+True if count_blobs else False
+True if count_blobs_all else False
+True if analyze_blobs else False
+True if download_missing_blobs else False
+True if analyze_channel else False
+True if print_channel_analysis else False
+True if redownload_blobs else False
+
+True if blobs_move else False
+True if blobs_move_all else False
