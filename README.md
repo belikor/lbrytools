@@ -102,28 +102,29 @@ This script should be run periodically to constantly download new content,
 and remove the older files if they take too much space.
 See [zeedit.py](./zeedit/zeedit.py).
 
-It uses a configuration file to set up a few options such as the channels
-to download content from, the download directory, at which point
-it should perform cleanup of older files, and whether to write a summary
-of all downloaded claims.
-Read the comments in [zeedit_config.py](./zeedit/zeedit_config.py)
-to know about the options that can be configured.
-
 If `lbrytools` is correctly installed in the Python path, the script can be
 executed directly, or through the Python interpreter.
 ```
 python zeedit.py [config.py]
 ```
 
-The configuration file can be passed as the first argument, so it is possible
-to have different configurations to download content of different channels.
+A configuration file should be passed as the first argument, so it is possible
+to have different configurations to download content from different channels.
 ```
 python zeedit.py funny_config.py
 python zeedit.py tech_channels_config.py
 ```
 
-If no argument is given, or the provided configuration file does not exist,
-it will try to load a configuration under the name `zeedit_config.py`.
+The configuration file specifies the channels to download content from,
+the download directory, the limit in gigabytes before cleanup of older files
+is started, and whether to write a summary of all downloaded claims.
+Modify the [zeedit_config_example.py](./zeedit/zeedit_config_example.py)
+to your liking, and read the comments in it to understand what each option
+does.
+
+If no argument is given, or if the provided configuration file does not exist,
+it will default to loading a configuration under the name `zeedit_config.py`;
+if this is not available, it will simply exit.
 
 To keep everything contained, the `lbrytools` package can be placed in the same
 directory as `zeedit.py` and `zeedit_config.py`.
