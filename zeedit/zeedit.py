@@ -44,8 +44,8 @@ import os
 import sys
 
 try:
-    # import lbrytools as lbryt
-    lbryt = importlib.import_module("lbrytools")
+    import lbrytools as lbryt
+    # lbryt = importlib.import_module("lbrytools")
 except ModuleNotFoundError as err:
     print(f"{err}")
     print("This package must be in the same directory as this script, "

@@ -1,8 +1,19 @@
 #!/bin/python3
 """Configuration module for the `zeedit` script that uses `lbrytools`.
 
-It defines all variables used by the `lbtytools` functions.
-Make sure this module is in the same directory as `zeedit.py`.
+It defines all variables used by the `lbtytools` functions in `zeedit.py`.
+
+Pass this module as the first argument to the script.
+::
+    python zeedit.py zeedit_config_example.py
+
+If you wish to use this module as default configuration, make sure
+it is named `zeedit_config.py`, and place it in the Python path,
+either in a user or global `site-packages` directory, or
+in the same directory as `zeedit.py`.
+Then `zeedit.py` can be called without an argument.
+::
+    python zeedit.py
 """
 # =============================================================================
 # 1. Download options
