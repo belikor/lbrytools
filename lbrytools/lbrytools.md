@@ -136,7 +136,7 @@ If the list of channels is large, it is better to randomize it
 so that we can start downloading from an arbitrary channel, and not
 always from the first one in the list.
 ```py
-c = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, rand=True)
+c = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, shuffle=True)
 ```
 
 # Printing
@@ -338,7 +338,7 @@ r = lbryt.redownload_latest(number=10, ddir=ddir, own_dir=True)
 If the list of claims is shuffled, then we can re-download random claims,
 not necessarily the latest ones.
 ```py
-r = lbryt.redownload_latest(number=20, ddir=ddir, own_dir=True, rand=True)
+r = lbryt.redownload_latest(number=20, ddir=ddir, own_dir=True, shuffle=True)
 ```
 
 ----

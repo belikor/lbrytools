@@ -109,7 +109,7 @@ def ch_download_latest(channel=None, number=2,
 
 
 def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
-                             number=None, rand=True,
+                             number=None, shuffle=True,
                              server="http://localhost:5279"):
     """Download the latest claims published by a list of a channels.
 
@@ -138,7 +138,7 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         numbers in `channels`.
         That is, the number of claims that will be downloaded
         will be the same for every channel.
-    rand: bool, optional
+    shuffle: bool, optional
         It defaults to `True`, in which case it will shuffle
         the list of channels so that they are not processed in the order
         that they come.
@@ -217,7 +217,7 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
 
     list_ch_info = []
 
-    if rand:
+    if shuffle:
         if isinstance(channels, tuple):
             channels = list(channels)
         random.shuffle(channels)
@@ -270,7 +270,7 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
     return list_ch_info
 
 
-def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
+def redownload_latest(number=2, ddir=None, own_dir=True, shuffle=False,
                       server="http://localhost:5279"):
     """Attempt to redownload the latest claims that were already downloaded.
 
@@ -297,7 +297,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
-    rand: bool, optional
+    shuffle: bool, optional
         It defaults to `False`.
         If it is `True` it will shuffle the list of claims
         so that `number` indicates a random number of claims,
@@ -329,7 +329,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, rand=False,
     sorted_items = sort.sort_items(server=server)
     sorted_items.reverse()
 
-    if rand:
+    if shuffle:
         random.shuffle(sorted_items)
         random.shuffle(sorted_items)
         random.shuffle(sorted_items)
