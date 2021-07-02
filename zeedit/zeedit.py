@@ -95,6 +95,12 @@ if __name__ == "__main__":
             usage()
             exit(1)
 
+    # Load the default variables if they are not in the configuration.
+    cfg = lbryt.z_defaults(cfg)
+    if not cfg:
+        print("Exiting.")
+        exit(1)
+
     # Download the latest claims from select channels.
     print(80 * "=")
     print("1. Download step")

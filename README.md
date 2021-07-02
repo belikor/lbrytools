@@ -119,8 +119,9 @@ The configuration file specifies the channels to download content from,
 the download directory, the limit in gigabytes before cleanup of older files
 is started, and whether to write a summary of all downloaded claims.
 Modify the [zeedit_config_example.py](./zeedit/zeedit_config_example.py)
-to your liking, and read the comments in it to understand what each option
-does.
+to your liking, and read the comments in it to understand what each variable
+does. Only the `channels` variable is mandatory, all others have a default
+value if they are missing in the configuration file.
 
 If no argument is given, or if the provided configuration file does not exist,
 it will default to loading a configuration under the name `zeedit_config.py`;

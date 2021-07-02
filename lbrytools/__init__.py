@@ -54,6 +54,8 @@ That is
 
 Developed and tested with Python 3.8.
 """
+from lbrytools.z_defaults import z_defaults
+
 from lbrytools.funcs import check_lbry
 
 from lbrytools.search import check_repost
@@ -105,6 +107,8 @@ from lbrytools.blobs_move import blobs_move
 from lbrytools.blobs_move import blobs_move_all
 
 # Use of the modules so that code checkers don't complain (flake8)
+True if z_defaults else False
+
 True if check_lbry else False
 
 True if check_repost else False

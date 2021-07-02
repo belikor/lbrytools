@@ -14,7 +14,22 @@ in the same directory as `zeedit.py`.
 Then `zeedit.py` can be called without an argument.
 ::
     python zeedit.py
+
+Defaults
+--------
+
+In this configuration file all variables are optional, that is, they can be
+missing or commented out. The defaults are loaded from the
+`lbrytools.z_defaults.py` module. The only variable that is mandatory
+is `channels`.
 """
+# =============================================================================
+# 0. General
+#
+# Set the address of the JSON-RPC server of the LBRY daemon.
+# Normally, this value does not need to be changed.
+server = "http://localhost:5279"
+
 # =============================================================================
 # 1. Download options
 #
@@ -47,10 +62,6 @@ number = 0
 # downloads are active, so this is useful to make sure all channels are
 # considered, and not only the first ones in the list.
 shuffle = 1
-
-# Set the address of the JSON-RPC server of the LBRY daemon.
-# Normally, this value does not need to be changed.
-server = "http://localhost:5279"
 
 # =============================================================================
 # 2. Seeding options
