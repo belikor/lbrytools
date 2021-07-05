@@ -146,31 +146,18 @@ def ch_search_latest(channel=None, number=2,
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    search_cmd = ["lbrynet",
-                  "claim",
-                  "search",
-                  "--channel=" + channel,
-                  # "--stream_type=video",
-                  "--page_size=" + str(number),
-                  "--order_by=release_time"]
+    cmd = ["lbrynet",
+           "claim",
+           "search",
+           "--channel=" + "'" + channel + "'",
+           # "--stream_type=video",
+           "--page_size=" + str(number),
+           "--order_by=release_time"]
 
-    search_cmd2 = search_cmd[:]
-    search_cmd2[3] = "--channel=" + "'" + channel + "'"
-
-    print("Search: " + " ".join(search_cmd2))
+    print("Search: " + " ".join(cmd))
     print(80 * "-")
-    # output = subprocess.run(search_cmd,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
 
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
-
-    # data = json.loads(output.stdout)
-
-    msg = {"method": search_cmd[1] + "_" + search_cmd[2],
+    msg = {"method": cmd[1] + "_" + cmd[2],
            "params": {"channel": channel,
                       "page_size": number,
                       "order_by": "release_time"}}

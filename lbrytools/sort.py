@@ -71,10 +71,10 @@ def sort_items(channel=None,
         If there is a problem it will return False.
     """
     page_size = 99000
-    list_cmd = ["lbrynet",
-                "file",
-                "list",
-                "--page_size=" + str(page_size)]
+    cmd = ["lbrynet",
+           "file",
+           "list",
+           "--page_size=" + str(page_size)]
 
     if channel and not isinstance(channel, str):
         print("Channel must be a string. Set to 'None'.")
@@ -84,21 +84,12 @@ def sort_items(channel=None,
     if channel:
         if not channel.startswith("@"):
             channel = "@" + channel
-        list_cmd.append("--channel_name=" + channel)
+        cmd.append("--channel_name=" + "'" + channel + "'")
 
-    print("List: " + " ".join(list_cmd))
+    print("List: " + " ".join(cmd))
     print(80 * "-")
-    # output = subprocess.run(list_cmd,
-    #                         capture_output=True,
-    #                         check=True,
-    #                         text=True)
-    # if output.returncode == 1:
-    #     print(f"Error: {output.stderr}")
-    #     sys.exit(1)
 
-    # data = json.loads(output.stdout)
-
-    msg = {"method": list_cmd[1] + "_" + list_cmd[2],
+    msg = {"method": cmd[1] + "_" + cmd[2],
            "params": {"page_size": page_size}}
     if channel:
         msg["params"]["channel_name"] = channel
