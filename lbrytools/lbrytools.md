@@ -622,8 +622,9 @@ c = lbryt.analyze_channel(blobfiles=bdir, channel="@EatMoreVegans")
 
 If the channel is not specified, it will analyze all blobs from all valid
 claims in the system, and thus provide an overall summary of all downloads.
-Beware that this takes considerable time if there is a large number of
-downloaded claims and blobs, for example, 1000 claims with 100 thousand blobs.
+Beware that this takes considerable time (more than one hour)
+if there is a large number of downloaded claims and blobs, for example,
+1000 claims with 100 thousand blobs.
 ```py
 c = lbryt.analyze_channel(blobfiles=bdir)
 ```
@@ -633,33 +634,38 @@ c = lbryt.analyze_channel(blobfiles=bdir)
 Print a summary for all channels in tabular form.
 It will print the number of claims, the number of blobs, and the disk space
 in gigabytes (GB) that those blobs use.
+
+This method uses `analyze_channel` internally with each channel,
+so it takes a considerable amount of time to run (more than one hour)
+if there is a large number of downloaded claims and blobs, for example,
+1000 claims with 100 thousand blobs.
 ```py
-d = print_channel_analysis(blobfiles=bdir)
+d = lbryt.print_channel_analysis(blobfiles=bdir)
 ```
 
 Print the information split in complete claims, and incomplete claims
 in parentheses.
 ```py
-d = print_channel_analysis(blobfiles=bdir, split=True)
+d = lbryt.print_channel_analysis(blobfiles=bdir, split=True)
 ```
 
 Print a bar for each channel representing their disk usage.
 In this case, it will show the numerical values combined as if `split=False`.
 ```py
-d = print_channel_analysis(blobfiles=bdir, bar=True)
+d = lbryt.print_channel_analysis(blobfiles=bdir, bar=True)
 ```
 
 We can sort the channels by disk usage.
 If `reverse=False` it is ascending order (higher usage last),
 and with `reverse=True` it will be in descending order (higher usage first).
 ```py
-d = print_channel_analysis(blobfiles=bdir, bar=True, sort=True, reverse=True)
+d = lbryt.print_channel_analysis(blobfiles=bdir, bar=True, sort=True, reverse=True)
 ```
 
 Print the list of channels to a file.
 Optionally add the date to the name of the file.
 ```py
-d = print_channel_analysis(blobfiles=bdir, file="ch_summary.txt", fdate=True)
+d = lbryt.print_channel_analysis(blobfiles=bdir, file="ch_summary.txt", fdate=True)
 ```
 
 # Move blobs
