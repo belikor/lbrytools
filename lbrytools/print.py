@@ -233,7 +233,7 @@ def print_multi_list(list_ch_info=None):
         out = "{:2d}/{:2d}, ".format(it, n_items)
 
         if not item:
-            print(out + "empty item; failed download?")
+            print(out + "empty item. Failure establishing server connection?")
             continue
 
         if "claim_id" in item:
