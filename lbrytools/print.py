@@ -237,9 +237,12 @@ def print_multi_list(list_ch_info=None):
             continue
 
         if "claim_id" in item:
-            print(out + "{}, {}, {}".format(item["claim_id"],
-                                            item["channel_name"],
-                                            item["claim_name"]))
+            out += "{}, {:3d}/{:3d}, ".format(item["claim_id"],
+                                              item["blobs_completed"],
+                                              item["blobs_in_stream"])
+            out += "{}, {}".format(item["channel_name"],
+                                   item["claim_name"])
+            print(out)
         elif "error" in item:
             print(out + "{}".format(item["error"]))
         else:
