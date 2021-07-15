@@ -399,6 +399,8 @@ def print_items(items=None, show="all",
         except (FileNotFoundError, PermissionError) as err:
             print(f"Cannot open file for writing; {err}")
 
+    out_list = []
+
     for it, item in enumerate(items, start=1):
         if it < start:
             continue
@@ -474,13 +476,15 @@ def print_items(items=None, show="all",
         else:
             out += "missing"
 
-        if file and fd:
-            print(out, file=fd)
-        else:
-            print(out)
+        out_list.append(out)
 
     if file and fd:
+        for line in out_list:
+            print(line, file=fd)
+
         fd.close()
         print(f"Summary written: {file}")
+    else:
+        print("\n".join(out_list))
 
     return True
