@@ -106,6 +106,8 @@ from lbrytools.blobs_act import redownload_blobs
 from lbrytools.blobs_move import blobs_move
 from lbrytools.blobs_move import blobs_move_all
 
+from lbrytools.claims import claims_bids
+
 # Use of the modules so that code checkers don't complain (flake8)
 True if z_defaults else False
 
@@ -158,3 +160,5 @@ True if redownload_blobs else False
 
 True if blobs_move else False
 True if blobs_move_all else False
+
+True if claims_bids else False

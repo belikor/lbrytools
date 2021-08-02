@@ -87,6 +87,7 @@ lbryt.analyze_channel(...)
 lbryt.print_channel_analysis(...)
 lbryt.blobs_move(...)
 lbryt.blobs_move_all(...)
+lbryt.claims_bids(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation

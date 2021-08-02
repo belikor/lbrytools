@@ -37,6 +37,7 @@ from lbrytools import analyze_channel
 from lbrytools import print_channel_analysis
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
+from lbrytools import claims_bids
 ```
 
 # Download
@@ -718,6 +719,45 @@ g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, channel="@ragreynolds")
 g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, channel="@ragreynolds", start=5, end=10)
 ```
 
+# Claims
+
+A claim is any object that is recorded in the blockchain,
+and that has some LBC supporting its `'name'`.
+This is typically channels (the highest bid controls the default `'name'`),
+streams (video and audio files, documents), but also reposts, playlists,
+and other types.
+We may want to see information on our claims, and how many other claims
+are competing for the same `'name'`.
+
+In most cases we want to omit the claims that are "controlling",
+meaning that we only want to see claims that don't have the highest bid.
+This is so that we know which of our claims we should support with more LBC
+if we want them to appear higher in search results.
+In most cases we should also omit our reposts because we don't need reposts
+to have a higher bid than the original claim.
+```py
+s = lbryt.claims_bids(skip_max=True, skip_repost=True)
+```
+
+Since LBRY allows two or more channels to have the same base `'name'`,
+we can inspect only our channels to see if they are unique,
+or if they are outbid by others.
+```py
+s = lbryt.claims_bids(skip_max=True, channels_only=True)
+```
+
+Due to `lbry-sdk` [issue #3381](https://github.com/lbryio/lbry-sdk/issues/3381),
+at the moment only 50 competing claims having the same `'name'` can be compared.
+
+Print the information on the claims to a file.
+Optionally add the date to the name of the file.
+If `compact=True`, the information from a claim will be printed
+in a single line.
+```py
+s = lbryt.claims_bids(file="claims.txt", fdate=True)
+s = lbryt.claims_bids(file="claims.txt", fdate=True, compact=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -751,4 +791,5 @@ lbryt.analyze_channel(..., server=server)
 lbryt.print_channel_analysis(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
+lbryt.claims_bids(..., server=server)
 ```
