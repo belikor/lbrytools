@@ -38,6 +38,7 @@ from lbrytools import print_channel_analysis
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 from lbrytools import claims_bids
+from lbrytools import channel_subs
 ```
 
 # Download
@@ -758,6 +759,25 @@ s = lbryt.claims_bids(file="claims.txt", fdate=True)
 s = lbryt.claims_bids(file="claims.txt", fdate=True, compact=True)
 ```
 
+# Channel subscriptions
+
+Display the channels to which we are subscribed,
+and whether we receive notifications from them.
+```py
+q = lbryt.channel_subs(notifications=True)
+```
+
+By default, the command searches the `"shared"` database,
+but it can also search the `"local"` database.
+```py
+q = lbryt.channel_subs(shared=False)
+```
+
+The information can be printed to a file as well.
+```py
+q = lbryt.channel_subs(file="subs.txt", fdate=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -792,4 +812,5 @@ lbryt.print_channel_analysis(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 lbryt.claims_bids(..., server=server)
+lbryt.channel_subs(..., server=server)
 ```

@@ -108,6 +108,8 @@ from lbrytools.blobs_move import blobs_move_all
 
 from lbrytools.claims import claims_bids
 
+from lbrytools.channels import channel_subs
+
 # Use of the modules so that code checkers don't complain (flake8)
 True if z_defaults else False
 
@@ -162,3 +164,6 @@ True if blobs_move else False
 True if blobs_move_all else False
 
 True if claims_bids else False
+
+True if channel_subs else False
+
