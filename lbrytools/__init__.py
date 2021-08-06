@@ -110,6 +110,8 @@ from lbrytools.claims import claims_bids
 
 from lbrytools.channels import channel_subs
 
+from lbrytools.accounts import list_accounts
+
 # Use of the modules so that code checkers don't complain (flake8)
 True if z_defaults else False
 
@@ -167,3 +169,4 @@ True if claims_bids else False
 
 True if channel_subs else False
 
+True if list_accounts else False

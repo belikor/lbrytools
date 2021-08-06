@@ -39,6 +39,7 @@ from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 from lbrytools import claims_bids
 from lbrytools import channel_subs
+from lbrytools import list_accounts
 ```
 
 # Download
@@ -778,6 +779,25 @@ The information can be printed to a file as well.
 q = lbryt.channel_subs(file="subs.txt", fdate=True)
 ```
 
+# Accounts
+
+List the accounts in the current wallet,
+along with the balance in each account.
+```py
+a = lbryt.list_accounts()
+```
+
+It can also show the individual addresses that have been
+used for each account.
+```py
+a = lbryt.list_accounts(addresses=True)
+```
+
+The information can be printed to a file as well.
+```py
+a = lbryt.list_accounts(file="accounts.txt", fdate=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -813,4 +833,5 @@ lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 lbryt.claims_bids(..., server=server)
 lbryt.channel_subs(..., server=server)
+lbryt.list_accounts(..., server=server)
 ```
