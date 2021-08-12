@@ -90,6 +90,7 @@ lbryt.blobs_move_all(...)
 lbryt.claims_bids(...)
 lbryt.channel_subs(...)
 lbryt.list_accounts(...)
+lbryt.list_playlists(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation

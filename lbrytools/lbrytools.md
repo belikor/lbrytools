@@ -40,6 +40,7 @@ from lbrytools import blobs_move_all
 from lbrytools import claims_bids
 from lbrytools import channel_subs
 from lbrytools import list_accounts
+from lbrytools import list_playlists
 ```
 
 # Download
@@ -798,6 +799,24 @@ The information can be printed to a file as well.
 a = lbryt.list_accounts(file="accounts.txt", fdate=True)
 ```
 
+# Playlists
+
+List the playlists saved in the current preferences.
+```py
+v = lbryt.list_playlists()
+```
+
+By default, the command searches the `"shared"` database,
+but it can also search the `"local"` database.
+```py
+v = lbryt.list_playlists(shared=False)
+```
+
+The information can be printed to a file as well.
+```py
+v = lbryt.list_playlists(file="playlists.txt", fdate=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -834,4 +853,5 @@ lbryt.blobs_move_all(..., server=server)
 lbryt.claims_bids(..., server=server)
 lbryt.channel_subs(..., server=server)
 lbryt.list_accounts(..., server=server)
+lbryt.list_playlists(..., server=server)
 ```
