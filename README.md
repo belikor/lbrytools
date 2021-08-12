@@ -112,11 +112,11 @@ executed directly, or through the Python interpreter.
 python zeedit.py [config.py]
 ```
 
-A configuration file should be passed as the first argument, so it is possible
-to have different configurations to download content from different channels.
+A configuration file should be passed as the first argument.
 ```
 python zeedit.py funny_config.py
 python zeedit.py tech_channels_config.py
+python zeedit.py cooking_conf.py
 ```
 
 The configuration file specifies the channels to download content from,
