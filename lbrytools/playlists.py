@@ -85,12 +85,34 @@ def list_playlists(shared=True,
     print(80 * "-")
     print(f"Synchronization: {sync}")
 
-    pl_builtin_local = r_local["value"]["builtinCollections"]
-    pl_unpub_local = r_local["value"]["unpublishedCollections"]
+    builtin = False
+    if "builtinCollections" in r_local["value"]:
+        pl_builtin_local = r_local["value"]["builtinCollections"]
+        builtin = True
 
-    if "shared" in result:
+    unpublished = False
+    if "unpublishedCollections" in r_local["value"]:
+        pl_unpub_local = r_local["value"]["unpublishedCollections"]
+        unpublished = True
+
+    if "shared" in result and "builtinCollections" in r_shared["value"]:
         pl_builtin_shared = r_shared["value"]["builtinCollections"]
+        builtin = True
+
+    if "shared" in result and "unpublishedCollections" in r_shared["value"]:
         pl_unpub_shared = r_shared["value"]["unpublishedCollections"]
+        unpublished = True
+
+    if not builtin or not unpublished:
+        if shared:
+            print(f"Database: shared")
+        else:
+            print(f"Database: local")
+
+        print(f"Builtin collection: {builtin}")
+        print(f"Unpublished collection: {unpublished}")
+        print("No playlists. Exit.")
+        return False
 
     if shared and "shared" in result:
         print(f"Database: shared")
