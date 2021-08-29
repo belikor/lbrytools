@@ -95,8 +95,11 @@ def print_info_pre_get(item=None, offline=False):
         _type = item["mime_type"]
     else:
         _type = item["type"]
+
     if "stream_type" in item["value"]:
         _type = item["value"]["stream_type"]
+
+    _vtype = item["value_type"]
 
     length_s = 0
     rem_s = 0
@@ -117,8 +120,9 @@ def print_info_pre_get(item=None, offline=False):
 
     _info = ["claim_id: " + item["claim_id"],
              "release_time: " + _time,
-             "title: " + _title,
+             "value_type: " + _vtype,
              "stream_type: " + _type,
+             "title: " + _title,
              "size: {:.4f} MB".format(_size),
              "duration: {} min {} s".format(rem_min, rem_s)]
     info.extend(_info)

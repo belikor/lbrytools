@@ -108,6 +108,7 @@ def lbrynet_get(uri=None, ddir=None,
 
 
 def download_single(uri=None, cid=None, name=None, invalid=False,
+                    collection=False, max_claims=2, reverse_collection=False,
                     ddir=None, own_dir=True,
                     server="http://localhost:5279"):
     """Download a single item and place it in the download directory.
@@ -157,6 +158,19 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
 
         This has no effect on `uri`, so if this input is used,
         it will always try to resolve it from the online database.
+    collection: bool, optional
+        It defaults to `False`, in which case it won't download items
+        in a collection.
+        If it is `True` it will expand the collection and try to download
+        every single item.
+    max_claims: int, optional
+        It defaults to 2. It specifies the maximum number of items to download
+        in a collection.
+    reverse_collection: bool, optional
+        It defaults to `False`, in which case the collection
+        will be downloaded in the same order it is defined.
+        If it is `True` it will reverse the items in the collection
+        so the newest ones will be downloaded first.
     ddir: str, optional
         It defaults to `$HOME`.
         The path to the download directory.
@@ -237,6 +251,36 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
         ddir = subdir
 
     prnt.print_info_pre_get(item, offline=False)
+
+    if collection and item["value_type"] in "collection":
+        info_get = []
+        claims = item["value"]["claims"]
+        n_claims = len(claims)
+        if reverse_collection:
+            claims.reverse()
+
+        print()
+        print("Collection")
+        print(80 * "-")
+        for num, cid in enumerate(claims, start=1):
+            s = srch.search_item(cid=cid, offline=False,
+                                 server=server)
+            if num > max_claims:
+                break
+
+            print(f"Claim {num}/{n_claims}")
+            prnt.print_info_pre_get(s, offline=False)
+            info = lbrynet_get(uri=s["canonical_url"], ddir=ddir,
+                               server=server)
+            info_get.append(info)
+
+            if info:
+                prnt.print_info_post_get(info)
+            else:
+                print(">>> Empty information from `lbrynet get`")
+            print()
+        return info_get
+
     info_get = lbrynet_get(uri=uri, ddir=ddir,
                            server=server)
 

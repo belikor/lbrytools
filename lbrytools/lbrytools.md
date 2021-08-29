@@ -143,6 +143,32 @@ always from the first one in the list.
 c = lbryt.ch_download_latest_multi(channels=channels, ddir=ddir, shuffle=True)
 ```
 
+# Downloading collections
+
+A "collection" or playlist is a special type of claim that contains
+a list of one or more claim IDs.
+We cannot download the collection directly but we can parse the list of IDs,
+and download these individually.
+```py
+c = lbryt.download_single("collection-music", collection=True, ddir=ddir)
+```
+
+If `collection=True` but the input URI or claim ID is not a collection
+it will be treated like a regular claim.
+
+A collection can have an arbitrary number of items, so to limit
+the number of claims to download we can use `max_claims`,
+which is 2 by default.
+
+To reverse the order of the claims in the collection
+use `reverse_collection=True`. This can be used to get the newest
+items in the collection.
+```py
+c = lbryt.download_single("collection-music", collection=True,
+                          max_claims=10, reverse_collection=True,
+                          ddir=ddir)
+```
+
 # Printing
 
 Print a list of claims that have been downloaded partially or fully
