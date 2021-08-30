@@ -54,9 +54,9 @@ Download a single item from the LBRY network by URI (`'canonical_url'`),
 `'claim_id'`, or `'claim_name'` (portion of the URI).
 Place the file in a subdirectory in the download directory.
 ```py
-d = lbryt.download_single(uri="RoboCopOS#c", ddir=ddir, own_dir=True)
-d = lbryt.download_single(cid="c8e8bb0029f6cb7d1b4d287b6e040339aa8b7f3e", ddir=ddir, own_dir=True)
-d = lbryt.download_single(name="RoboCopOS", ddir=ddir, own_dir=True)
+d = lbryt.download_single(uri="dealing-with-pollution-in-a-free-market#3", ddir=ddir, own_dir=True)
+d = lbryt.download_single(cid="37c6878fbd35b153c4f7807dfb74d45abf3dbee3", ddir=ddir, own_dir=True)
+d = lbryt.download_single(name="dealing-with-pollution-in-a-free-market", ddir=ddir, own_dir=True)
 ```
 
 # Download invalid claims
@@ -105,7 +105,7 @@ If the number is missing it will use the default value (2).
 ```py
 channels = [
     ["@BrodieRobertson#5", 2],
-#    ["@Lunduke:e", 4],
+#    ["@rossmanngroup:a", 4],
     ["@Odysee#8", 2],
 #    ["@MoneroTalk:8", 1],
     ["@samtime#1", 3],
@@ -129,7 +129,7 @@ For example, download the latest claim for each channel in the list.
 ```py
 channels = [
     "BrodieRobertson",
-    "Lunduke",
+    "rossmanngroup",
     "MoneroTalk"
 ]
 
@@ -386,7 +386,7 @@ Choose to delete the media file (mp4, mp3, mkv, etc.), the blobs, or both.
 ```py
 s = lbryt.delete_single(cid="099ace3145fba6bef6b529bcf03efcc0eb8ebfc9", what="media")
 s = lbryt.delete_single(uri="if-samsung-made-a-macbook", what="blobs")
-s = lbryt.delete_single(uri="RoboCopOS", what="both")
+s = lbryt.delete_single(uri="ftc-rulemaking-testimony-from-louis:9", what="both")
 ```
 
 As long as the blobs are present, the content can be seeded to the network,
@@ -416,7 +416,7 @@ Choose to delete the media files, the blobs, or both.
 This is useful to only seed the newest videos from a particular channel.
 ```py
 s = lbryt.ch_cleanup(channel="@gothix", number=5, what="both")
-s = lbryt.ch_cleanup(channel="@emmyhucker", number=10, what="media")
+s = lbryt.ch_cleanup(channel="@classical", number=10, what="media")
 s = lbryt.ch_cleanup(channel="@samtime", number=4, what="blobs")
 ```
 
@@ -448,7 +448,7 @@ channels = [
     "AlisonMorrow",
     "ThePholosopher",
     "ChrissieMayr",
-    "emmyhucker"
+    "Karlyn"
 ]
 
 c = lbryt.ch_cleanup_multi(channels=channels, number=4)
@@ -720,7 +720,7 @@ You can specify whether to copy the blobs (default) or move the blobs.
 Moving the blobs will free space in `blobfiles`.
 ```py
 f = lbryt.blobs_move(uri="can-you-turn-a-samsung-into-a-blackberry:0", move_dir=mdir, blobfiles=bdir)
-f = lbryt.blobs_move(cid="5bc30d93445070581fc10e44e4e96e6d23f0ab87", move_dir=mdir, blobfiles=bdir, action="copy")
+f = lbryt.blobs_move(cid="70dfefa510ca6eee7023a2a927e34d385b5a18bd", move_dir=mdir, blobfiles=bdir, action="copy")
 f = lbryt.blobs_move(name="new-stimulus-approved-only-with-crypto", move_dir=mdir, blobfiles=bdir, action="move")
 ```
 
