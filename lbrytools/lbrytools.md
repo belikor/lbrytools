@@ -261,13 +261,17 @@ p = lbryt.print_summary(invalid=True, channel="mises")
 
 Print a list of all unique channels that published the downloaded claims
 that we have.
+Specify the separator, or it will use a semicolon by default.
 ```py
 o = lbryt.print_channels()
+o = lbryt.print_channels(sep=";")
 ```
 
 Since LBRY allows channels to have the same "base" name, by default
 channels are printed in their "full" form (`@MyChannel#3`, `@MyChannel#c6`)
 in order to avoid ambiguity.
+Certain claims were published anonymously, so for these the channel
+is `@_Unknown_`.
 Two parameters control whether to use the full name or the canonical name.
 ```py
 o = lbryt.print_channels(full=False)
@@ -276,9 +280,9 @@ o = lbryt.print_channels(canonical=True)
 
 By default, channel names are printed in three columns for clarity.
 Use the `simple` parameter to print all channels in a single string,
-each channel separated from another by a comma.
+each channel separated from another by a `sep` symbol.
 ```py
-o = lbryt.print_channels(simple=True)
+o = lbryt.print_channels(simple=True, sep=",")
 ```
 
 By default, each claim is resolved online in order to get the channel

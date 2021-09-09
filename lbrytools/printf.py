@@ -178,7 +178,7 @@ def print_channels(full=True, canonical=False,
                    simple=False, invalid=False, offline=False,
                    start=1, end=0,
                    print_msg=True,
-                   file=None, fdate=False,
+                   file=None, fdate=False, pre_num=True, sep=";",
                    server="http://localhost:5279"):
     """Print a unique list of channels by inspecting all downloaded claims.
 
@@ -205,7 +205,7 @@ def print_channels(full=True, canonical=False,
         It defaults to `False`, in which case the channels are printed
         in three columns.
         If it is `True` the channels will be printed as a single,
-        long string, each channel separated from another by a comma.
+        long string, each channel separated from another by a `sep` symbol.
     invalid: bool, optional
         It defaults to `False`, in which case it will try to resolve
         the list of claims from the online database (blockchain),
@@ -244,6 +244,14 @@ def print_channels(full=True, canonical=False,
     fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    pre_num: bool, optional
+        It defaults to `True`, in which case it will print the index
+        of the channel at the beginning of the line; this way it is easy
+        to count the channels.
+        If it is `False` it won't show a number, just the channels.
+    sep: str, optional
+        It defaults to `;`. It is the separator for the fields.
+        Since the claim name accepts commas, a semicolon is chosen by default.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -290,8 +298,6 @@ def print_channels(full=True, canonical=False,
                                        server=server)
         if channel:
             all_channels.append(channel)
-        else:
-            print()
 
     if not all_channels:
         print("No unique channels could be determined.")
@@ -337,7 +343,7 @@ def print_channels(full=True, canonical=False,
             print(f"Cannot open file for writing; {err}")
 
     if simple:
-        out = ", ".join(all_channels)
+        out = f"{sep} ".join(all_channels)
 
         if file and fd:
             print(out, file=fd)
@@ -378,10 +384,13 @@ def print_channels(full=True, canonical=False,
     # Print rows that are full, only if the number of rows is more than 1
     if rows > 1:
         for u in range(int(rows)-1):
-            c1 = all_channels[index + 0] + ","
-            c2 = all_channels[index + 1] + ","
-            c3 = all_channels[index + 2] + ","
-            out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
+            c1 = all_channels[index + 0] + f"{sep}"
+            c2 = all_channels[index + 1] + f"{sep}"
+            c3 = all_channels[index + 2] + f"{sep}"
+            if pre_num:
+                out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
+            else:
+                out = f"{c1:33s} {c2:33s} {c3:33s}"
             if file and fd:
                 print(out, file=fd)
             else:
@@ -392,16 +401,25 @@ def print_channels(full=True, canonical=False,
     # Print the last row, which may be the only row if row=1
     if res == 1:
         c1 = all_channels[index + 0]
-        out = f"{row:3d}: {c1:33s}"
+        if pre_num:
+            out = f"{row:3d}: {c1:33s}"
+        else:
+            out = f"{c1:33s}"
     if res == 2:
-        c1 = all_channels[index + 0] + ","
+        c1 = all_channels[index + 0] + f"{sep}"
         c2 = all_channels[index + 1]
-        out = f"{row:3d}: {c1:33s} {c2:33s}"
+        if pre_num:
+            out = f"{row:3d}: {c1:33s} {c2:33s}"
+        else:
+            out = f"{c1:33s} {c2:33s}"
     if res == 0:
-        c1 = all_channels[index + 0] + ","
-        c2 = all_channels[index + 1] + ","
+        c1 = all_channels[index + 0] + f"{sep}"
+        c2 = all_channels[index + 1] + f"{sep}"
         c3 = all_channels[index + 2]
-        out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
+        if pre_num:
+            out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
+        else:
+            out = f"{c1:33s} {c2:33s} {c3:33s}"
 
     if file and fd:
         print(out, file=fd)
