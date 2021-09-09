@@ -206,10 +206,12 @@ if the claim is currently being downloaded a partial media file may be present.
 Various options control the type of information that is printed,
 including title, type, download path, claim id, number of blobs,
 name of channel, and name of claim.
+We may specify the separator between the data fields; since a claim name
+can have a comma as part of the name, a semicolon `;` is used by default.
 ```py
 p = lbryt.print_summary(title=True, typ=False, path=False,
                         cid=True, blobs=True, ch=False,
-                        name=True)
+                        name=True, sep=";")
 ```
 
 We can also restrict printing only a range of items, or only the claims
@@ -235,7 +237,7 @@ However, this is slow because it has to resolve the item online first.
 The second case uses the locally stored database to get the channel name,
 and thus it is very fast. However, if that channel name has not been properly
 resolved, it may not return an actual name, in which case it will just
-print `_None_`.
+print `_Unknown_`.
 
 # Printing invalid claims
 

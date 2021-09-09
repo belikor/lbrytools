@@ -36,7 +36,7 @@ def print_summary(show="all",
                   title=False, typ=False, path=False,
                   cid=True, blobs=True, ch=False, ch_online=True, name=True,
                   start=1, end=0, channel=None, invalid=False,
-                  file=None, fdate=False,
+                  file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
     """Print a summary of the items downloaded from the LBRY network.
 
@@ -124,6 +124,10 @@ def print_summary(show="all",
     fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -139,7 +143,7 @@ def print_summary(show="all",
     """
     if invalid:
         items = sort.sort_invalid(server=server)
-        if len(items) < 1:
+        if not items or len(items) < 1:
             if file:
                 print("No file written.")
             return False
@@ -150,11 +154,11 @@ def print_summary(show="all",
                                   cid=cid, blobs=blobs, ch=ch,
                                   ch_online=False, name=name,
                                   start=start, end=end, channel=channel,
-                                  file=file, fdate=fdate,
+                                  file=file, fdate=fdate, sep=sep,
                                   server=server)
     else:
         items = sort.sort_items(server=server)
-        if len(items) < 1:
+        if not items or len(items) < 1:
             if file:
                 print("No file written.")
             return False
@@ -165,7 +169,7 @@ def print_summary(show="all",
                                   cid=cid, blobs=blobs, ch=ch,
                                   ch_online=ch_online, name=name,
                                   start=start, end=end, channel=channel,
-                                  file=file, fdate=fdate,
+                                  file=file, fdate=fdate, sep=sep,
                                   server=server)
     return status
 

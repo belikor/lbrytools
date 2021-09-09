@@ -260,7 +260,7 @@ def print_items(items=None, show="all",
                 cid=True, blobs=True, ch=False,
                 ch_online=True, name=True,
                 start=1, end=0, channel=None,
-                file=None, fdate=False,
+                file=None, fdate=False, sep=";",
                 server="http://localhost:5279"):
     """Print information on each claim in the given list of claims.
 
@@ -339,6 +339,10 @@ def print_items(items=None, show="all",
     fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -360,7 +364,7 @@ def print_items(items=None, show="all",
               f"title={title}, typ={typ}, path={path}, "
               f"cid={cid}, blobs={blobs}, ch={ch}, ch_online={ch_online}, "
               f"name={name}, start={start}, end={end}, "
-              f"channel={channel}, file={file}, fdate={fdate}")
+              f"channel={channel}, file={file}, fdate={fdate}, sep={sep}")
         if file:
             print("No file written.")
         return False
@@ -430,24 +434,18 @@ def print_items(items=None, show="all",
         _time = int(item["metadata"]["release_time"])
         _time = time.localtime(_time)
         _time = time.strftime("%Y%m%d_%H:%M:%S%z", _time)
+
         _title = item["metadata"]["title"]
         _claim_id = item["claim_id"]
         _claim_name = item["claim_name"]
         _type = item["metadata"]["stream_type"]
 
-        out = "{:4d}/{:4d}, {}, ".format(it, n_items, _time)
-
-        if title:
-            out += f"{_title}, "
-        if typ:
-            out += f"{_type}, "
-        if path:
-            out += f"{_path}, "
+        out = "{:4d}/{:4d}".format(it, n_items) + sep + f" {_time}" + f"{sep} "
 
         if cid:
-            out += f"{_claim_id}, "
+            out += f"{_claim_id}" + f"{sep} "
         if blobs:
-            out += "{:3d}/{:3d}, ".format(_blobs, _blobs_in_stream)
+            out += "{:3d}/{:3d}".format(_blobs, _blobs_in_stream) + f"{sep} "
         if ch:
             if ch_online:
                 # Searching online is slower but it gets the full channel name
@@ -464,23 +462,32 @@ def print_items(items=None, show="all",
                 # We don't want to skip this item so we force a channel name.
                 _channel = item["channel_name"]
                 if not _channel:
-                    _channel = "_None_"
+                    _channel = "_Unknown_"
 
-            out += f"{_channel}, "
+            out += f"{_channel}" + f"{sep} "
 
             # Skip if the item is not published by the specified channel
             if channel and channel not in _channel:
                 continue
 
         if name:
-            out += f"{_claim_name}, "
+            out += f'"{_claim_name}"' + f"{sep} "
+
+        if title:
+            out += f'"{_title}"' + f"{sep} "
+        if typ:
+            out += f"{_type}" + f"{sep} "
+        if path:
+            out += f'"{_path}"' + f"{sep} "
 
         if _path:
             out += "media"
         else:
-            out += "missing"
+            out += "no-media"
 
         out_list.append(out)
+
+    print(f"Number of shown items: {len(out_list)}")
 
     if file and fd:
         for line in out_list:
