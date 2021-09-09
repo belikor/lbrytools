@@ -337,7 +337,7 @@ def search_item(uri=None, cid=None, name=None, offline=False,
     return item
 
 
-def parse_claim_file(file=None, start=1, end=0):
+def parse_claim_file(file=None, sep=";", start=1, end=0):
     """Parse a CSV file containing claim_ids.
 
     Parameters
@@ -348,6 +348,10 @@ def parse_claim_file(file=None, start=1, end=0):
         value in a row must be a 40 character `'claim_id'`.
 
         This file can be produced by `print_summary(file='summary.txt')`
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the read file. Since the claim name
+        can have commas, a semicolon `;` is used by default.
     start: int, optional
         It defaults to 1.
         Operate on the item starting from this index in `file`.
@@ -372,9 +376,9 @@ def parse_claim_file(file=None, start=1, end=0):
               "with claim ids")
         print(f"file={file}")
         print("Example file:")
-        print("1/435, 70dfefa510ca6eee7023a2a927e34d385b5a18bd,  5/ 5")
-        print("2/435, 0298c56e0593b140c231229a065cc1647d4fedae, 24/24")
-        print("3/435, d30002fec25bff804f144655b3fe4495e00439de, 15/15")
+        print("  1/435; 70dfefa510ca6eee7023a2a927e34d385b5a18bd;  5/ 5")
+        print("  2/435; 0298c56e0593b140c231229a065cc1647d4fedae; 24/24")
+        print("  3/435; d30002fec25bff804f144655b3fe4495e00439de; 15/15")
         return False
 
     with open(file, "r") as fd:
@@ -388,7 +392,7 @@ def parse_claim_file(file=None, start=1, end=0):
         return False
 
     print(80 * "-")
-    print(f"Parsing file with claims, {file}")
+    print(f"Parsing file with claims, '{file}'")
 
     for it, line in enumerate(lines, start=1):
         # Skip lines with only whitespace, and starting with # (comments)
@@ -401,10 +405,10 @@ def parse_claim_file(file=None, start=1, end=0):
         if end != 0 and it > end:
             break
 
-        out = "{:4d}/{:4d}, ".format(it, n_lines)
+        out = "{:4d}/{:4d}".format(it, n_lines) + f"{sep} "
 
-        # Split by using the comma, and remove whitespaces
-        parts = line.split(",")
+        # Split by using the separator, and remove whitespaces
+        parts = line.split(sep)
         clean_parts = [i.strip() for i in parts]
 
         found = True

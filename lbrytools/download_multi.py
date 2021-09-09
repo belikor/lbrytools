@@ -353,7 +353,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, shuffle=False,
 
 
 def download_claims(ddir=None, own_dir=True,
-                    start=1, end=0, file=None, invalid=False,
+                    start=1, end=0, file=None, sep=";", invalid=False,
                     server="http://localhost:5279"):
     """Download claims from a file, or redownload the ones already present.
 
@@ -378,12 +378,17 @@ def download_claims(ddir=None, own_dir=True,
         It defaults to `None`.
         The file to read claims from. It is a comma-separated value (CSV)
         list of claims, in which each row represents a claim,
-        and one element is the `'claim_id'` which can be used
-        with `download_single` to get that claim.
+        and one data field is the `'claim_id'` which can be used
+        with `download_single` to get that claim. The value of `sep`
+        indicates the separator between the fields.
 
         If `file=None` it will re-download the claims obtained
         from `sort_items` which should already be present
         in the system fully or partially.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the read file. Since the claim name
+        can have commas, a semicolon `;` is used by default.
     invalid: bool, optional
         It defaults to `False`, in which case it will assume
         the processed claims are still valid in the online database.
@@ -433,7 +438,7 @@ def download_claims(ddir=None, own_dir=True,
             return False
 
         print("Download from existing file")
-        sorted_items = srch.parse_claim_file(file=file)
+        sorted_items = srch.parse_claim_file(file=file, sep=sep)
         print()
 
         if not sorted_items:
