@@ -59,6 +59,14 @@ d = lbryt.download_single(cid="37c6878fbd35b153c4f7807dfb74d45abf3dbee3", ddir=d
 d = lbryt.download_single(name="dealing-with-pollution-in-a-free-market", ddir=ddir, own_dir=True)
 ```
 
+By default all blobs will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+will be placed in the download directory.
+In certain cases, we only want to have the first blob (`sd_hash`);
+in this case we can use `save_file=False`.
+```py
+d = lbryt.download_single("murray-sabrin's-new-book-on-escaping", ddir=ddir, save_file=False)
+```
+
 # Download invalid claims
 
 Invalid claims are those that were downloaded at some point but which now

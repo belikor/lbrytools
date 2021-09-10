@@ -32,7 +32,7 @@ import lbrytools.search_ch as srch_ch
 import lbrytools.print as prnt
 
 
-def lbrynet_get(uri=None, ddir=None,
+def lbrynet_get(uri=None, ddir=None, save_file=True,
                 server="http://localhost:5279"):
     """Run the lbrynet get command and return the information that it shows.
 
@@ -50,6 +50,13 @@ def lbrynet_get(uri=None, ddir=None,
     ddir: str, optional
         It defaults to `$HOME`.
         The path to the download directory.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -82,7 +89,10 @@ def lbrynet_get(uri=None, ddir=None,
     get_cmd = ["lbrynet",
                "get",
                uri,
-               "--download_directory=" + "'" + ddir + "'"]
+               "--download_directory=" + "'" + ddir + "'",
+               "--save_file=False"]
+    if save_file:
+        get_cmd[4] = "--save_file=True"
 
     # This is just to print the command that can be used on the terminal.
     # The URI is surrounded by single or double quotes.
@@ -95,7 +105,10 @@ def lbrynet_get(uri=None, ddir=None,
 
     msg = {"method": "get",
            "params": {"uri": uri,
-                      "download_directory": ddir}}
+                      "download_directory": ddir,
+                      "save_file": False}}
+    if save_file:
+        msg["params"]["save_file"] = True
 
     output = requests.post(server, json=msg).json()
     if "error" in output:
@@ -109,7 +122,7 @@ def lbrynet_get(uri=None, ddir=None,
 
 def download_single(uri=None, cid=None, name=None, invalid=False,
                     collection=False, max_claims=2, reverse_collection=False,
-                    ddir=None, own_dir=True,
+                    ddir=None, own_dir=True, save_file=True,
                     server="http://localhost:5279"):
     """Download a single item and place it in the download directory.
 
@@ -177,6 +190,13 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -271,6 +291,7 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
             print(f"Claim {num}/{n_claims}")
             prnt.print_info_pre_get(s, offline=False)
             info = lbrynet_get(uri=s["canonical_url"], ddir=ddir,
+                               save_file=save_file,
                                server=server)
             info_get.append(info)
 
@@ -281,7 +302,7 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
             print()
         return info_get
 
-    info_get = lbrynet_get(uri=uri, ddir=ddir,
+    info_get = lbrynet_get(uri=uri, ddir=ddir, save_file=save_file,
                            server=server)
 
     if not info_get:
