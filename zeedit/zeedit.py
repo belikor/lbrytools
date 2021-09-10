@@ -110,7 +110,7 @@ if __name__ == "__main__":
                                           number=cfg.number,
                                           shuffle=cfg.shuffle,
                                           server=cfg.server)
-    lbryt.print_multi_list(info)
+    lbryt.print_multi_list(info, sep=cfg.sm_sep)
 
     # For a seeding only system, the media files (mp4, mp3, mkv, etc.)
     # will be removed and only the binary blobs will remain.

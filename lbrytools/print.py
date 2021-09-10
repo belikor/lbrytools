@@ -183,7 +183,7 @@ def print_info_post_get(info_get=None):
     return True
 
 
-def print_multi_list(list_ch_info=None):
+def print_multi_list(list_ch_info=None, sep=";"):
     """Print the summary of downloaded claims from multiple channels.
 
     This is meant to be used with the returned list from
@@ -199,6 +199,10 @@ def print_multi_list(list_ch_info=None):
 
         If the download fails, then the corresponding item in the list
         may be `False`, in which case no claim information is printed.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
 
     Returns
     -------
@@ -232,26 +236,30 @@ def print_multi_list(list_ch_info=None):
     n_items = len(flat_list)
 
     print("Summary of downloads")
+    out_list = []
 
     for it, item in enumerate(flat_list, start=1):
-        out = "{:2d}/{:2d}, ".format(it, n_items)
+        out = "{:2d}/{:2d}".format(it, n_items) + f"{sep} "
 
         if not item:
-            print(out + "empty item. Failure establishing server connection?")
+            out += "empty item. Failure establishing server connection?"
+            out_list.append(out)
             continue
 
         if "claim_id" in item:
-            out += "{}, {:3d}/{:3d}, ".format(item["claim_id"],
-                                              item["blobs_completed"],
-                                              item["blobs_in_stream"])
-            out += "{}, {}".format(item["channel_name"],
-                                   item["claim_name"])
-            print(out)
+            out += "{}".format(item["claim_id"]) + f"{sep} "
+            out += "{:3d}/{:3d}".format(item["blobs_completed"],
+                                        item["blobs_in_stream"]) + f"{sep} "
+            out += '"{}"'.format(item["channel_name"])
+            out += f"{sep} "
+            out += '"{}"'.format(item["claim_name"])
+            out_list.append(out)
         elif "error" in item:
-            print(out + "{}".format(item["error"]))
+            out_list.append(out + '"{}"'.format(item["error"]))
         else:
-            print(out + "not downloaded")
+            out_list.append(out + "not downloaded")
 
+    print("\n".join(out_list))
     return True
 
 
