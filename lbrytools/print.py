@@ -95,11 +95,13 @@ def print_info_pre_get(item=None, offline=False):
         _type = item["mime_type"]
     else:
         _type = item["type"]
-
     if "stream_type" in item["value"]:
         _type = item["value"]["stream_type"]
 
-    _vtype = item["value_type"]
+    if offline:
+        _vtype = "stream"
+    else:
+        _vtype = item["value_type"]
 
     length_s = 0
     rem_s = 0
