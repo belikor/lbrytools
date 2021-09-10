@@ -132,6 +132,9 @@ sm_summary = 1
 # Path and filename of the summary.
 sm_file = "/home/user/Documents/lbry_summary.txt"
 
+# Separator used in the summary to separate the data fields.
+sm_sep = ";"
+
 # Add the day and time to the summary filename.
 sm_fdate = 1
 

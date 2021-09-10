@@ -125,6 +125,12 @@ def z_defaults(cfg):
     else:
         print(f"sm_file: '{cfg.sm_file}'")
 
+    if "sm_sep" not in config:
+        cfg.sm_sep = ";"
+        print(f"sm_sep: '{cfg.sm_sep}' (use default)")
+    else:
+        print(f"sm_sep: '{cfg.sm_sep}'")
+
     if "sm_fdate" not in config:
         cfg.sm_fdate = True
         print(f"sm_fdate: {cfg.sm_fdate} (use default)")
