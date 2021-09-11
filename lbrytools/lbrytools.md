@@ -67,6 +67,10 @@ in this case we can use `save_file=False`.
 d = lbryt.download_single("murray-sabrin's-new-book-on-escaping", ddir=ddir, save_file=False)
 ```
 
+This argument, `save_file`, is `True` by default, and is also used
+by other functions that download multiple claims such as `ch_download_latest`,
+`redownload_latest`, `download_claims`, and `ch_download_latest_multi`.
+
 # Download invalid claims
 
 Invalid claims are those that were downloaded at some point but which now

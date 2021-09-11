@@ -117,7 +117,7 @@ def ch_download_latest(channel=None, number=2,
 
 
 def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
-                             number=None, shuffle=True,
+                             save_file=True, number=None, shuffle=True,
                              server="http://localhost:5279"):
     """Download the latest claims published by a list of a channels.
 
@@ -140,6 +140,13 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     number: int, optional
         It defaults to `None`.
         If this is present, it will override the individual
@@ -271,6 +278,7 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         print(f"Channel {it}/{n_channels}, {channel}")
         ch_info = ch_download_latest(channel=channel, number=_number,
                                      ddir=ddir, own_dir=own_dir,
+                                     save_file=save_file,
                                      server=server)
 
         list_ch_info.append(ch_info)
