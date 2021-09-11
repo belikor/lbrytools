@@ -34,7 +34,7 @@ import lbrytools.download as dld
 
 
 def ch_download_latest(channel=None, number=2,
-                       ddir=None, own_dir=True,
+                       ddir=None, own_dir=True, save_file=True,
                        server="http://localhost:5279"):
     """Download the latest claims published by a specific channel.
 
@@ -56,6 +56,13 @@ def ch_download_latest(channel=None, number=2,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -101,6 +108,7 @@ def ch_download_latest(channel=None, number=2,
         print(f"Claim {it}/{n_items}")
         info_get = dld.download_single(cid=item["claim_id"],
                                        ddir=ddir, own_dir=own_dir,
+                                       save_file=save_file,
                                        server=server)
         list_info_get.append(info_get)
         print()
@@ -270,7 +278,8 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
     return list_ch_info
 
 
-def redownload_latest(number=2, ddir=None, own_dir=True, shuffle=False,
+def redownload_latest(number=2, ddir=None, own_dir=True, save_file=True,
+                      shuffle=False,
                       server="http://localhost:5279"):
     """Attempt to redownload the latest claims that were already downloaded.
 
@@ -297,6 +306,13 @@ def redownload_latest(number=2, ddir=None, own_dir=True, shuffle=False,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     shuffle: bool, optional
         It defaults to `False`.
         If it is `True` it will shuffle the list of claims
@@ -345,6 +361,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, shuffle=False,
         print(f"Re-download claim {it}/{number}")
         d = dld.download_single(cid=item["claim_id"],
                                 ddir=ddir, own_dir=own_dir,
+                                save_file=save_file,
                                 server=server)
         list_info_get.append(d)
         print()
@@ -352,7 +369,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, shuffle=False,
     return list_info_get
 
 
-def download_claims(ddir=None, own_dir=True,
+def download_claims(ddir=None, own_dir=True, save_file=True,
                     start=1, end=0, file=None, sep=";", invalid=False,
                     server="http://localhost:5279"):
     """Download claims from a file, or redownload the ones already present.
@@ -365,6 +382,13 @@ def download_claims(ddir=None, own_dir=True,
     own_dir: bool, optional
         It defaults to `True`, in which case it places the downloaded
         content inside a subdirectory named after the channel in `ddir`.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     start: int, optional
         It defaults to 1.
         Operate on the item starting from this index in the internal list
@@ -462,6 +486,7 @@ def download_claims(ddir=None, own_dir=True,
         info_get = dld.download_single(cid=item["claim_id"],
                                        invalid=invalid,
                                        ddir=ddir, own_dir=own_dir,
+                                       save_file=save_file,
                                        server=server)
         list_info_get.append(info_get)
         print()
