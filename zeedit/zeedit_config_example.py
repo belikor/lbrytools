@@ -52,6 +52,12 @@ ddir = "/home/user/Downloads"
 # or 0 (False) to place all downloaded files in the download directory.
 own_dir = 1
 
+# Set to 1 (True) to make sure all blobs are downloaded, and the media file
+# is created in `ddir`.
+# Set to 0 (False) to only download the first blob of the streams (sd_hash);
+# the media file will not be created.
+save_file = 1
+
 # A global number that will override the individual numbers in the `channels`
 # list.
 # Set to 0 or None to disable.

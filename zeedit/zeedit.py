@@ -107,6 +107,7 @@ if __name__ == "__main__":
     info = lbryt.ch_download_latest_multi(channels=cfg.channels,
                                           ddir=cfg.ddir,
                                           own_dir=cfg.own_dir,
+                                          save_file=cfg.save_file,
                                           number=cfg.number,
                                           shuffle=cfg.shuffle,
                                           server=cfg.server)

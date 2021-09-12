@@ -62,6 +62,12 @@ def z_defaults(cfg):
     else:
         print(f"own_dir: {cfg.own_dir}")
 
+    if "save_file" not in config:
+        cfg.save_file = True
+        print(f"save_file: {cfg.save_file} (use default)")
+    else:
+        print(f"save_file: {cfg.save_file}")
+
     if "number" not in config:
         cfg.number = 2
         print(f"number: {cfg.number} (use default)")
