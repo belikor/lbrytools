@@ -27,6 +27,7 @@
 import os
 import requests
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
@@ -58,6 +59,9 @@ def lbrynet_del(claim_id=None, claim_name=None, what="blobs",
         It returns `True` if the files were deleted successfully.
         It returns `False` if there is an error.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not claim_id:
         print("No input claim ID, using default value.")
         claim_id = "70dfefa510ca6eee7023a2a927e34d385b5a18bd"

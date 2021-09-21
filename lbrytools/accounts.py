@@ -28,6 +28,8 @@ import os
 import requests
 import time
 
+import lbrytools.funcs as funcs
+
 
 def list_accounts(addresses=False,
                   file=None, fdate=False,
@@ -60,6 +62,9 @@ def list_accounts(addresses=False,
         It returns `True` if it prints the information successfully.
         If there is a problem it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     print("Accounts in the wallet")
     print(80 * "-")
 

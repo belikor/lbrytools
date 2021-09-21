@@ -27,6 +27,8 @@
 import os
 import requests
 
+import lbrytools.funcs as funcs
+
 
 def check_repost(item):
     """Check if the item is a repost, and return the original item.
@@ -97,6 +99,9 @@ def search_item_uri(uri=None, print_error=True,
         If the dictionary has the `'error'` key, it will print the contents
         of this key, and return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not uri or not isinstance(uri, str):
         m = ["Search by URI, full or partial.",
              "lbry://@MyChannel#3/some-video-name#2",
@@ -186,6 +191,9 @@ def search_item_cid(cid=None, name=None, offline=False, print_error=True,
         If the dictionary seems to have no items found, it will print
         an error message and return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (name and (not isinstance(name, str)
                   or "#" in name or ":" in name or "@" in name)
             or cid and (not isinstance(cid, str)
@@ -314,6 +322,9 @@ def search_item(uri=None, cid=None, name=None, offline=False,
         If the dictionary seems to have no items found, it will print
         an error message and return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not (uri or cid or name):
         print("Search by 'URI', 'claim_id' or 'name'.")
         print(f"uri={uri}")

@@ -28,6 +28,8 @@ import os
 import requests
 import time
 
+import lbrytools.funcs as funcs
+
 
 def channel_subs(shared=True, notifications=True,
                  file=None, fdate=False,
@@ -74,6 +76,9 @@ def channel_subs(shared=True, notifications=True,
     False
         If there is a problem it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     msg = {"method": "preference_get",
            "params": {}}
 

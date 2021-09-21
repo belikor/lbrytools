@@ -27,6 +27,7 @@
 import os
 import time
 
+import lbrytools.funcs as funcs
 import lbrytools.search_ch as srch_ch
 
 
@@ -366,6 +367,9 @@ def print_items(items=None, show="all",
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not items or not isinstance(items, (list, tuple)):
         print("No input item list. "
               "A list of items must be obtained from `lbrynet file list`.")

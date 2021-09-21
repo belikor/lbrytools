@@ -26,6 +26,7 @@
 """Functions to help with searching channels in the LBRY network."""
 import requests
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
@@ -65,6 +66,9 @@ def resolve_channel(channel=None,
         If the dictionary has the `'error'` key, it will print the contents
         of this key, and return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not channel or not isinstance(channel, str):
         print("Channel must be a string.")
         print(f"channel={channel}")
@@ -133,6 +137,9 @@ def ch_search_latest(channel=None, number=2,
         If there is a problem, or no existing channel,
         it will return False.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not channel or not isinstance(channel, str):
         print("Search items by channel name (string), "
               "and number of items (int).")
@@ -254,6 +261,9 @@ def find_channel(uri=None, cid=None, name=None,
     False
         If there is a problem or non existing claim, it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not (uri or cid or name):
         print("Find the channel's name from a claim's "
               "'URI', 'claim_id', or 'name'.")

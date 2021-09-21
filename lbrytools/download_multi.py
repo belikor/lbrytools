@@ -27,6 +27,7 @@
 import os
 import random
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.search_ch as srch_ch
 import lbrytools.sort as sort
@@ -80,6 +81,9 @@ def ch_download_latest(channel=None, number=2,
         If there is a problem, or no existing channel,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not channel or not isinstance(channel, str):
         print("Download items from a single channel.")
         print(f"channel={channel}")
@@ -197,6 +201,9 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         If there is a problem, or an empty channel list,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not channels or not isinstance(channels, (list, tuple)):
         m = ["Download items from a list of channels and items.",
              "  [",
@@ -340,6 +347,9 @@ def redownload_latest(number=2, ddir=None, own_dir=True, save_file=True,
         the standard output of the `lbrynet_get` command for each
         re-downloaded claim.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not number or not isinstance(number, int) or number < 0:
         number = 2
         print("Number must be a positive integer, "
@@ -454,6 +464,9 @@ def download_claims(ddir=None, own_dir=True, save_file=True,
         If there is a problem, non-existing claims, or non-existing file,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     print(80 * "-")
 
     if not file:

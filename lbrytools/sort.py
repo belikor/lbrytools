@@ -26,6 +26,7 @@
 """Functions to help with sorting downloaded claims from the LBRY network."""
 import requests
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.search_ch as srch_ch
 
@@ -70,6 +71,9 @@ def sort_items(channel=None,
     False
         If there is a problem it will return False.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     page_size = 99000
     cmd = ["lbrynet",
            "file",
@@ -183,6 +187,9 @@ def sort_invalid(channel=None,
     False
         If there is a problem it will return False.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     items = sort_items(channel=channel,
                        server=server)
     if not items:

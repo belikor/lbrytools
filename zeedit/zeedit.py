@@ -101,6 +101,9 @@ if __name__ == "__main__":
         print("Exiting.")
         exit(1)
 
+    if not lbryt.server_exists(server=cfg.server):
+        exit(1)
+
     # Download the latest claims from select channels.
     print(80 * "=")
     print("1. Download step")

@@ -26,6 +26,7 @@
 """Functions to clean multiple downloaded claims from the LBRY network."""
 import os
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.search_ch as srch_ch
 import lbrytools.sort as sort
@@ -73,6 +74,9 @@ def ch_cleanup(channel=None, number=2, what="media",
         If there is a problem or non existing channel,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not channel or not isinstance(channel, str):
         print("Clean up items from a single channel.")
         print(f"channel={channel}")
@@ -188,6 +192,9 @@ def ch_cleanup_multi(channels=None, what="media", number=None,
         If there is a problem, or an empty channel list,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not channels or not isinstance(channels, (list, tuple)):
         m = ["Delete items from a list of channels and numbers.",
              "  [",
@@ -304,6 +311,9 @@ def remove_media(never_delete=None,
         It returns `False` if there is a problem, or if there
         was nothing to clean up.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if never_delete and not isinstance(never_delete, (list, tuple)):
         print("Must be a list of channels that should never be deleted.")
         print(f"never_delete={never_delete}")
@@ -411,6 +421,9 @@ def remove_claims(start=1, end=0, file=None, invalid=False,
         If there is a problem, non-existing claims, or non-existing file,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     print(80 * "-")
 
     if not file:

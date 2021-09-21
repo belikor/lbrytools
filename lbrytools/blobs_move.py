@@ -27,6 +27,7 @@
 import os
 import shutil
 
+import lbrytools.funcs as funcs
 import lbrytools.sort as sort
 import lbrytools.blobs as blobs
 
@@ -97,6 +98,9 @@ def blobs_move(uri=None, cid=None, name=None,
         The last point may mean that the claim was not downloaded fully,
         so it needs to be redownloaded.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not move_dir or not isinstance(move_dir, str)
             or move_dir == "~" or not os.path.exists(move_dir)):
         move_dir = os.path.expanduser("~")
@@ -251,6 +255,9 @@ def blobs_move_all(move_dir=None, blobfiles=None, print_missing=False,
         The last point may mean that the claim was not downloaded fully,
         so it needs to be redownloaded.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not move_dir or not isinstance(move_dir, str)
             or move_dir == "~" or not os.path.exists(move_dir)):
         move_dir = os.path.expanduser("~")

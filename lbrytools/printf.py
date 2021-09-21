@@ -27,6 +27,7 @@
 import os
 import time
 
+import lbrytools.funcs as funcs
 import lbrytools.search_ch as srch_ch
 import lbrytools.sort as sort
 import lbrytools.print as prnt
@@ -141,6 +142,9 @@ def print_summary(show="all",
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if invalid:
         items = sort.sort_invalid(server=server)
         if not items or len(items) < 1:
@@ -267,6 +271,9 @@ def print_channels(full=True, canonical=False,
         If there is a problem like non existing channels,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if invalid:
         items = sort.sort_invalid(server=server)

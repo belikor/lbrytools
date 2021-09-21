@@ -27,6 +27,7 @@
 import os
 import requests
 
+import lbrytools.funcs as funcs
 import lbrytools.download as dld
 import lbrytools.clean as clean
 import lbrytools.blobs as blobs
@@ -74,6 +75,9 @@ def blob_get(blob=None, action="get", out="",
         If there is a problem or non existing blob hash,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not isinstance(blob, str) or len(blob) < 96:
         print(">>> Error: blob must be a 96-character alphanumeric string")
         print(f"blob={blob}")
@@ -157,6 +161,9 @@ def blobs_action(blobfiles=None, action="get",
         If there is a problem or non existing blobfiles directory,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
         print("Perform an action with the blobs from the blobfiles directory")
@@ -267,6 +274,9 @@ def redownload_blobs(uri=None, cid=None, name=None,
     If the bug is solved, `blob_get` could be called with the missing blob
     hash to only get that piece.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     blob_info = blobs.count_blobs(uri=uri, cid=cid, name=name,
                                   blobfiles=blobfiles,
                                   print_each=print_each,

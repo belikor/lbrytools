@@ -27,6 +27,7 @@
 import json
 import os
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.sort as sort
 
@@ -117,6 +118,9 @@ def count_blobs(uri=None, cid=None, name=None,
         If there is a problem, like non existing blobfiles directory,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
         print("Count the blobs of the claim from the blobfiles directory")
@@ -281,6 +285,9 @@ def count_blobs_all(blobfiles=None, channel=None,
         If there is a problem, like non existing blobfiles directory,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
         print("Count the blobs of the claim from the blobfiles directory")

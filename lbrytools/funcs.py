@@ -89,3 +89,15 @@ def check_lbry(server="http://localhost:5279"):
     # except subprocess.CalledProcessError:
     #     start_lbry()
     #     return False
+
+
+def server_exists(server="http://localhost:5279"):
+    """Return True if the server is up, and False if not."""
+    try:
+        requests.post(server)
+    except requests.exceptions.ConnectionError:
+        print(f"Cannot establish connection to 'lbrynet' on {server}")
+        print("Start server with:")
+        print("  lbrynet start")
+        return False
+    return True

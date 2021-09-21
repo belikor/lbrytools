@@ -28,6 +28,8 @@ import os
 import requests
 import time
 
+import lbrytools.funcs as funcs
+
 
 def list_playlists(shared=True,
                    file=None, fdate=False,
@@ -61,6 +63,9 @@ def list_playlists(shared=True,
         It returns `True` if it prints the information successfully.
         If there is a problem it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     msg = {"method": "preference_get",
            "params": {}}
 

@@ -27,6 +27,7 @@
 import os
 import requests
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.search_ch as srch_ch
 import lbrytools.print as prnt
@@ -70,6 +71,9 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
         Returns the dictionary that represents the standard output
         of the `lbrynet get` command.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not uri:
         print("No input claim by canonical url (URI).")
         print(f"uri={uri}")
@@ -212,6 +216,9 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
     False
         If there is a problem or non existing claim, it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not (uri or cid or name):
         print("No input claim by 'URI', 'claim_id', or 'name'.")
         print(f"uri={uri}, cid={cid}, name={name}")
@@ -349,6 +356,9 @@ def lbrynet_save(claim_id=None, claim_name=None, ddir=None,
         Returns the dictionary that represents the standard output
         of the `lbrynet file save` command.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not (claim_id or claim_name):
         print("No input claim by 'claim_id' or 'claim_name'.")
         print(f"claim_id={claim_id}, claim_name={claim_name}")
@@ -437,6 +447,9 @@ def download_invalid(cid=None, name=None,
     False
         If there is a problem or non existing claim, it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if not (cid or name):
         print("No input claim by 'claim_id' or 'name'.")
         print(f"cid={cid}, name={name}")

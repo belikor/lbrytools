@@ -28,6 +28,8 @@ import os
 import requests
 import time
 
+import lbrytools.funcs as funcs
+
 
 def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
                 compact=False,
@@ -78,6 +80,9 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
     False
         If there is a problem it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     msg = {"method": "claim_list",
            "params": {"page_size": 99000,
                       "resolve": True}}

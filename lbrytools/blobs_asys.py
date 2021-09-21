@@ -27,6 +27,7 @@
 import os
 import time
 
+import lbrytools.funcs as funcs
 import lbrytools.printf as prntf
 import lbrytools.clean as clean
 import lbrytools.download as dld
@@ -115,6 +116,9 @@ def analyze_blobs(blobfiles=None, channel=None,
         If there is a problem, like non existing blobfiles directory,
         it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
         print("Count the blobs of the claim from the blobfiles directory")
@@ -315,6 +319,9 @@ def analyze_channel(blobfiles=None, channel=None,
         - `'incomplete_usage'` value in gigabytes (GB) of all blobs
           from incomplete claims.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
@@ -489,6 +496,9 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         It returns `True` if it printed the summary successfully.
         If there is any error it will return `False`.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     channels = prntf.print_channels(full=False, canonical=False,
                                     invalid=False, offline=False,
@@ -691,6 +701,9 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         The second list has the return information of the downloaded claims
         that were missing the `'sd_hash'` blob.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
         print("Count the blobs of the claim from the blobfiles directory")

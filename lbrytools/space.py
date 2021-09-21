@@ -27,6 +27,7 @@
 import os
 import shutil
 
+import lbrytools.funcs as funcs
 import lbrytools.search_ch as srch_ch
 import lbrytools.sort as sort
 import lbrytools.clean as clean
@@ -269,6 +270,9 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         or if after going through all claims, it failed to clear
         enough space to bring usage within limits.
     """
+    if not funcs.server_exists(server=server):
+        return False
+
     if (not main_dir or not isinstance(main_dir, str)
             or main_dir == "~" or not os.path.exists(main_dir)):
         main_dir = os.path.expanduser("~")
