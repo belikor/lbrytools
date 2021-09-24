@@ -115,6 +115,8 @@ from lbrytools.accounts import list_accounts
 
 from lbrytools.playlists import list_playlists
 
+from lbrytools.support import list_supports
+
 # Use of the modules so that code checkers don't complain (flake8)
 True if z_defaults else False
 
@@ -176,3 +178,5 @@ True if channel_subs else False
 True if list_accounts else False
 
 True if list_playlists else False
+
+True if list_supports else False

@@ -41,6 +41,7 @@ from lbrytools import claims_bids
 from lbrytools import channel_subs
 from lbrytools import list_accounts
 from lbrytools import list_playlists
+from lbrytools import list_supports
 ```
 
 # Download
@@ -862,6 +863,32 @@ The information can be printed to a file as well.
 v = lbryt.list_playlists(file="playlists.txt", fdate=True)
 ```
 
+# Supports
+
+List the supports, along with the amount of LBC staked,
+and the trending score.
+By default it will show both claim and channel supports,
+but we can specify this manually if we want.
+We can also choose whether to show the `'claim_id'` instead of the name.
+```py
+w = lbryt.list_supports()
+w = lbryt.list_supports(channels=False)
+w = lbryt.list_supports(claims=False)
+w = lbryt.list_supports(claim_id=True)
+```
+
+There are four trending scores; they are normally combined into one
+so that the information displayed is more compact.
+This can be controlled with the `combine` argument:
+```py
+w = lbryt.list_supports(combine=False)
+```
+
+The information can be printed to a file as well.
+```py
+w = lbryt.list_supports(file="supports.txt", fdate=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -899,4 +926,5 @@ lbryt.claims_bids(..., server=server)
 lbryt.channel_subs(..., server=server)
 lbryt.list_accounts(..., server=server)
 lbryt.list_playlists(..., server=server)
+lbryt.list_supports(..., server=server)
 ```

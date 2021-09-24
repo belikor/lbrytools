@@ -97,6 +97,7 @@ lbryt.claims_bids(...)
 lbryt.channel_subs(...)
 lbryt.list_accounts(...)
 lbryt.list_playlists(...)
+lbryt.list_supports(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation
