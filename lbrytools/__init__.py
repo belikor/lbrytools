@@ -119,6 +119,7 @@ from lbrytools.playlists import list_playlists
 True if z_defaults else False
 
 True if check_lbry else False
+True if server_exists else False
 
 True if check_repost else False
 True if search_item else False
