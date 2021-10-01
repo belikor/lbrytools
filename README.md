@@ -41,10 +41,16 @@ This can be in the user's home directory,
 /home/user/.local/lib/python3.8/site-packages/lbrytools
 ```
 
-or in a system-wide directory.
+or in a system-wide directory:
 ```
 /usr/local/lib/python3.8/dist-packages/lbrytools
 /usr/lib/python3/dist-packages/lbrytools
+```
+
+You can also modify the `PYTHONPATH` environmental variable
+to include the parent directory where `lbrytools` is located:
+```sh
+PYTHONPATH=/opt/git/lbrytools:$PYTHONPATH
 ```
 
 This library was developed and tested with Python 3.8 but it may also work with
