@@ -34,7 +34,7 @@ import lbrytools.search as srch
 
 def list_supports(claim_id=False,
                   combine=True, claims=True, channels=True,
-                  file=None, fdate=False,
+                  file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
     """Print supported claims, the amount, and the trending score.
 
@@ -61,6 +61,10 @@ def list_supports(claim_id=False,
     fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -70,16 +74,18 @@ def list_supports(claim_id=False,
 
     Returns
     -------
-    bool
-        It returns `True` if the LBRY daemon is already running.
-        It returns `False` if the LBRY daemon was not running
-        but it was started manually.
+    list
+        The list of resolved claims, as returned by `lbrynet resolve`.
+        Each item is a dictionary with information from the supported claim
+        which may be a stream (video, music, document) or a channel.
+    False
+        If there is a problem or no list of supports, it will return `False`.
     """
     if not funcs.server_exists(server=server):
         return False
 
     msg = {"method": "support_list",
-           "params": {"page_size": 1000}}
+           "params": {"page_size": 99000}}
     output = requests.post(server, json=msg).json()
 
     if "error" in output:
@@ -87,6 +93,10 @@ def list_supports(claim_id=False,
 
     items = output["result"]["items"]
     n_items = len(items)
+
+    if n_items < 1:
+        print(f"Supports found: {n_items}")
+        return False
 
     resolved = []
     for item in items:
@@ -100,9 +110,10 @@ def list_supports(claim_id=False,
 
         name = item["name"]
         if claim_id:
-            obj = item["claim_id"]
+            obj = f'"{item["claim_id"]}"'
         else:
-            obj = f'{name:40s}'
+            _name = f'"{name}"'
+            obj = f'{_name:50s}'
 
         is_channel = True if name.startswith("@") else False
 
@@ -123,13 +134,16 @@ def list_supports(claim_id=False,
         tr_combined = f'{combined:6.2f}'
         is_spent = item["is_spent"]
 
-        out = f'{num:3d}/{n_items:3d}, {obj}, {amount}, '
+        out = f"{num:3d}/{n_items:3d}" + f"{sep} "
+        out += f"{obj}" + f"{sep} " + f"{amount}" + f"{sep} "
         if not is_spent:
             if combine:
-                out += f'combined: {tr_combined}'
+                out += f"combined: {tr_combined}"
             else:
-                out += (f'mix: {tr_mix}, glob: {tr_gl}, '
-                        f'grp: {tr_gr}, loc: {tr_loc}')
+                out += f"mix: {tr_mix}" + f"{sep} "
+                out += f"glob: {tr_gl}" + f"{sep} "
+                out += f"grp: {tr_gr}" + f"{sep} "
+                out += f"loc: {tr_loc}"
         else:
             continue
         out_list.append(out)

@@ -869,12 +869,13 @@ List the supports, along with the amount of LBC staked,
 and the trending score.
 By default it will show both claim and channel supports,
 but we can specify this manually if we want.
-We can also choose whether to show the `'claim_id'` instead of the name.
+We can also choose whether to show the `'claim_id'` instead of the name,
+and choose a specific separator:
 ```py
 w = lbryt.list_supports()
 w = lbryt.list_supports(channels=False)
 w = lbryt.list_supports(claims=False)
-w = lbryt.list_supports(claim_id=True)
+w = lbryt.list_supports(claim_id=True, sep=";.;")
 ```
 
 There are four trending scores; they are normally combined into one
