@@ -203,6 +203,9 @@ def delete_single(uri=None, cid=None, name=None, invalid=False,
     # and blob information.
     item = srch.search_item(cid=claim_id, offline=True,
                             server=server)
+    if not item:
+        print("No claim found locally, probably already deleted.")
+        return True
 
     path = item["download_path"]
     blobs = int(item["blobs_completed"])
