@@ -109,11 +109,12 @@ def list_supports(claim_id=False,
         s = pair[1]
 
         name = item["name"]
+        obj = ""
         if claim_id:
-            obj = f'"{item["claim_id"]}"'
-        else:
-            _name = f'"{name}"'
-            obj = f'{_name:50s}'
+            obj += f'"{item["claim_id"]}"' + f"{sep} "
+
+        _name = f'"{name}"'
+        obj += f'{_name:50s}'
 
         is_channel = True if name.startswith("@") else False
 
@@ -127,11 +128,11 @@ def list_supports(claim_id=False,
         combined = (m["trending_global"] + m["trending_group"]
                     + m["trending_local"] + m["trending_mixed"])
 
-        tr_gl = f'{m["trending_global"]:6.2f}'
-        tr_gr = f'{m["trending_group"]:6.2f}'
-        tr_loc = f'{m["trending_local"]:6.2f}'
-        tr_mix = f'{m["trending_mixed"]:6.2f}'
-        tr_combined = f'{combined:6.2f}'
+        tr_gl = f'{m["trending_global"]:7.2f}'
+        tr_gr = f'{m["trending_group"]:7.2f}'
+        tr_loc = f'{m["trending_local"]:7.2f}'
+        tr_mix = f'{m["trending_mixed"]:7.2f}'
+        tr_combined = f'{combined:7.2f}'
         is_spent = item["is_spent"]
 
         out = f"{num:3d}/{n_items:3d}" + f"{sep} "
