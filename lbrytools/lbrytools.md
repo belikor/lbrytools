@@ -42,6 +42,7 @@ from lbrytools import channel_subs
 from lbrytools import list_accounts
 from lbrytools import list_playlists
 from lbrytools import list_supports
+from lbrytools import print_blobs_ratio
 ```
 
 # Download
@@ -890,6 +891,28 @@ The information can be printed to a file as well.
 w = lbryt.list_supports(file="supports.txt", fdate=True)
 ```
 
+# Seeding ratio
+
+The blob seeding ratio is estimated from the number of times that the words
+`"sent"` and `"downloaded"` are found in the log files of `lbrynet`,
+normally under `~/.local/share/lbry/lbrynet`.
+
+If Numpy and Matplotlib are available we can generate a plot with histograms
+of the blobs processed (uploaded or downloaded) per hour
+versus the day they were processed, counting back from today.
+```py
+vv = lbryt.print_blobs_ratio(plot_hst=True)
+```
+
+The logs are normally read automatically from the default `data_dir` directory,
+but a specific directory can also be given containing log files
+named `lbrynet.log.{n}`.
+The analysis of the seeding ratio can be printed to a file as well.
+```py
+vv = lbryt.print_blobs_ratio(data_dir="many_logs/",
+                             file="summary_ratio.txt", fdate=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -928,4 +951,5 @@ lbryt.channel_subs(..., server=server)
 lbryt.list_accounts(..., server=server)
 lbryt.list_playlists(..., server=server)
 lbryt.list_supports(..., server=server)
+lbryt.print_blobs_ratio(..., server=server)
 ```

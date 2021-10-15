@@ -98,6 +98,7 @@ lbryt.channel_subs(...)
 lbryt.list_accounts(...)
 lbryt.list_playlists(...)
 lbryt.list_supports(...)
+lbryt.print_blobs_ratio(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation

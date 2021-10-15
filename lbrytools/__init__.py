@@ -117,6 +117,9 @@ from lbrytools.playlists import list_playlists
 
 from lbrytools.support import list_supports
 
+from lbrytools.blobs_ratio import print_blobs_ratio
+
+
 # Use of the modules so that code checkers don't complain (flake8)
 True if z_defaults else False
 
@@ -180,3 +183,5 @@ True if list_accounts else False
 True if list_playlists else False
 
 True if list_supports else False
+
+True if print_blobs_ratio else False
