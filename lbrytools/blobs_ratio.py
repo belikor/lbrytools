@@ -44,6 +44,7 @@ import time
 
 try:
     import numpy as np
+    import matplotlib.backends.backend_tkagg as mbacks
     import matplotlib.pyplot as plt
     PLOTTING = True
 except ModuleNotFoundError as err:
@@ -129,7 +130,8 @@ def count_updown_blobs(filename):
             "down_times_days": down_times_days}
 
 
-def plot_histogram(up_times_days, down_times_days, now=0.0):
+def plot_histogram(up_times_days, down_times_days, now=0.0,
+                   tk_frame=None):
     """Plot the histogram of the uploaded and downloaded blobs.
 
     The Y is the number of blobs uploaded or downloaded in a single hour.
@@ -213,30 +215,22 @@ def plot_histogram(up_times_days, down_times_days, now=0.0):
     axs[1].plot(X0, Y0, markerfacecolor="r", **mk)
     axs[1].legend()
 
-    # Adjust the ticks better if the value is in the range
-    ticks = None
-    if -10 <= oldest_day < 0:
-        ticks = list(range(-10, 2, 1))
-    elif -30 <= oldest_day < -10:
-        ticks = list(range(-30, 5, 5))
-    elif -50 <= oldest_day < -30:
-        ticks = list(range(-50, 10, 5))
-    elif -70 <= oldest_day < -50:
-        ticks = list(range(-70, 10, 5))
-    elif -90 <= oldest_day < -70:
-        ticks = list(range(-90, 10, 10))
-    elif -120 <= oldest_day < -90:
-        ticks = list(range(-120, 10, 10))
+    if tk_frame:
+        canvas = mbacks.FigureCanvasTkAgg(fig, master=tk_frame)
+        canvas.draw()
+        # canvas.get_tk_widget().grid(row=0, column=0)
+        canvas.get_tk_widget().pack(fill="both", expand=True)
 
-    if ticks:
-        axs[0].set_xticks(ticks)
-        axs[1].set_xticks(ticks)
-
-    plt.show()
+        tbar = mbacks.NavigationToolbar2Tk(canvas, tk_frame)
+        tbar.update()
+        # canvas.get_tk_widget().grid(row=1, column=0)
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+    else:
+        plt.show()
 
 
-def print_blobs_ratio(data_dir=None, plot_hst=True, sep=";",
-                      file=None, fdate=False,
+def print_blobs_ratio(data_dir=None, plot_hst=True,
+                      file=None, fdate=False, sep=";", tk_frame=None,
                       server="http://localhost:5279"):
     """Estimate the number of blobs uploaded and downloaded from the logs.
 
@@ -436,7 +430,8 @@ def print_blobs_ratio(data_dir=None, plot_hst=True, sep=";",
         print("\n".join(out))
 
     if plot_hst and PLOTTING:
-        plot_histogram(up_times_days, down_times_days, now=now)
+        plot_histogram(up_times_days, down_times_days, now=now,
+                       tk_frame=tk_frame)
 
     return estimations
 
