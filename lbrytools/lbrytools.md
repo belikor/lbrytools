@@ -786,14 +786,14 @@ if we want them to appear higher in search results.
 In most cases we should also omit our reposts because we don't need reposts
 to have a higher bid than the original claim.
 ```py
-s = lbryt.claims_bids(skip_max=True, skip_repost=True)
+s = lbryt.claims_bids(skip_controlling=True, skip_repost=True)
 ```
 
 Since LBRY allows two or more channels to have the same base `'name'`,
 we can inspect only our channels to see if they are unique,
 or if they are outbid by others.
 ```py
-s = lbryt.claims_bids(skip_max=True, channels_only=True)
+s = lbryt.claims_bids(skip_controlling=True, channels_only=True)
 ```
 
 Due to `lbry-sdk` [issue #3381](https://github.com/lbryio/lbry-sdk/issues/3381),
@@ -802,10 +802,17 @@ at the moment only 50 competing claims having the same `'name'` can be compared.
 Print the information on the claims to a file.
 Optionally add the date to the name of the file.
 If `compact=True`, the information from a claim will be printed
-in a single line.
+in a single line, and use the specified separator.
 ```py
 s = lbryt.claims_bids(file="claims.txt", fdate=True)
-s = lbryt.claims_bids(file="claims.txt", fdate=True, compact=True)
+s = lbryt.claims_bids(file="claims.txt", fdate=True, compact=True, sep=";")
+```
+
+Some options only work with `compact=True`, to produce more or less detail
+on the claims.
+```py
+s = lbryt.claims_bids(show_claim_id=True, show_repost_status=True, compact=True)
+s = lbryt.claims_bids(show_competing=True, show_reposts=True, compact=True)
 ```
 
 # Channel subscriptions

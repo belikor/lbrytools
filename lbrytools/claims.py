@@ -31,9 +31,12 @@ import time
 import lbrytools.funcs as funcs
 
 
-def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
+def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
+                show_claim_id=False,
+                show_repost_status=True,
+                show_competing=True, show_reposts=True,
                 compact=False,
-                file=None, fdate=False,
+                file=None, fdate=False, sep=";",
                 server="http://localhost:5279"):
     """Display the claims that are competing in name and LBC bidding.
 
@@ -41,7 +44,7 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
 
     Parameters
     ----------
-    skip_max: bool, optional
+    skip_controlling: bool, optional
         It defaults to `True`, in which case it will not process
         the 'controlling' claims, that is, those which have the highest bid.
         If it is `False` it will process all claims whether
@@ -54,10 +57,27 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
         It defaults to `False`, in which case it will process all claims
         whether they are channels or not.
         If it is `True` it will only process the claims that are channels.
+    show_claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True`, the claim ID will be printed for all claims.
+        This option only has an effect when `compact=True`.
+    show_repost_status: bool, optional
+        It defaults to `True`, in which case it will show whether the claims
+        are reposts or not.
+        This option only has an effect when `compact=True`.
+    show_competing: bool, optional
+        It defaults to `True`, in which case it will show the number
+        of competing claims, that is, those that share the same name
+        with the claim being inspected.
+        This option only has an effect when `compact=True`.
+    show_reposts: bool, optional
+        It defaults to `True`, in which case it will show the number
+        of reposts for the claim being inspected.
+        This option only has an effect when `compact=True`.
     compact: bool, optional
         It defaults to `False`, in which case each claim's information
         will be printed in a paragraph.
-        If it is `True` there will be one claim per line, so the summary
+        If it is `True` there will be one claim per row, so the summary
         will be more compact.
     file: str, optional
         It defaults to `None`.
@@ -66,6 +86,10 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
     fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -98,7 +122,7 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
     num_claims = output["result"]["total_items"]
     print(f"Number of claims: {num_claims}")
 
-    if skip_max:
+    if skip_controlling:
         print("- Only non-controlling claims (low bids) will be considered")
     else:
         print("- Both controlling and non-controlling claims "
@@ -124,7 +148,8 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
         is_channel = claim["value_type"] == "channel"
         is_controlling = claim["meta"]["is_controlling"]
 
-        if ((skip_max and is_controlling) or (skip_repost and is_repost)
+        if ((skip_controlling and is_controlling)
+                or (skip_repost and is_repost)
                 or (channels_only and not is_channel)):
             continue
 
@@ -167,14 +192,25 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
                 else:
                     competitors += 1
 
+        name = f'"{name}"'
+
         if compact:
-            line = (f"Claim {it}/{num_claims}, {name}, "
-                    f"controlling: {is_controlling}, "
-                    f"repost: {is_repost}, "
-                    f"competing: {competitors}, "
-                    f"reposts: {comp_reposts}, "
-                    f"staked: {staked:.3f}, "
-                    f"highest bid: {max_lbc:.3f}")
+            line = f"{it:3d}/{num_claims:3d}" + f"{sep} "
+            if show_claim_id:
+                line += f"{claim_id}" + f"{sep} "
+
+            line += f"{name:56s}" + f"{sep} "
+            line += f"controlling: {str(is_controlling):5s}" + f"{sep} "
+
+            if show_repost_status:
+                line += f"repost: {str(is_repost):5s}" + f"{sep} "
+            if show_competing:
+                line += f"competing: {competitors:2d}" + f"{sep} "
+            if show_reposts:
+                line += f"reposts: {comp_reposts:2d}" + f"{sep} "
+
+            line += (f"staked: {staked:7.2f}" + f"{sep} " +
+                     f"highest bid: {max_lbc:7.2f}")
             out += [line]
         else:
             paragraph = (f"Claim {it}/{num_claims}, {name}\n"
@@ -221,5 +257,5 @@ def claims_bids(skip_max=True, skip_repost=False, channels_only=False,
 
 
 if __name__ == "__main__":
-    claims_bids(skip_max=True, skip_repost=False, channels_only=False)
-    # claims_bids(skip_max=True, skip_repost=True, channels_only=False)
+    claims_bids(skip_controlling=True, skip_repost=False, channels_only=False)
+    # claims_bids(skip_controlling=True, skip_repost=True, channels_only=False)
