@@ -31,7 +31,8 @@ import time
 import lbrytools.funcs as funcs
 
 
-def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
+def claims_bids(show_controlling=False, show_non_controlling=True,
+                skip_repost=False, channels_only=False,
                 show_claim_id=False,
                 show_repost_status=True,
                 show_competing=True, show_reposts=True,
@@ -44,11 +45,14 @@ def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
 
     Parameters
     ----------
-    skip_controlling: bool, optional
-        It defaults to `True`, in which case it will not process
+    show_controlling: bool, optional
+        It defaults to `False`, in which case it will not show
         the 'controlling' claims, that is, those which have the highest bid.
-        If it is `False` it will process all claims whether
-        they have the highest bid (controlling) or not (non-controlling).
+        If it is `True` it will show controlling claims.
+    show_non_controlling: bool, optional
+        It defaults to `True`, in which case it will show
+        the 'non-controlling' claims, that is, those which have a lower bid.
+        If it is `False` it will not show non-controlling claims.
     skip_repost: bool, optional
         It defaults to `False`, in which case it will process all claims
         whether they are reposts or not.
@@ -122,11 +126,16 @@ def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
     num_claims = output["result"]["total_items"]
     print(f"Number of claims: {num_claims}")
 
-    if skip_controlling:
-        print("- Only non-controlling claims (low bids) will be considered")
-    else:
-        print("- Both controlling and non-controlling claims "
-              "will be considered (high and low bids)")
+    if (not show_controlling and not show_non_controlling):
+        print(f"show_controlling: {bool(show_controlling)}")
+        print(f"show_non_controlling: {bool(show_non_controlling)}")
+        print("Won't show any item; at least one option must be True.")
+        return False
+
+    if show_controlling:
+        print("- Controlling claims (highest bids) will be considered")
+    if show_non_controlling:
+        print("- Non-controlling claims (low bids) will be considered")
 
     if skip_repost:
         print("- Reposts will be omitted")
@@ -148,9 +157,18 @@ def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
         is_channel = claim["value_type"] == "channel"
         is_controlling = claim["meta"]["is_controlling"]
 
-        if ((skip_controlling and is_controlling)
+        if show_controlling and show_non_controlling:
+            # Show everything, it doesn't care about controlling status
+            pass
+        elif (not show_controlling and not show_non_controlling):
+            # Show nothing, it doesn't care about controlling status
+            continue
+        elif ((show_controlling and not is_controlling)
+                or (show_non_controlling and is_controlling)
                 or (skip_repost and is_repost)
                 or (channels_only and not is_channel)):
+            # Skip claim depending on controlling status
+            # or whether it is a repost or a channel
             continue
 
         claims_filtered.append(claim)
@@ -199,33 +217,33 @@ def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
             if show_claim_id:
                 line += f"{claim_id}" + f"{sep} "
 
-            line += f"{name:56s}" + f"{sep} "
-            line += f"controlling: {str(is_controlling):5s}" + f"{sep} "
+            line += (f"{name:58s}" + f"{sep} " +
+                     f"staked: {staked:8.2f}" + f"{sep} " +
+                     f"highest_bid: {max_lbc:8.2f}" + f"{sep} " +
+                     f"is_controlling: {str(is_controlling):5s}")
 
             if show_repost_status:
-                line += f"repost: {str(is_repost):5s}" + f"{sep} "
+                line += f"{sep} " + f"is_repost: {str(is_repost):5s}"
             if show_competing:
-                line += f"competing: {competitors:2d}" + f"{sep} "
+                line += f"{sep} " + f"competing: {competitors:2d}"
             if show_reposts:
-                line += f"reposts: {comp_reposts:2d}" + f"{sep} "
+                line += f"{sep} " + f"reposts: {comp_reposts:2d}"
 
-            line += (f"staked: {staked:7.2f}" + f"{sep} " +
-                     f"highest bid: {max_lbc:7.2f}")
             out += [line]
         else:
             paragraph = (f"Claim {it}/{num_claims}, {name}\n"
                          f"canonical_url: {uri}\n"
                          f"claim_id: {claim_id}\n"
-                         f"controlling claim: {is_controlling}\n"
-                         f"repost: {is_repost}\n"
+                         f"staked: {staked:.3f}\n"
+                         f"highest_bid: {max_lbc:.3f} (by others)\n"
+                         f"is_controlling: {is_controlling}\n"
+                         f"is_repost: {is_repost}\n"
                          f"competing: {competitors}\n")
             if is_repost:
-                paragraph += f"reposts: {comp_reposts} + 1\n"
+                paragraph += f"reposts: {comp_reposts} + 1 (this one)\n"
             else:
                 paragraph += f"reposts: {comp_reposts}\n"
 
-            paragraph += (f"staked: {staked:.3f}\n"
-                          f"highest bid: {max_lbc:.3f} (by others)\n")
             out += [paragraph]
 
     fd = 0
@@ -257,5 +275,5 @@ def claims_bids(skip_controlling=True, skip_repost=False, channels_only=False,
 
 
 if __name__ == "__main__":
-    claims_bids(skip_controlling=True, skip_repost=False, channels_only=False)
-    # claims_bids(skip_controlling=True, skip_repost=True, channels_only=False)
+    claims_bids(show_non_controlling=True, skip_repost=False, channels_only=False)
+    # claims_bids(show_non_controlling=True, skip_repost=True, channels_only=False)

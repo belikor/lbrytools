@@ -779,21 +779,27 @@ and other types.
 We may want to see information on our claims, and how many other claims
 are competing for the same `'name'`.
 
-In most cases we want to omit the claims that are "controlling",
-meaning that we only want to see claims that don't have the highest bid.
-This is so that we know which of our claims we should support with more LBC
-if we want them to appear higher in search results.
-In most cases we should also omit our reposts because we don't need reposts
+We can display claims that are "controlling" and "non-controlling",
+depending on whether they have the highest bid for a particular name.
+```py
+s = lbryt.claims_bids(show_controlling=True, show_non_controlling=False)
+s = lbryt.claims_bids(show_non_controlling=True, show_controlling=False)
+```
+
+Showing only non-controlling claims helps us know which of our claims
+we can support with more LBC if we want them to appear higher
+in search results.
+In most cases we want to omit our reposts because we don't need reposts
 to have a higher bid than the original claim.
 ```py
-s = lbryt.claims_bids(skip_controlling=True, skip_repost=True)
+s = lbryt.claims_bids(show_non_controlling=True, skip_repost=True)
 ```
 
 Since LBRY allows two or more channels to have the same base `'name'`,
 we can inspect only our channels to see if they are unique,
 or if they are outbid by others.
 ```py
-s = lbryt.claims_bids(skip_controlling=True, channels_only=True)
+s = lbryt.claims_bids(show_non_controlling=True, channels_only=True)
 ```
 
 Due to `lbry-sdk` [issue #3381](https://github.com/lbryio/lbry-sdk/issues/3381),
