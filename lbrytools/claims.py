@@ -158,10 +158,16 @@ def claims_bids(show_controlling=False, show_non_controlling=True,
         is_controlling = claim["meta"]["is_controlling"]
 
         if show_controlling and show_non_controlling:
-            # Show everything, it doesn't care about controlling status
-            pass
+            # Show regardless of controlling status
+            if ((skip_repost and is_repost)
+                    or (channels_only and not is_channel)):
+                # Skip claim depending on whether it is a repost or a channel
+                continue
+            else:
+                # Show everything
+                pass
         elif (not show_controlling and not show_non_controlling):
-            # Show nothing, it doesn't care about controlling status
+            # Show nothing, regardless of controlling status
             continue
         elif ((show_controlling and not is_controlling)
                 or (show_non_controlling and is_controlling)
