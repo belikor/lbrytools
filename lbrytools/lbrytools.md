@@ -43,6 +43,7 @@ from lbrytools import list_accounts
 from lbrytools import list_playlists
 from lbrytools import list_supports
 from lbrytools import print_blobs_ratio
+from lbrytools import create_support
 ```
 
 # Download
@@ -879,7 +880,7 @@ v = lbryt.list_playlists(file="playlists.txt", fdate=True)
 
 # Supports
 
-List the supports, along with the amount of LBC staked,
+List the supports, along with the amount of LBC staked, the total support,
 and the trending score.
 By default it will show both claim and channel supports,
 but we can specify this manually if we want.
@@ -902,6 +903,15 @@ w = lbryt.list_supports(combine=False)
 The information can be printed to a file as well.
 ```py
 w = lbryt.list_supports(file="supports.txt", fdate=True)
+```
+
+## Create support
+
+Create a new support for a specified claim, by URL or claim ID,
+regardless if there is already a previous support.
+```py
+w = lbryt.create_support(uri="ep.-1981-forbidden-thinkers-and-their", amount=10)
+w = lbryt.create_support(cid="2b6b11a42f51dba3baf06532cbcb1d3b6cc57057", amount=990)
 ```
 
 # Seeding ratio
@@ -965,4 +975,5 @@ lbryt.list_accounts(..., server=server)
 lbryt.list_playlists(..., server=server)
 lbryt.list_supports(..., server=server)
 lbryt.print_blobs_ratio(..., server=server)
+lbryt.create_support(..., server=server)
 ```

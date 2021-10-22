@@ -229,3 +229,124 @@ def get_base_support(uri=None, cid=None, name=None,
             "existing_support": existing,
             "base_support": base_support,
             "old_support": old_support}
+
+
+def create_support(uri=None, cid=None, name=None,
+                   amount=0.0,
+                   server="http://localhost:5279"):
+    """Create a new support on the claim.
+
+    Parameters
+    ----------
+    uri: str
+        A unified resource identifier (URI) to a claim on the LBRY network.
+        It can be full or partial.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            uri = '@MyChannel#3/some-video-name#2'
+            uri = 'some-video-name'
+
+        The URI is also called the `'canonical_url'` of the claim.
+    cid: str, optional
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    amount: float, optional
+        It defaults to `0.0`.
+        It is the amount of LBC support that will be deposited,
+        whether there is a previous support or not.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        A dictionary with information on the result of the support.
+        The keys are the following:
+        - 'canonical_url': canonical URI of the claim.
+        - 'claim_id': unique 40 character alphanumeric string.
+        - 'existing_support': existing support before we add or remove ours;
+          this is the sum of `base_support` and `old_support`.
+        - 'base_support': existing minimum support that we do not control;
+          all published claims must have a positive `base_support`.
+        - 'old_support': support that we have added to this claim in the past;
+          it may be zero.
+        - 'new_support': new support that was successfully deposited
+          in the claim, equal to `keep`.
+        - 'txid': transaction ID in the blockchain that records the operation.
+    False
+        If there is a problem or non existing claim, or lack of funds,
+        it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    supports = get_base_support(uri=uri, cid=cid, name=name)
+    if not supports:
+        return False
+
+    uri = supports["canonical_url"]
+    claim_id = supports["claim_id"]
+    existing = supports["existing_support"]
+    base_support = supports["base_support"]
+    old_support = supports["old_support"]
+
+    new_support = 0.0
+    t_input = 0.0
+    t_output = 0.0
+    t_fee = 0.0
+    txid = None
+
+    amount = abs(amount)
+    msg = {"method": "support_create",
+           "params": {"claim_id": claim_id,
+                      "amount": f"{amount:.8f}"}}
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        error = output["error"]
+        if "data" in error:
+            print(">>> Error: {}, {}".format(error["data"]["name"],
+                                             error["message"]))
+        else:
+            print(f">>> Error: {error}")
+        print(f">>> Requested amount: {amount:.8f}")
+        return False
+
+    new_support = amount
+    t_input = float(output["result"]["total_input"])
+    t_output = float(output["result"]["total_output"])
+    t_fee = float(output["result"]["total_fee"])
+    txid = output["result"]["txid"]
+
+    out = [f"canonical_url: {uri}",
+           f"claim_id: {claim_id}",
+           f"Existing support: {existing:14.8f}",
+           f"Base support:     {base_support:14.8f}",
+           f"Old support:      {old_support:14.8f}",
+           f"New support:      {new_support:14.8f}",
+           "",
+           f"Applied:          {new_support:14.8f}",
+           f"total_input:      {t_input:14.8f}",
+           f"total_output:     {t_output:14.8f}",
+           f"total_fee:        {t_fee:14.8f}",
+           f"txid: {txid}"]
+    print("\n".join(out))
+
+    return {"canonical_url": uri,
+            "claim_id": claim_id,
+            "existing_support": existing,
+            "base_support": base_support,
+            "old_support": old_support,
+            "new_support": new_support,
+            "txid": txid}

@@ -99,6 +99,7 @@ lbryt.list_accounts(...)
 lbryt.list_playlists(...)
 lbryt.list_supports(...)
 lbryt.print_blobs_ratio(...)
+lbryt.create_support(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation
