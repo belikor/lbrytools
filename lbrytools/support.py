@@ -185,3 +185,47 @@ def list_supports(claim_id=False,
         print("\n".join(out_list))
 
     return resolved
+
+
+def get_base_support(uri=None, cid=None, name=None,
+                     server="http://localhost:5279"):
+    """Get the existing, base, and our support."""
+    if not funcs.server_exists(server=server):
+        return False
+
+    item = srch.search_item(uri=uri, cid=cid, name=name, offline=False,
+                            server=server)
+
+    if not item:
+        return False
+
+    uri = item["canonical_url"]
+    cid = item["claim_id"]
+
+    existing = float(item["amount"]) + float(item["meta"]["support_amount"])
+
+    msg = {"method": "support_list",
+           "params": {"claim_id": item["claim_id"]}}
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        return False
+
+    supported_items = output["result"]["items"]
+    old_support = 0
+
+    if not supported_items:
+        # Old support remains 0
+        pass
+    else:
+        for su_item in supported_items:
+            old_support += float(su_item["amount"])
+
+    base_support = existing - old_support
+
+    return {"canonical_url": uri,
+            "claim_id": cid,
+            "existing_support": existing,
+            "base_support": base_support,
+            "old_support": old_support}
