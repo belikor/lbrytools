@@ -41,8 +41,9 @@ def list_supports(claim_id=False,
     Parameters
     ----------
     claim_id: bool, optional
-        It defaults to `False`, in which case the name of the claim is shown.
-        If it is `True` the `'claim_id'` will be shown instead.
+        It defaults to `False`, in which case only the name of the claim
+        is shown.
+        If it is `True` the `'claim_id'` will be shown as well.
     combine: bool, optional
         It defaults to `True`, in which case the `global`, `group`, `local`,
         and `mixed` trending scores are added into one combined score.
@@ -109,13 +110,7 @@ def list_supports(claim_id=False,
         s = pair[1]
 
         name = item["name"]
-        obj = ""
-        if claim_id:
-            obj += f'"{item["claim_id"]}"' + f"{sep} "
-
-        _name = f'"{name}"'
-        obj += f'{_name:50s}'
-
+        cid = item["claim_id"]
         is_channel = True if name.startswith("@") else False
 
         if is_channel and not channels:
@@ -123,8 +118,19 @@ def list_supports(claim_id=False,
         if not is_channel and not claims:
             continue
 
-        amount = f'{float(item["amount"]):8.2f}'
+        obj = ""
+        if claim_id:
+            obj += f'"{cid}"' + f"{sep} "
+
+        _name = f'"{name}"'
+        obj += f'{_name:58s}'
+
+        _amount = float(item["amount"])
+        amount = f"{_amount:14.8f}"
+
         m = s["meta"]
+        existing_support = float(s["amount"]) + float(m["support_amount"])
+
         combined = (m["trending_global"] + m["trending_group"]
                     + m["trending_local"] + m["trending_mixed"])
 
@@ -137,6 +143,8 @@ def list_supports(claim_id=False,
 
         out = f"{num:3d}/{n_items:3d}" + f"{sep} "
         out += f"{obj}" + f"{sep} " + f"{amount}" + f"{sep} "
+        out += f"{existing_support:15.8f}" + f"{sep} "
+
         if not is_spent:
             if combine:
                 out += f"combined: {tr_combined}"
