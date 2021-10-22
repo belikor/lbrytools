@@ -44,6 +44,7 @@ from lbrytools import list_playlists
 from lbrytools import list_supports
 from lbrytools import print_blobs_ratio
 from lbrytools import create_support
+from lbrytools import abandon_support
 ```
 
 # Download
@@ -914,6 +915,15 @@ w = lbryt.create_support(uri="ep.-1981-forbidden-thinkers-and-their", amount=10)
 w = lbryt.create_support(cid="2b6b11a42f51dba3baf06532cbcb1d3b6cc57057", amount=990)
 ```
 
+## Abandon or change support
+
+If the claim already has a support, we can abandon it, or we can update it,
+meaning decrease it or increase it.
+```py
+w = lbryt.abandon_support(uri="how-to-make-it-as-a-controversial")
+w = lbryt.abandon_support(cid="e6315c25446e80bd0bc6077126dbb93019055532", keep=100)
+```
+
 # Seeding ratio
 
 The blob seeding ratio is estimated from the number of times that the words
@@ -976,4 +986,5 @@ lbryt.list_playlists(..., server=server)
 lbryt.list_supports(..., server=server)
 lbryt.print_blobs_ratio(..., server=server)
 lbryt.create_support(..., server=server)
+lbryt.abandon_support(..., server=server)
 ```

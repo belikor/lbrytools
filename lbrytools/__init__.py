@@ -117,6 +117,7 @@ from lbrytools.playlists import list_playlists
 
 from lbrytools.support import list_supports
 from lbrytools.support import create_support
+from lbrytools.support import abandon_support
 
 from lbrytools.blobs_ratio import print_blobs_ratio
 
@@ -185,5 +186,6 @@ True if list_playlists else False
 
 True if list_supports else False
 True if create_support else False
+True if abandon_support else False
 
 True if print_blobs_ratio else False
