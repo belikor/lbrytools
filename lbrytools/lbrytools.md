@@ -45,6 +45,7 @@ from lbrytools import list_supports
 from lbrytools import print_blobs_ratio
 from lbrytools import create_support
 from lbrytools import abandon_support
+from lbrytools import target_support
 ```
 
 # Download
@@ -924,6 +925,27 @@ w = lbryt.abandon_support(uri="how-to-make-it-as-a-controversial")
 w = lbryt.abandon_support(cid="e6315c25446e80bd0bc6077126dbb93019055532", keep=100)
 ```
 
+## Target a certain support
+
+We can add a specific amount of support to a claim so that the final support
+on it is equal to the specified `target`.
+If `target` is above the existing support, some support will be added;
+if `target` is below the existing support, some support will be removed;
+if `target` is exactly at the existing support, nothing will be added nor removed.
+```py
+w = lbryt.target_support(uri="@rossmanngroup", target=1000)
+w = lbryt.target_support(cid="4494604ae93fe6995cb61dccb1c6a29202155af3", target=333)
+```
+
+Each claim has a base support that is provided by the author
+and by other users. Our specified `target` cannot be smaller than this value.
+If we specify a lower value, all of our existing support, if any,
+will be removed.
+```
+target = base + our_support
+target = (author + others) + our_support
+```
+
 # Seeding ratio
 
 The blob seeding ratio is estimated from the number of times that the words
@@ -987,4 +1009,5 @@ lbryt.list_supports(..., server=server)
 lbryt.print_blobs_ratio(..., server=server)
 lbryt.create_support(..., server=server)
 lbryt.abandon_support(..., server=server)
+lbryt.target_support(..., server=server)
 ```

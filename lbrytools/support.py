@@ -475,3 +475,177 @@ def abandon_support(uri=None, cid=None, name=None,
             "old_support": old_support,
             "new_support": new_support,
             "txid": txid}
+
+
+def target_support(uri=None, cid=None, name=None,
+                   target=0.0,
+                   server="http://localhost:5279"):
+    """Add an appropriate amount of LBC to reach a target support.
+
+    Parameters
+    ----------
+    uri: str
+        A unified resource identifier (URI) to a claim on the LBRY network.
+        It can be full or partial.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            uri = '@MyChannel#3/some-video-name#2'
+            uri = 'some-video-name'
+
+        The URI is also called the `'canonical_url'` of the claim.
+    cid: str, optional
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    target: float, optional
+        It defaults to `0.0`.
+        It is the amount of LBC support that we want the claim to have
+        at the end of our support.
+        For example, if the current support is `100`, and we specify a target
+        of `500`, we will be supporting the claim with `400`
+        in order to reach the target.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        A dictionary with information on the result of the support.
+        The keys are the following:
+        - 'canonical_url': canonical URI of the claim.
+        - 'claim_id': unique 40 character alphanumeric string.
+        - 'existing_support': existing support before we add or remove ours;
+          this is the sum of `base_support` and `old_support`.
+        - 'base_support': existing minimum support that we do not control;
+          all published claims must have a positive `base_support`.
+        - 'old_support': support that we have added to this claim in the past;
+          it may be zero.
+        - 'target': target support that we want after running this method.
+          It must be a positive number.
+        - 'must_add': amount of support that we must add or remove (negative)
+          to reach the `target`; it may be zero if `target`
+          is already below the `base_support`.
+        - 'new_support': new support that was successfully deposited
+          in the claim; it may be zero if `target` is already below
+          the `base_support`, or if `old_support` already satisfies
+          our `target`.
+        - 'txid': transaction ID in the blockchain that records the operation;
+          it may be `None` if the transaction was not made because the `target`
+          was already achieved before applying additional support.
+    False
+        If there is a problem or non existing claim, or lack of funds,
+        it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    supports = get_base_support(uri=uri, cid=cid, name=name)
+    if not supports:
+        return False
+
+    uri = supports["canonical_url"]
+    claim_id = supports["claim_id"]
+    existing = supports["existing_support"]
+    base_support = supports["base_support"]
+    old_support = supports["old_support"]
+
+    target = abs(target)
+    out = [f"canonical_url: {uri}",
+           f"claim_id: {claim_id}",
+           f"Existing support: {existing:14.8f}",
+           f"Base support:     {base_support:14.8f}",
+           f"Old support:      {old_support:14.8f}",
+           "",
+           f"Target:           {target:14.8f}"]
+
+    new_support = 0.0
+    must_add = 0.0
+
+    if target > base_support:
+        # Target above base, calculate addition
+        must_add = target - existing
+        new_support = old_support + must_add
+    elif target < base_support:
+        if not old_support:
+            # Target below base support, and no old support, nothing to add,
+            # reset support to 0
+            pass
+        else:
+            # Target below base support, and old support, remove it
+            must_add = -old_support
+    else:
+        # Same target as base support, nothing to add, reset support to 0
+        pass
+
+    out.append(f"Must add:         {must_add:14.8f}")
+    out.append(f"New support:      {new_support:14.8f}")
+
+    applied = 0.0
+    t_input = 0.0
+    t_output = 0.0
+    t_fee = 0.0
+    txid = None
+
+    # The SDK accepts the amount as a string, not directly as a number.
+    # The minimum amount is 0.00000001, so we convert all quantities
+    # to have 8 decimal significant numbers.
+    #
+    # Only perform the transaction if the new support is different
+    # from the old support
+    if new_support != old_support:
+        if not old_support and new_support > 0:
+            # No existing support, so we create it
+            msg = {"method": "support_create",
+                   "params": {"claim_id": claim_id,
+                              "amount": f"{new_support:.8f}"}}
+            output = requests.post(server, json=msg).json()
+        else:
+            # Existing support, so we update it with the new value
+            msg = {"method": "support_abandon",
+                   "params": {"claim_id": claim_id,
+                              "keep": f"{new_support:.8f}"}}
+            output = requests.post(server, json=msg).json()
+
+        if "error" in output:
+            error = output["error"]
+            if "data" in error:
+                print(">>> Error: {}, {}".format(error["data"]["name"],
+                                                 error["message"]))
+            else:
+                print(f">>> Error: {error}")
+            print(f">>> Requested amount: {new_support:.8f}")
+            return False
+
+        applied = new_support
+        t_input = float(output["result"]["total_input"])
+        t_output = float(output["result"]["total_output"])
+        t_fee = float(output["result"]["total_fee"])
+        txid = output["result"]["txid"]
+
+    out += ["",
+            f"Applied:          {applied:14.8f}",
+            f"total_input:      {t_input:14.8f}",
+            f"total_output:     {t_output:14.8f}",
+            f"total_fee:        {t_fee:14.8f}",
+            f"txid: {txid}"]
+
+    print("\n".join(out))
+
+    return {"canonical_url": uri,
+            "claim_id": cid,
+            "existing_support": existing,
+            "base_support": base_support,
+            "old_support": old_support,
+            "target": target,
+            "must_add": must_add,
+            "new_support": new_support,
+            "txid": txid}
