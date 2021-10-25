@@ -392,8 +392,8 @@ def print_blobs_ratio(data_dir=None, plot_hst=True,
             _min_dtime = min(estimation["down_times_days"])
 
         out.append(f"{_name:15s} "
-                   f"up: {_blobs_up:6d}" + f"{sep} "
-                   f"down: {_blobs_down:6d}" + f"{sep} "
+                   f"up: {_blobs_up:5d}" + f"{sep} "
+                   f"down: {_blobs_down:5d}" + f"{sep} "
                    f"ratio: {ratio:8.4f}" + f"{sep} "
                    f"up new: {_max_utime:7.2f}" + f"{sep} "
                    f"up old: {_min_utime:7.2f}" + f"{sep} "
