@@ -102,6 +102,8 @@ def list_supports(claim_id=False,
     resolved = []
     for item in items:
         s = srch.search_item(cid=item["claim_id"])
+        if not s:
+            continue
         resolved.append(s)
 
     out_list = []
