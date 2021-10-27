@@ -61,9 +61,7 @@ def ch_download_latest(channel=None, number=2,
         It defaults to `True`, in which case all blobs of the stream
         will be downloaded, and the media file (mp4, mp3, mkv, etc.)
         will be placed in the downloaded directory.
-        If it is `False` it will only download the first blob (`sd_hash`)
-        in the stream, so the file will be in the local database
-        but the complete file won't be placed in the download directory.
+        If it is `False` it will only download the blobs.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -325,9 +323,7 @@ def redownload_latest(number=2, ddir=None, own_dir=True, save_file=True,
         It defaults to `True`, in which case all blobs of the stream
         will be downloaded, and the media file (mp4, mp3, mkv, etc.)
         will be placed in the downloaded directory.
-        If it is `False` it will only download the first blob (`sd_hash`)
-        in the stream, so the file will be in the local database
-        but the complete file won't be placed in the download directory.
+        If it is `False` it will only download the blobs.
     shuffle: bool, optional
         It defaults to `False`.
         If it is `True` it will shuffle the list of claims
@@ -404,9 +400,7 @@ def download_claims(ddir=None, own_dir=True, save_file=True,
         It defaults to `True`, in which case all blobs of the stream
         will be downloaded, and the media file (mp4, mp3, mkv, etc.)
         will be placed in the downloaded directory.
-        If it is `False` it will only download the first blob (`sd_hash`)
-        in the stream, so the file will be in the local database
-        but the complete file won't be placed in the download directory.
+        If it is `False` it will only download the blobs.
     start: int, optional
         It defaults to 1.
         Operate on the item starting from this index in the internal list

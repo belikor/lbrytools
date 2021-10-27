@@ -55,9 +55,7 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
         It defaults to `True`, in which case all blobs of the stream
         will be downloaded, and the media file (mp4, mp3, mkv, etc.)
         will be placed in the downloaded directory.
-        If it is `False` it will only download the first blob (`sd_hash`)
-        in the stream, so the file will be in the local database
-        but the complete file won't be placed in the download directory.
+        If it is `False` it will only download the blobs.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -95,6 +93,7 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
                uri,
                "--download_directory=" + "'" + ddir + "'",
                "--save_file=False"]
+
     if save_file:
         get_cmd[4] = "--save_file=True"
 
@@ -111,6 +110,7 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
            "params": {"uri": uri,
                       "download_directory": ddir,
                       "save_file": False}}
+
     if save_file:
         msg["params"]["save_file"] = True
 
@@ -120,6 +120,9 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
         return False
 
     info_get = output["result"]
+
+    if not save_file:
+        requests.get(info_get["streaming_url"])
 
     return info_get
 
@@ -198,9 +201,7 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
         It defaults to `True`, in which case all blobs of the stream
         will be downloaded, and the media file (mp4, mp3, mkv, etc.)
         will be placed in the downloaded directory.
-        If it is `False` it will only download the first blob (`sd_hash`)
-        in the stream, so the file will be in the local database
-        but the complete file won't be placed in the download directory.
+        If it is `False` it will only download the blobs.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -309,7 +310,8 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
             print()
         return info_get
 
-    info_get = lbrynet_get(uri=uri, ddir=ddir, save_file=save_file,
+    info_get = lbrynet_get(uri=uri, ddir=ddir,
+                           save_file=save_file,
                            server=server)
 
     if not info_get:

@@ -54,8 +54,8 @@ own_dir = 1
 
 # Set to 1 (True) to make sure all blobs are downloaded, and the media file
 # is created in `ddir`.
-# Set to 0 (False) to only download the first blob of the streams (sd_hash);
-# the media file will not be created.
+# Set to 0 (False) to only download the blobs; the media file will not
+# be created. This is ideal if you only intend to seed the content.
 save_file = 1
 
 # A global number that will override the individual numbers in the `channels`
