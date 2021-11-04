@@ -25,9 +25,16 @@
 # --------------------------------------------------------------------------- #
 """Auxiliary functions for other methods of the lbrytools package."""
 import os
+import regex
 import requests
 import subprocess
 import time
+
+try:
+    import emoji
+    EMOJI_LOADED = True
+except ModuleNotFoundError:
+    EMOJI_LOADED = False
 
 
 def start_lbry():
@@ -135,3 +142,36 @@ def print_content(output_list, file=None, fdate=None):
         print(content)
 
     return content
+
+
+def sanitize_name(text="random_string"):
+    """Sanitize names with complex unicode characters.
+
+    Some names have complex unicode characters, especially emojis.
+    With this method we remove these `grapheme clusters` so that applications
+    that receive the string don't cause an error.
+
+    Many terminals and interface toolkits are able to display the emojis
+    without problem but others such as Tkinter Text widgets
+    may crash when trying to display such symbols.
+    """
+    # This will find unicode country flags, which are actually composed
+    # of two or more characters together, like 'U' 'S' is the US flag,
+    # and 'F' 'R' is the France flag.
+    flags = regex.findall(u'[\U0001F1E6-\U0001F1FF]', text)
+
+    name_normalized = ""
+
+    # Only remove the emojis if we have the `emoji` package loaded
+    if EMOJI_LOADED:
+        emoji_dict = emoji.UNICODE_EMOJI['en']
+    else:
+        emoji_dict = ""
+
+    for character in text:
+        if character in emoji_dict or character in flags:
+            name_normalized += "\u275A"  # monospace black box
+        else:
+            name_normalized += character
+
+    return name_normalized

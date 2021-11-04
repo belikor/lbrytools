@@ -255,6 +255,237 @@ def claims_bids(show_controlling=False, show_non_controlling=True,
     return claims_filtered
 
 
+def print_claims(claims, claim_id=False, sanitize=False,
+                 file=None, fdate=None, sep=";"):
+    """Internal function to print generic claims."""
+    n_claims = len(claims)
+
+    out = []
+    for num, claim in enumerate(claims, start=1):
+        vtype = claim["value_type"]
+
+        if "stream_type" in claim["value"]:
+            stream_type = claim["value"].get("stream_type")
+        else:
+            stream_type = 8 * "_"
+
+        if "source" in claim["value"]:
+            mtype = claim["value"]["source"].get("media_type", 14 * "_")
+        else:
+            mtype = 14 * "_"
+
+        if "signing_channel" in claim:
+            channel = claim["signing_channel"].get("name", 14 * "_")
+            if sanitize:
+                channel = funcs.sanitize_name(channel)
+        else:
+            channel = 14 * "_"
+
+        name = claim["name"]
+        if sanitize:
+            name = funcs.sanitize_name(claim["name"])
+
+        line = f"{num:2d}/{n_claims:2d}" + f"{sep} "
+
+        if claim_id:
+            line += claim["claim_id"] + f"{sep} "
+
+        line += f"{vtype:9s}" + f"{sep} "
+        line += f"{stream_type:9s}" + f"{sep} "
+        line += f"{mtype:17s}" + f"{sep} "
+        line += f"{channel:40s}" + f"{sep} "
+        line += f'"{name}"'
+        out.append(line)
+
+    content = funcs.print_content(out, file=file, fdate=fdate)
+
+    return content
+
+
+def w_claim_search(page=1,
+                   what="trending",
+                   trending="trending_mixed",
+                   order="release_time",
+                   text=None,
+                   tags=None,
+                   claim_id=False,
+                   claim_type=None,
+                   video_stream=False, audio_stream=False,
+                   doc_stream=False, img_stream=False,
+                   bin_stream=False, model_stream=False,
+                   sanitize=False,
+                   file=None, fdate=False, sep=";",
+                   server="http://localhost:5279"):
+    """Print trending claims or searched claims in the the network."""
+    print(80 * "-")
+    if what in "trending":
+        print("Show trending claims")
+    elif what in "text":
+        print("Show searched text and tags")
+
+    print(f"Page: {page}")
+
+    msg = {"method": "claim_search",
+           "params": {"page": page,
+                      "page_size": 100,
+                      "no_totals": True}}
+
+    if what in "trending":
+        msg["params"]["order_by"] = trending
+    elif what in "text":
+        msg["params"]["order_by"] = order
+
+    if what in "text":
+        if not tags:
+            tags = []
+        if isinstance(tags, str):
+            tags = [tags]
+        if not isinstance(tags, list):
+            tags = []
+
+        if text:
+            msg["params"]["text"] = f'"{text}"'
+        if tags:
+            msg["params"]["any_tags"] = tags
+
+    # Claim type can only be one of:
+    # 'stream', 'channel', 'repost', 'collection'
+    if claim_type:
+        # Livestreams are just type 'stream' but have no 'source'
+        if claim_type == "livestream":
+            msg["params"]["has_no_source"] = True
+            claim_type = "stream"
+
+        # The 'playlist' argument is treated the same as 'collection'
+        if claim_type == "playlist":
+            claim_type = "collection"
+
+        msg["params"]["claim_type"] = claim_type
+
+    stypes = []
+    if video_stream:
+        stypes.append("video")
+    if audio_stream:
+        stypes.append("audio")
+    if doc_stream:
+        stypes.append("document")
+    if img_stream:
+        stypes.append("image")
+    if bin_stream:
+        stypes.append("binary")
+    if model_stream:
+        stypes.append("model")
+    if stypes:
+        msg["params"]["stream_types"] = stypes
+
+    if what in "trending":
+        print(f"order_by: {trending}")
+    elif what in "text":
+        print(f'text: "{text}"')
+        print(f"tags: " + ", ".join(tags))
+        print(f"order_by: {order}")
+
+    print(f"claim_type: {claim_type}")
+    print(f"stream_types: {stypes}")
+
+    output = requests.post(server, json=msg).json()
+    if "error" in output:
+        return False
+
+    claims = output["result"]["items"]
+
+    content = print_claims(claims, claim_id=claim_id,
+                           sanitize=sanitize,
+                           file=file, fdate=fdate, sep=sep)
+
+    return content
+
+
+def print_trending_claims(page=1,
+                          trending="trending_mixed",
+                          claim_id=False,
+                          claim_type=None,
+                          video_stream=False, audio_stream=False,
+                          doc_stream=False, img_stream=False,
+                          bin_stream=False, model_stream=False,
+                          sanitize=False,
+                          file=None, fdate=False, sep=";",
+                          server="http://localhost:5279"):
+    """Print trending claims in the network.
+
+    Parameters
+    ----------
+    page: int, optional
+        It defaults to 1.
+        Page of output to show. Each page has 50 elements.
+        At the moment the maximum is 20.
+    claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the claim ID (40-character string).
+    claim_type: str, optional
+        One of the five types: 'stream', 'channel', 'repost', 'collection',
+        or 'livestream'.
+    video_stream: bool, optional
+        Show 'video' streams.
+    audio_stream: bool, optional
+        Show 'audio' streams.
+    doc_stream: bool, optional
+        Show 'document' streams.
+    img_stream: bool, optional
+        Show 'image' streams.
+    bin_stream: bool, optional
+        Show 'binary' streams.
+    model_stream: bool, optional
+        Show 'model' streams.
+    sanitize: bool, optional
+        It defaults to `True`, in which case it will remove the emojis
+        from the name of the claim and channel.
+        If it is `False` it will leave these characters there.
+        This option requires the `emoji` package to be installed.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    str
+        Returns the string to display, that was printed to the terminal
+        or to the file.
+    False
+        If there is a problem it will return `False`.
+    """
+    content = w_claim_search(page=page,
+                             what="trending",
+                             trending=trending,
+                             claim_id=claim_id,
+                             claim_type=claim_type,
+                             video_stream=video_stream,
+                             audio_stream=audio_stream,
+                             doc_stream=doc_stream,
+                             img_stream=img_stream,
+                             bin_stream=bin_stream,
+                             model_stream=model_stream,
+                             sanitize=sanitize,
+                             file=file, fdate=fdate, sep=sep,
+                             server=server)
+
+    return content
+
+
 if __name__ == "__main__":
     claims_bids(show_non_controlling=True, skip_repost=False, channels_only=False)
     # claims_bids(show_non_controlling=True, skip_repost=True, channels_only=False)

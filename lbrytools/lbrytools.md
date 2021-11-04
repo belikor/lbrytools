@@ -46,6 +46,7 @@ from lbrytools import print_blobs_ratio
 from lbrytools import create_support
 from lbrytools import abandon_support
 from lbrytools import target_support
+from lbrytools import print_trending_claims
 ```
 
 # Download
@@ -824,6 +825,45 @@ s = lbryt.claims_bids(show_claim_id=True, show_repost_status=True, compact=True)
 s = lbryt.claims_bids(show_competing=True, show_reposts=True, compact=True)
 ```
 
+## Trending claims
+
+Display the trending claims in the network.
+We can specify different claim types: `'stream'` (downloadable),
+`'channel'`, `'repost'`, `'collection'`, or `'livestream'`.
+By default it will display the first page of the results;
+we can choose one page from 1 to 20.
+```py
+g = lbryt.print_trending_claims()  # all types
+g = lbryt.print_trending_claims(page=12, claim_type="stream")
+g = lbryt.print_trending_claims(page=7, claim_type="channel")
+```
+
+Some names have complex unicode characters in them, especially emojis.
+We can remove these clusters so that the names can be displayed
+without problem in all systems.
+With the `sanitize` option the complex unicode symbols are replaced
+by a monospace heavy vertical bar `'❚'` (unicode U+275A).
+In this case, we may decide to display the claim ID, to be able to download
+this claim by ID rather than by name.
+```py
+g = lbryt.print_trending_claims(claim_id=True, sanitize=True)
+```
+
+If the claim type is a stream (downloadable content), we can further specify
+the type of media: `'video'`, `'audio'`, `'document'`, `'image'`, `'binary'`,
+and `'model'`.
+```py
+g = lbryt.print_trending_claims(claim_type="stream",
+                                video_stream=True, audio_stream=True,
+                                doc_stream=True, img_stream=True,
+                                bin_stream=False, model_stream=False)
+```
+
+The trending claims can be printed to a file.
+```py
+g = lbryt.print_trending_claims(file="claims.txt", fdate=True, sep=';')
+```
+
 # Channel subscriptions
 
 Display the channels to which we are subscribed,
@@ -1010,4 +1050,5 @@ lbryt.print_blobs_ratio(..., server=server)
 lbryt.create_support(..., server=server)
 lbryt.abandon_support(..., server=server)
 lbryt.target_support(..., server=server)
+lbryt.print_trending_claims(..., server=server)
 ```

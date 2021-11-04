@@ -55,8 +55,20 @@ PYTHONPATH=/opt/git/lbrytools:$PYTHONPATH
 
 This library was developed and tested with Python 3.8 but it may also work with
 earlier versions with small changes.
-It uses standard modules such as `importlib`, `os`, `random`, `requests`,
+It uses standard modules such as `importlib`, `os`, `random`, `regex`,
 `sys`, and `time`.
+
+The `requests` module is necessary to communicate with the `lbrynet` daemon.
+It may already be installed in your system as a dependency to another package.
+
+The `numpy` and `matplotlib` packages are optional; they are used
+to create a plot with `print_blobs_ratio`.
+
+The `emoji` package is optional; it is used to remove emojis from
+strings that contain them.
+```sh
+python -m pip install --user requests emoji numpy matplotlib
+```
 
 # Usage
 
@@ -102,6 +114,7 @@ lbryt.print_blobs_ratio(...)
 lbryt.create_support(...)
 lbryt.abandon_support(...)
 lbryt.target_support(...)
+lbryt.print_trending_claims(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation
