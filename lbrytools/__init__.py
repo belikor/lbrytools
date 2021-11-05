@@ -109,6 +109,7 @@ from lbrytools.blobs_move import blobs_move_all
 
 from lbrytools.claims import claims_bids
 from lbrytools.claims import print_trending_claims
+from lbrytools.claims import print_search_claims
 
 from lbrytools.channels import channel_subs
 
@@ -181,6 +182,7 @@ True if blobs_move_all else False
 
 True if claims_bids else False
 True if print_trending_claims else False
+True if print_search_claims else False
 
 True if channel_subs else False
 

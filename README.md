@@ -115,6 +115,7 @@ lbryt.create_support(...)
 lbryt.abandon_support(...)
 lbryt.target_support(...)
 lbryt.print_trending_claims(...)
+lbryt.print_search_claims(...)
 ```
 
 Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation

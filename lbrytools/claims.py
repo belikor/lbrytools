@@ -486,6 +486,103 @@ def print_trending_claims(page=1,
     return content
 
 
+def print_search_claims(page=1,
+                        order="release_time",
+                        text="lbry",
+                        tags=None,
+                        claim_id=False,
+                        claim_type=None,
+                        video_stream=False, audio_stream=False,
+                        doc_stream=False, img_stream=False,
+                        bin_stream=False, model_stream=False,
+                        sanitize=False,
+                        file=None, fdate=False, sep=";",
+                        server="http://localhost:5279"):
+    """Print the result of the claim search for an arbitrary text.
+
+    Parameters
+    ----------
+    page: int, optional
+        It defaults to 1.
+        Page of output to show. Each page has 50 elements.
+        At the moment the maximum is 20.
+    text: str, optional
+        It defaults to 'lbry'.
+        Full string to search in the network; it will search in the claim name,
+        channel name, title, description, author, and tags.
+        The search isn't very good, however. Adding many words together
+        will return few results or none.
+    tags: list of str, optional
+        Each string in the list will be considered a tag that is searched.
+    claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the claim ID (40-character string).
+    claim_type: str, optional
+        One of the five types: 'stream', 'channel', 'repost', 'collection',
+        or 'livestream'.
+    video_stream: bool, optional
+        Show 'video' streams.
+    audio_stream: bool, optional
+        Show 'audio' streams.
+    doc_stream: bool, optional
+        Show 'document' streams.
+    img_stream: bool, optional
+        Show 'image' streams.
+    bin_stream: bool, optional
+        Show 'binary' streams.
+    model_stream: bool, optional
+        Show 'model' streams.
+    sanitize: bool, optional
+        It defaults to `True`, in which case it will remove the emojis
+        from the name of the claim and channel.
+        If it is `False` it will leave these characters there.
+        This option requires the `emoji` package to be installed.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    str
+        Returns the string to display, that was printed to the terminal
+        or to the file.
+    False
+        If there is a problem it will return `False`.
+    """
+    content = w_claim_search(page=page,
+                             what="text",
+                             order=order,
+                             text=text,
+                             tags=tags,
+                             claim_id=claim_id,
+                             claim_type=claim_type,
+                             video_stream=video_stream,
+                             audio_stream=audio_stream,
+                             doc_stream=doc_stream,
+                             img_stream=img_stream,
+                             bin_stream=bin_stream,
+                             model_stream=model_stream,
+                             sanitize=sanitize,
+                             file=file, fdate=fdate, sep=sep,
+                             server=server)
+
+    return content
+
+
 if __name__ == "__main__":
     claims_bids(show_non_controlling=True, skip_repost=False, channels_only=False)
     # claims_bids(show_non_controlling=True, skip_repost=True, channels_only=False)

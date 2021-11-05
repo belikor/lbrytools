@@ -47,6 +47,7 @@ from lbrytools import create_support
 from lbrytools import abandon_support
 from lbrytools import target_support
 from lbrytools import print_trending_claims
+from lbrytools import print_search_claims
 ```
 
 # Download
@@ -864,6 +865,23 @@ The trending claims can be printed to a file.
 g = lbryt.print_trending_claims(file="claims.txt", fdate=True, sep=';')
 ```
 
+## Search for claims
+
+Display the claims found by searching for a textual string
+and by a list of tags.
+```py
+h = lbryt.print_search_claims(page=1, text="lbry")
+h = lbryt.print_search_claims(page=3, text="", tags=["cook", "food"])
+```
+
+This search is performed by the SDK, and thus it isn't very good.
+Adding many words to the `text` string will return few results or none.
+
+Other options are the same as for `print_trending_claims`, that is,
+`claim_id`, `claim_type`, `video_stream`, `audio_stream`,
+`doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
+`sanitize`, `file`, `fdate`, `sep`,
+
 # Channel subscriptions
 
 Display the channels to which we are subscribed,
@@ -1051,4 +1069,5 @@ lbryt.create_support(..., server=server)
 lbryt.abandon_support(..., server=server)
 lbryt.target_support(..., server=server)
 lbryt.print_trending_claims(..., server=server)
+lbryt.print_search_claims(..., server=server)
 ```
