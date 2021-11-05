@@ -24,8 +24,10 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Auxiliary functions for other methods of the lbrytools package."""
+import os
 import requests
 import subprocess
+import time
 
 
 def start_lbry():
@@ -101,3 +103,35 @@ def server_exists(server="http://localhost:5279"):
         print("  lbrynet start")
         return False
     return True
+
+
+def print_content(output_list, file=None, fdate=None):
+    """Print contents to the terminal or to a file."""
+    fd = 0
+
+    if file:
+        dirn = os.path.dirname(file)
+        base = os.path.basename(file)
+
+        if fdate:
+            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+        else:
+            fdate = ""
+
+        file = os.path.join(dirn, fdate + base)
+
+        try:
+            fd = open(file, "w")
+        except (FileNotFoundError, PermissionError) as err:
+            print(f"Cannot open file for writing; {err}")
+
+    content = "\n".join(output_list)
+
+    if file and fd:
+        print(content, file=fd)
+        fd.close()
+        print(f"Summary written: {file}")
+    else:
+        print(content)
+
+    return content

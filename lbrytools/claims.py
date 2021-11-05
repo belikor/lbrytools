@@ -24,9 +24,7 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to display information on our own claims."""
-import os
 import requests
-import time
 
 import lbrytools.funcs as funcs
 
@@ -252,30 +250,7 @@ def claims_bids(show_controlling=False, show_non_controlling=True,
 
             out += [paragraph]
 
-    fd = 0
-
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
-
-        file = os.path.join(dirn, fdate + base)
-
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
-
-    if file and fd:
-        print("\n".join(out), file=fd)
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print("\n".join(out))
+    funcs.print_content(out, file=file, fdate=fdate)
 
     return claims_filtered
 
