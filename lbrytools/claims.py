@@ -438,9 +438,10 @@ def print_trending_claims(page=1,
     model_stream: bool, optional
         Show 'model' streams.
     sanitize: bool, optional
-        It defaults to `True`, in which case it will remove the emojis
+        It defaults to `False`, in which case it will not remove the emojis
         from the name of the claim and channel.
-        If it is `False` it will leave these characters there.
+        If it is `True` it will remove these unicode characters
+        and replace them with a simple black square.
         This option requires the `emoji` package to be installed.
     file: str, optional
         It defaults to `None`.
@@ -533,9 +534,10 @@ def print_search_claims(page=1,
     model_stream: bool, optional
         Show 'model' streams.
     sanitize: bool, optional
-        It defaults to `True`, in which case it will remove the emojis
+        It defaults to `False`, in which case it will not remove the emojis
         from the name of the claim and channel.
-        If it is `False` it will leave these characters there.
+        If it is `True` it will remove these unicode characters
+        and replace them with a simple black square.
         This option requires the `emoji` package to be installed.
     file: str, optional
         It defaults to `None`.
