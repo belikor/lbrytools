@@ -105,6 +105,48 @@ def resolve_channel(channel=None,
     return ch_item
 
 
+def ch_search_fifty_claims(channel, number=2,
+                           server="http://localhost:5279"):
+    """Return only the first page of results."""
+    cmd = ["lbrynet",
+           "claim",
+           "search",
+           "--channel=" + "'" + channel + "'",
+           # "--stream_type=video",
+           "--page_size=" + str(number),
+           "--order_by=release_time"]
+
+    print("Search: " + " ".join(cmd))
+    print(80 * "-")
+
+    msg = {"method": cmd[1] + "_" + cmd[2],
+           "params": {"channel": channel,
+                      "page_size": number,
+                      "order_by": "release_time"}}
+
+    # A bug (lbryio/lbry-sdk #3316) prevents the `lbrynet file list`
+    # command from finding the channel, therefore the channel must be
+    # resolved with `lbrynet resolve` before it becomes known by other
+    # functions.
+    ch = resolve_channel(channel=channel, server=server)
+    if not ch:
+        return False
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    claims = output["result"]["items"]
+
+    if len(claims) < 1:
+        print(">>> No items found; "
+              f"check that the name is correct, channel={channel}")
+
+    return claims
+
+
 def ch_search_latest(channel=None, number=2,
                      server="http://localhost:5279"):
     """Search for the latest claims published by a specific channel.
@@ -153,43 +195,13 @@ def ch_search_latest(channel=None, number=2,
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    cmd = ["lbrynet",
-           "claim",
-           "search",
-           "--channel=" + "'" + channel + "'",
-           # "--stream_type=video",
-           "--page_size=" + str(number),
-           "--order_by=release_time"]
+    if number <= 50:
+        claims = ch_search_fifty_claims(channel, number=number,
+                                        server=server)
+    else:
+        claims = []
 
-    print("Search: " + " ".join(cmd))
-    print(80 * "-")
-
-    msg = {"method": cmd[1] + "_" + cmd[2],
-           "params": {"channel": channel,
-                      "page_size": number,
-                      "order_by": "release_time"}}
-
-    # A bug (lbryio/lbry-sdk #3316) prevents the `lbrynet file list`
-    # command from finding the channel, therefore the channel must be
-    # resolved with `lbrynet resolve` before it becomes known by other
-    # functions.
-    ch = resolve_channel(channel=channel, server=server)
-    if not ch:
-        return False
-
-    output = requests.post(server, json=msg).json()
-
-    if "error" in output:
-        print(">>> No 'result' in the JSON-RPC server output")
-        return False
-
-    items = output["result"]["items"]
-
-    if len(items) < 1:
-        print(">>> No items found; "
-              f"check that the name is correct, channel={channel}")
-
-    return items
+    return claims
 
 
 def find_channel(uri=None, cid=None, name=None,
