@@ -48,6 +48,7 @@ from lbrytools import abandon_support
 from lbrytools import target_support
 from lbrytools import print_trending_claims
 from lbrytools import print_search_claims
+from lbrytools import print_ch_claims
 ```
 
 # Download
@@ -882,6 +883,50 @@ Other options are the same as for `print_trending_claims`, that is,
 `doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
 `sanitize`, `file`, `fdate`, `sep`,
 
+## Search channel claims
+
+Display the latest claims by the specified `channel`.
+The `number` parameter specifies how many claims will be returned
+starting with the newest claim, and going back in time.
+
+With `reverse=True` the newest claims will come first in the printed output,
+otherwise the oldest claims will be first:
+```py
+k = lbryt.print_ch_claims("@lbry:3f", number=10, reverse=True)
+```
+
+Various options allow us to display different fields of information.
+If `sanitize=True`, it will remove emojis from the displayed names,
+which may be necessary if we want to use the output in other programs:
+```py
+k = lbryt.print_ch_claims("@lbry:3f", number=20,
+                          typ=True, ch_name=True, blocks=True, sanitize=True)
+```
+
+Instead of displaying the claim name, we can display the title
+of the claim. If we want to download the item, we must use
+either the claim name or the claim ID, so the latter
+can be displayed as well:
+```py
+k = lbryt.print_ch_claims("@lbry:3f", number=15,
+                          claim_id=True, title=True)
+```
+
+If `number` is not provided, it defaults to zero,
+in which case all claims from the channel will be printed.
+If this is done we can also choose an arbitrary range of claims to print:
+```py
+k = lbryt.print_ch_claims("@TomWoodsTV", start=1005)
+k = lbryt.print_ch_claims("@TomWoodsTV", end=75)
+k = lbryt.print_ch_claims("@TomWoodsTV", start=445, end=600)
+```
+
+The list of claims can be printed directly to a file:
+```py
+k = lbryt.print_ch_claims("@TomWoodsTV",
+	                  file="ch_claims.txt", fdate=True, sep=";")
+```
+
 # Channel subscriptions
 
 Display the channels to which we are subscribed,
@@ -1070,4 +1115,5 @@ lbryt.abandon_support(..., server=server)
 lbryt.target_support(..., server=server)
 lbryt.print_trending_claims(..., server=server)
 lbryt.print_search_claims(..., server=server)
+lbryt.print_ch_claims(..., server=server)
 ```

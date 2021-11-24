@@ -74,6 +74,7 @@ from lbrytools.print import print_multi_list
 
 from lbrytools.printf import print_summary
 from lbrytools.printf import print_channels
+from lbrytools.printf import print_ch_claims
 
 from lbrytools.download import download_single
 
@@ -147,6 +148,7 @@ True if print_multi_list else False
 
 True if print_summary else False
 True if print_channels else False
+True if print_ch_claims else False
 
 True if download_single else False
 
