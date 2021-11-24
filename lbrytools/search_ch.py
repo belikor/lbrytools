@@ -28,6 +28,7 @@ import requests
 
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
+import lbrytools.search_ch_all as srchall
 
 
 def resolve_channel(channel=None,
@@ -162,7 +163,9 @@ def ch_search_latest(channel=None, number=2,
         Enter the full name to choose the right one.
     number: int, optional
         It defaults to 2.
-        The number of items to search that were last posted by `channel`.
+        The number of claims to search that were last posted by `channel`.
+        If `number=0` it will search all claims ever published
+        by this channel.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -198,8 +201,16 @@ def ch_search_latest(channel=None, number=2,
     if number <= 50:
         claims = ch_search_fifty_claims(channel, number=number,
                                         server=server)
-    else:
-        claims = []
+    elif number > 50:
+        claims = srchall.ch_search_n_claims(channel, number=number,
+                                            reverse=True,
+                                            server=server)
+        claims = claims["claims"]
+    elif number == 0:
+        claims = srchall.ch_search_all_claims(channel,
+                                              reverse=True,
+                                              server=server)
+        claims = claims["claims"]
 
     return claims
 
