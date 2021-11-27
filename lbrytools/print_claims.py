@@ -167,7 +167,7 @@ def print_sch_claims(claims,
             line += claim["claim_id"] + f"{sep} "
 
         if typ:
-            line += f"{vtype:9s}" + f"{sep} "
+            line += f"{vtype:10s}" + f"{sep} "
             line += f"{stream_type:9s}" + f"{sep} "
             line += f"{mtype:17s}" + f"{sep} "
 
