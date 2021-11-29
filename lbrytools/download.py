@@ -127,6 +127,45 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
     return info_get
 
 
+def download_collection(collection, max_claims=2, reverse=False,
+                        ddir=None, save_file=True,
+                        server="http://localhost:5279"):
+    """Internal function to download the claims inside a collection."""
+    claims = collection["value"]["claims"]
+    n_claims = len(claims)
+
+    if not max_claims:
+        max_claims = int(n_claims)
+
+    if reverse:
+        claims.reverse()
+
+    info_get = []
+
+    print()
+    print("Collection")
+    print(80 * "-")
+    for num, cid in enumerate(claims, start=1):
+        s = srch.search_item(cid=cid, offline=False,
+                             server=server)
+        if num > max_claims:
+            break
+
+        print(f"Claim {num}/{n_claims}")
+        prnt.print_info_pre_get(s, offline=False)
+        info = lbrynet_get(uri=s["canonical_url"], ddir=ddir,
+                           save_file=save_file,
+                           server=server)
+        info_get.append(info)
+
+        if info:
+            prnt.print_info_post_get(info)
+        else:
+            print(">>> Empty information from `lbrynet get`")
+        print()
+    return info_get
+
+
 def download_single(uri=None, cid=None, name=None, invalid=False,
                     collection=False, max_claims=2, reverse_collection=False,
                     ddir=None, own_dir=True, save_file=True,
@@ -186,6 +225,7 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
     max_claims: int, optional
         It defaults to 2. It specifies the maximum number of items to download
         in a collection.
+        If it is 0, it will consider all claims in the collection.
     reverse_collection: bool, optional
         It defaults to `False`, in which case the collection
         will be downloaded in the same order it is defined.
@@ -280,42 +320,33 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
 
     prnt.print_info_pre_get(item, offline=False)
 
-    if collection and item["value_type"] in "collection":
-        info_get = []
-        claims = item["value"]["claims"]
-        n_claims = len(claims)
-        if reverse_collection:
-            claims.reverse()
+    info_get = []
 
-        print()
-        print("Collection")
-        print(80 * "-")
-        for num, cid in enumerate(claims, start=1):
-            s = srch.search_item(cid=cid, offline=False,
-                                 server=server)
-            if num > max_claims:
-                break
+    is_collection = False
 
-            print(f"Claim {num}/{n_claims}")
-            prnt.print_info_pre_get(s, offline=False)
-            info = lbrynet_get(uri=s["canonical_url"], ddir=ddir,
-                               save_file=save_file,
-                               server=server)
-            info_get.append(info)
+    if item["value_type"] in "collection":
+        is_collection = True
 
-            if info:
-                prnt.print_info_post_get(info)
-            else:
-                print(">>> Empty information from `lbrynet get`")
-            print()
+    if collection and is_collection:
+        info_get = download_collection(item,
+                                       max_claims=max_claims,
+                                       reverse=reverse_collection,
+                                       ddir=ddir, save_file=save_file,
+                                       server=server)
         return info_get
 
-    info_get = lbrynet_get(uri=uri, ddir=ddir,
-                           save_file=save_file,
-                           server=server)
+    if not is_collection:
+        info_get = lbrynet_get(uri=uri, ddir=ddir,
+                               save_file=save_file,
+                               server=server)
 
     if not info_get:
-        print(">>> Empty information from `lbrynet get`")
+        if is_collection:
+            print(">>> Collection items will not be downloaded "
+                  "without `collection=True` option")
+            print(">>> Skip download.")
+        else:
+            print(">>> Empty information from `lbrynet get`")
         return False
 
     prnt.print_info_post_get(info_get)
