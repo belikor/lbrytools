@@ -270,6 +270,7 @@ def print_items(items=None, show="all",
                 blocks=False, cid=True, blobs=True, size=True,
                 typ=False, ch=False, ch_online=True,
                 name=True, title=False, path=False,
+                sanitize=False,
                 start=1, end=0, channel=None,
                 file=None, fdate=False, sep=";",
                 server="http://localhost:5279"):
@@ -338,6 +339,11 @@ def print_items(items=None, show="all",
     path: bool, optional
         It defaults to `False`.
         Show the full path of the saved media file.
+    sanitize: bool, optional
+        It defaults to `False`, in which case it will not remove the emojis
+        from the name of the claim and channel.
+        If it is `True` it will remove these unicode characters.
+        This option requires the `emoji` package to be installed.
     start: int, optional
         It defaults to 1.
         Show claims starting from this index in the list of items.
@@ -484,6 +490,11 @@ def print_items(items=None, show="all",
             # Skip if the item is not published by the specified channel
             if channel and channel not in st_channel:
                 continue
+
+        if sanitize:
+            st_claim_name = funcs.sanitize_name(st_claim_name)
+            st_title = funcs.sanitize_name(st_title)
+            st_channel = funcs.sanitize_name(st_channel)
 
         line = f"{num:4d}/{n_items:4d}" + f"{sep} "
 
