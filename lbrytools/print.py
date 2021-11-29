@@ -24,7 +24,6 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to print information about the claims in the LBRY network."""
-import os
 import time
 
 import lbrytools.funcs as funcs
@@ -403,24 +402,6 @@ def print_items(items=None, show="all",
         print(f"file={file}")
         return False
 
-    fd = 0
-
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
-
-        file = os.path.join(dirn, fdate + base)
-
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
-
     out_list = []
 
     for it, item in enumerate(items, start=1):
@@ -503,13 +484,6 @@ def print_items(items=None, show="all",
 
     print(f"Number of shown items: {len(out_list)}")
 
-    if file and fd:
-        for line in out_list:
-            print(line, file=fd)
-
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print("\n".join(out_list))
+    funcs.print_content(out_list, file=file, fdate=fdate)
 
     return True
