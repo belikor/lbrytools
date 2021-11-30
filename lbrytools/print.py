@@ -267,9 +267,9 @@ def print_multi_list(list_ch_info=None, sep=";"):
 
 
 def print_items(items=None, show="all",
-                title=False, typ=False, path=False,
-                cid=True, blobs=True, ch=False,
-                ch_online=True, name=True,
+                cid=True, blobs=True,
+                typ=False, ch=False, ch_online=True,
+                name=True, title=False, path=False,
                 start=1, end=0, channel=None,
                 file=None, fdate=False, sep=";",
                 server="http://localhost:5279"):
@@ -292,15 +292,6 @@ def print_items(items=None, show="all",
         a partial media file may be present.
         If it is `'missing'` it will show claims that don't have
         the media file, whether the full blobs are present or not.
-    title: bool, optional
-        It defaults to `False`.
-        Show the title of the claim.
-    typ: bool, optional
-        It defaults to `False`.
-        Show the type of claim (video, audio, document, etc.).
-    path: bool, optional
-        It defaults to `False`.
-        Show the full path of the saved media file.
     cid: bool, optional
         It defaults to `True`.
         Show the `'claim_id'` of the claim.
@@ -308,6 +299,9 @@ def print_items(items=None, show="all",
     blobs: bool, optional
         It defaults to `True`.
         Show the number of blobs in the file, and how many are complete.
+    typ: bool, optional
+        It defaults to `False`.
+        Show the type of stream (video, audio, document, etc.).
     ch: bool, optional
         It defaults to `False`.
         Show the name of the channel that published the claim.
@@ -329,6 +323,12 @@ def print_items(items=None, show="all",
     name: bool, optional
         It defaults to `True`.
         Show the name of the claim.
+    title: bool, optional
+        It defaults to `False`.
+        Show the title of the claim.
+    path: bool, optional
+        It defaults to `False`.
+        Show the full path of the saved media file.
     start: int, optional
         It defaults to 1.
         Show claims starting from this index in the list of items.
@@ -427,14 +427,16 @@ def print_items(items=None, show="all",
         elif show in "full" and st_blobs < st_blobs_in_stream:
             continue
 
-        st_time = int(item["metadata"]["release_time"])
+        meta = item["metadata"]
+
+        st_time = int(meta["release_time"])
         st_time = time.strftime("%Y%m%d_%H:%M:%S%z",
                                 time.localtime(st_time))
 
         st_claim_id = item["claim_id"]
+        st_type = meta.get("stream_type", 8 * "_")
         st_claim_name = item["claim_name"]
-        st_title = item["metadata"]["title"]
-        st_type = item["metadata"]["stream_type"]
+        st_title = meta["title"]
 
         if ch:
             if ch_online:
@@ -468,6 +470,14 @@ def print_items(items=None, show="all",
         if blobs:
             line += f"{st_blobs:3d}/{st_blobs_in_stream:3d}" + f"{sep} "
 
+        if typ:
+            line += f"{st_type:9s}" + f"{sep} "
+
+        if st_path:
+            line += "media   " + f"{sep} "
+        else:
+            line += "no-media" + f"{sep} "
+
         if ch:
             line += f"{st_channel}" + f"{sep} "
 
@@ -477,16 +487,8 @@ def print_items(items=None, show="all",
         if title:
             line += f'"{st_title}"' + f"{sep} "
 
-        if typ:
-            line += f"{st_type}" + f"{sep} "
-
         if path:
-            line += f'"{st_path}"' + f"{sep} "
-
-        if st_path:
-            line += "media"
-        else:
-            line += "no-media"
+            line += f'"{st_path}"'
 
         out.append(line)
 
