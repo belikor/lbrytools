@@ -74,34 +74,36 @@ def print_info_pre_get(item=None, offline=False):
     if offline:
         item["value"] = item["metadata"]
 
-    _time = "0"
+    cl_time = 0
     if "release_time" in item["value"]:
-        _time = int(item["value"]["release_time"])
-        _time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                              time.localtime(_time))
+        cl_time = int(item["value"]["release_time"])
+        cl_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
+                                time.localtime(cl_time))
 
-    _size = 0
+    cl_size = 0
     if "source" in item["value"] and "size" in item["value"]["source"]:
-        _size = float(item["value"]["source"]["size"])/(1024*1024)
+        cl_size = float(item["value"]["source"]["size"])/(1024**2)  # to MiB
 
     if offline:
-        _title = item["claim_name"]
+        cl_title = item["claim_name"]
     else:
-        _title = item["name"]
+        cl_title = item["name"]
+
     if "title" in item["value"]:
-        _title = item["value"]["title"]
+        cl_title = item["value"]["title"]
 
     if offline:
-        _type = item["mime_type"]
+        cl_type = item["mime_type"]
     else:
-        _type = item["type"]
+        cl_type = item["type"]
+
     if "stream_type" in item["value"]:
-        _type = item["value"]["stream_type"]
+        cl_type = item["value"]["stream_type"]
 
     if offline:
-        _vtype = "stream"
+        cl_vtype = "stream"
     else:
-        _vtype = item["value_type"]
+        cl_vtype = item["value_type"]
 
     length_s = 0
     rem_s = 0
@@ -112,25 +114,24 @@ def print_info_pre_get(item=None, offline=False):
     if "audio" in item["value"] and "duration" in item["value"]["audio"]:
         length_s = item["value"]["audio"]["duration"]
 
-    rem_s = length_s % 60
-    rem_min = (length_s - rem_s)/60
+    rem_s = length_s % 60  # remainder
+    rem_min = length_s // 60  # integer part
 
     if offline:
         info = ["claim_name: " + item["claim_name"]]
     else:
         info = ["canonical_url: " + item["canonical_url"]]
 
-    _info = ["claim_id: " + item["claim_id"],
-             "release_time: " + _time,
-             "value_type: " + _vtype,
-             "stream_type: " + _type,
-             "title: " + _title,
-             "size: {:.4f} MB".format(_size),
-             "duration: {} min {} s".format(rem_min, rem_s)]
-    info.extend(_info)
+    info2 = ["claim_id: " + item["claim_id"],
+             "release_time: " + cl_time,
+             "value_type: " + cl_vtype,
+             "stream_type: " + cl_type,
+             "title: " + cl_title,
+             f"size: {cl_size:.4f} MB",
+             f"duration: {rem_min} min {rem_s} s"]
+    info.extend(info2)
 
-    for line in info:
-        print(line)
+    print("\n".join(info))
     return info
 
 
