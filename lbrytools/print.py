@@ -411,77 +411,77 @@ def print_items(items=None, show="all",
         if end != 0 and it > end:
             break
 
-        _path = item["download_path"]
-        _blobs = item["blobs_completed"]
-        _blobs_in_stream = item["blobs_in_stream"]
-        # _completed = item["completed"]
+        st_path = item["download_path"]
+        st_blobs = item["blobs_completed"]
+        st_blobs_in_stream = item["blobs_in_stream"]
+        # st_completed = item["completed"]
 
         # Skip printing an item depending on the value of `show`,
         # and whether the blobs or media files exist or not
-        if show in "media" and not _path:
+        if show in "media" and not st_path:
             continue
-        elif show in "missing" and _path:
+        elif show in "missing" and st_path:
             continue
-        elif show in "incomplete" and _blobs == _blobs_in_stream:
+        elif show in "incomplete" and st_blobs == st_blobs_in_stream:
             continue
-        elif show in "full" and _blobs < _blobs_in_stream:
+        elif show in "full" and st_blobs < st_blobs_in_stream:
             continue
 
-        _time = int(item["metadata"]["release_time"])
-        _time = time.localtime(_time)
-        _time = time.strftime("%Y%m%d_%H:%M:%S%z", _time)
+        st_time = int(item["metadata"]["release_time"])
+        st_time = time.strftime("%Y%m%d_%H:%M:%S%z",
+                                time.localtime(st_time))
 
-        _title = item["metadata"]["title"]
-        _claim_id = item["claim_id"]
-        _claim_name = item["claim_name"]
-        _type = item["metadata"]["stream_type"]
+        st_claim_id = item["claim_id"]
+        st_claim_name = item["claim_name"]
+        st_title = item["metadata"]["title"]
+        st_type = item["metadata"]["stream_type"]
 
         if ch:
             if ch_online:
                 # Searching online is slower but it gets the full channel name
-                _channel = srch_ch.find_channel(cid=item["claim_id"],
-                                                full=True,
-                                                server=server)
-                if not _channel:
-                    print(_claim_name)
+                st_channel = srch_ch.find_channel(cid=item["claim_id"],
+                                                  full=True,
+                                                  server=server)
+                if not st_channel:
+                    print(st_claim_name)
                     print()
                     continue
             else:
                 # Searching offline is necessary for "invalid" claims
                 # that no longer exist as active claims online.
                 # We don't want to skip this item so we force a channel name.
-                _channel = item["channel_name"]
-                if not _channel:
-                    _channel = "_Unknown_"
+                st_channel = item["channel_name"]
+                if not st_channel:
+                    st_channel = "_Unknown_"
 
             # Skip if the item is not published by the specified channel
-            if channel and channel not in _channel:
+            if channel and channel not in st_channel:
                 continue
 
         out = f"{it:4d}/{n_items:4d}" + f"{sep} "
 
-        out += f"{_time}" + f"{sep} "
+        out += f"{st_time}" + f"{sep} "
 
         if cid:
-            out += f"{_claim_id}" + f"{sep} "
+            out += f"{st_claim_id}" + f"{sep} "
 
         if blobs:
-            out += f"{_blobs:3d}/{_blobs_in_stream:3d}" + f"{sep} "
+            out += f"{st_blobs:3d}/{st_blobs_in_stream:3d}" + f"{sep} "
 
         if ch:
-            out += f"{_channel}" + f"{sep} "
+            out += f"{st_channel}" + f"{sep} "
 
         if name:
-            out += f'"{_claim_name}"' + f"{sep} "
+            out += f'"{st_claim_name}"' + f"{sep} "
 
         if title:
-            out += f'"{_title}"' + f"{sep} "
+            out += f'"{st_title}"' + f"{sep} "
         if typ:
-            out += f"{_type}" + f"{sep} "
+            out += f"{st_type}" + f"{sep} "
         if path:
-            out += f'"{_path}"' + f"{sep} "
+            out += f'"{st_path}"' + f"{sep} "
 
-        if _path:
+        if st_path:
             out += "media"
         else:
             out += "no-media"
