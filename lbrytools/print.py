@@ -267,7 +267,7 @@ def print_multi_list(list_ch_info=None, sep=";"):
 
 
 def print_items(items=None, show="all",
-                blocks=False, cid=True, blobs=True,
+                blocks=False, cid=True, blobs=True, size=True,
                 typ=False, ch=False, ch_online=True,
                 name=True, title=False, path=False,
                 start=1, end=0, channel=None,
@@ -304,6 +304,10 @@ def print_items(items=None, show="all",
     blobs: bool, optional
         It defaults to `True`.
         Show the number of blobs in the file, and how many are complete.
+    size: bool, optional
+        It defaults to `True`.
+        Show the length of the stream in minutes and seconds, like `14:12`,
+        when possible (audio and video), and also the size in mebibytes (MB).
     typ: bool, optional
         It defaults to `False`.
         Show the type of stream (video, audio, document, etc.).
@@ -444,6 +448,21 @@ def print_items(items=None, show="all",
         st_claim_name = item["claim_name"]
         st_title = meta["title"]
 
+        length_s = 0
+
+        if ("video" in meta and "duration" in meta["video"]):
+            length_s = meta["video"]["duration"]
+        if ("audio" in meta and "duration" in meta["audio"]):
+            length_s = meta["audio"]["duration"]
+
+        rem_s = length_s % 60
+        rem_min = length_s // 60
+
+        st_size = 0
+        if ("source" in meta and "size" in meta["source"]):
+            st_size = float(meta["source"]["size"])
+            st_size = st_size/(1024**2)  # to MB
+
         if ch:
             if ch_online:
                 # Searching online is slower but it gets the full channel name
@@ -478,6 +497,10 @@ def print_items(items=None, show="all",
 
         if blobs:
             line += f"{st_blobs:3d}/{st_blobs_in_stream:3d}" + f"{sep} "
+
+        if size:
+            line += f"{rem_min:3d}:{rem_s:02d}" + f"{sep} "
+            line += f"{st_size:9.4f} MB" + f"{sep} "
 
         if typ:
             line += f"{st_type:9s}" + f"{sep} "
