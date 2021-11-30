@@ -403,12 +403,12 @@ def print_items(items=None, show="all",
         print(f"file={file}")
         return False
 
-    out_list = []
+    out = []
 
-    for it, item in enumerate(items, start=1):
-        if it < start:
+    for num, item in enumerate(items, start=1):
+        if num < start:
             continue
-        if end != 0 and it > end:
+        if end != 0 and num > end:
             break
 
         st_path = item["download_path"]
@@ -458,38 +458,40 @@ def print_items(items=None, show="all",
             if channel and channel not in st_channel:
                 continue
 
-        out = f"{it:4d}/{n_items:4d}" + f"{sep} "
+        line = f"{num:4d}/{n_items:4d}" + f"{sep} "
 
-        out += f"{st_time}" + f"{sep} "
+        line += f"{st_time}" + f"{sep} "
 
         if cid:
-            out += f"{st_claim_id}" + f"{sep} "
+            line += f"{st_claim_id}" + f"{sep} "
 
         if blobs:
-            out += f"{st_blobs:3d}/{st_blobs_in_stream:3d}" + f"{sep} "
+            line += f"{st_blobs:3d}/{st_blobs_in_stream:3d}" + f"{sep} "
 
         if ch:
-            out += f"{st_channel}" + f"{sep} "
+            line += f"{st_channel}" + f"{sep} "
 
         if name:
-            out += f'"{st_claim_name}"' + f"{sep} "
+            line += f'"{st_claim_name}"' + f"{sep} "
 
         if title:
-            out += f'"{st_title}"' + f"{sep} "
+            line += f'"{st_title}"' + f"{sep} "
+
         if typ:
-            out += f"{st_type}" + f"{sep} "
+            line += f"{st_type}" + f"{sep} "
+
         if path:
-            out += f'"{st_path}"' + f"{sep} "
+            line += f'"{st_path}"' + f"{sep} "
 
         if st_path:
-            out += "media"
+            line += "media"
         else:
-            out += "no-media"
+            line += "no-media"
 
-        out_list.append(out)
+        out.append(line)
 
-    print(f"Number of shown items: {len(out_list)}")
+    print(f"Number of shown items: {len(out)}")
 
-    funcs.print_content(out_list, file=file, fdate=fdate)
+    funcs.print_content(out, file=file, fdate=fdate)
 
     return True
