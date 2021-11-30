@@ -267,7 +267,7 @@ def print_multi_list(list_ch_info=None, sep=";"):
 
 
 def print_items(items=None, show="all",
-                cid=True, blobs=True,
+                blocks=False, cid=True, blobs=True,
                 typ=False, ch=False, ch_online=True,
                 name=True, title=False, path=False,
                 start=1, end=0, channel=None,
@@ -292,6 +292,11 @@ def print_items(items=None, show="all",
         a partial media file may be present.
         If it is `'missing'` it will show claims that don't have
         the media file, whether the full blobs are present or not.
+    blocks: bool, optional
+        It defaults to `False`, in which case it won't print
+        the `height` block of the claims.
+        If it is `True` it will print this value, which gives some idea
+        of when the claim was registered in the blockchain.
     cid: bool, optional
         It defaults to `True`.
         Show the `'claim_id'` of the claim.
@@ -429,6 +434,7 @@ def print_items(items=None, show="all",
 
         meta = item["metadata"]
 
+        st_height = item["height"]
         st_time = int(meta["release_time"])
         st_time = time.strftime("%Y%m%d_%H:%M:%S%z",
                                 time.localtime(st_time))
@@ -461,6 +467,9 @@ def print_items(items=None, show="all",
                 continue
 
         line = f"{num:4d}/{n_items:4d}" + f"{sep} "
+
+        if blocks:
+            line += f"{st_height:8d}" + f"{sep} "
 
         line += f"{st_time}" + f"{sep} "
 
