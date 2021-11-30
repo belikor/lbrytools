@@ -436,12 +436,6 @@ def print_items(items=None, show="all",
         _claim_name = item["claim_name"]
         _type = item["metadata"]["stream_type"]
 
-        out = "{:4d}/{:4d}".format(it, n_items) + sep + f" {_time}" + f"{sep} "
-
-        if cid:
-            out += f"{_claim_id}" + f"{sep} "
-        if blobs:
-            out += "{:3d}/{:3d}".format(_blobs, _blobs_in_stream) + f"{sep} "
         if ch:
             if ch_online:
                 # Searching online is slower but it gets the full channel name
@@ -449,7 +443,7 @@ def print_items(items=None, show="all",
                                                 full=True,
                                                 server=server)
                 if not _channel:
-                    print(out + _claim_name)
+                    print(_claim_name)
                     print()
                     continue
             else:
@@ -460,11 +454,22 @@ def print_items(items=None, show="all",
                 if not _channel:
                     _channel = "_Unknown_"
 
-            out += f"{_channel}" + f"{sep} "
-
             # Skip if the item is not published by the specified channel
             if channel and channel not in _channel:
                 continue
+
+        out = f"{it:4d}/{n_items:4d}" + f"{sep} "
+
+        out += f"{_time}" + f"{sep} "
+
+        if cid:
+            out += f"{_claim_id}" + f"{sep} "
+
+        if blobs:
+            out += f"{_blobs:3d}/{_blobs_in_stream:3d}" + f"{sep} "
+
+        if ch:
+            out += f"{_channel}" + f"{sep} "
 
         if name:
             out += f'"{_claim_name}"' + f"{sep} "
