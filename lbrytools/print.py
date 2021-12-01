@@ -390,10 +390,12 @@ def print_items(items=None, show="all",
               "A list of items must be obtained from `lbrynet file list`.")
         print(f"items={items}, "
               f"show={show}, "
-              f"title={title}, typ={typ}, path={path}, "
-              f"cid={cid}, blobs={blobs}, ch={ch}, ch_online={ch_online}, "
-              f"name={name}, start={start}, end={end}, "
-              f"channel={channel}, file={file}, fdate={fdate}, sep={sep}")
+              f"blocks={blocks}, cid={cid}, blobs={blobs}, size={size}, "
+              f"typ={typ}, ch={ch}, ch_online={ch_online}, "
+              f"name={name}, title={title}, path={path}, "
+              f"sanitize={sanitize}, "
+              f"start={start}, end={end}, channel={channel}, "
+              f"file={file}, fdate={fdate}, sep={sep}")
         if file:
             print("No file written.")
         return False
