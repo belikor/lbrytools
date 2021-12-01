@@ -36,8 +36,10 @@ import lbrytools.print_claims as prntc
 
 
 def print_summary(show="all",
-                  title=False, typ=False, path=False,
-                  cid=True, blobs=True, ch=False, ch_online=True, name=True,
+                  blocks=False, cid=True, blobs=True, size=True,
+                  typ=False, ch=False, ch_online=True,
+                  name=True, title=False, path=False,
+                  sanitize=False,
                   start=1, end=0, channel=None, invalid=False,
                   file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
@@ -56,15 +58,11 @@ def print_summary(show="all",
         a partial media file may be present.
         If it is `'missing'` it will show claims that don't have
         the media file, whether the full blobs are present or not.
-    title: bool, optional
-        It defaults to `False`.
-        Show the title of the claim.
-    typ: bool, optional
-        It defaults to `False`.
-        Show the type of claim (video, audio, document, etc.)
-    path: bool, optional
-        It defaults to `False`.
-        Show the full path of the saved media file.
+    blocks: bool, optional
+        It defaults to `False`, in which case it won't print
+        the `height` block of the claims.
+        If it is `True` it will print this value, which gives some idea
+        of when the claim was registered in the blockchain.
     cid: bool, optional
         It defaults to `True`.
         Show the `'claim_id'` of the claim.
@@ -72,6 +70,13 @@ def print_summary(show="all",
     blobs: bool, optional
         It defaults to `True`.
         Show the number of blobs in the file, and how many are complete.
+    size: bool, optional
+        It defaults to `True`.
+        Show the length of the stream in minutes and seconds, like `14:12`,
+        when possible (audio and video), and also the size in mebibytes (MB).
+    typ: bool, optional
+        It defaults to `False`.
+        Show the type of claim (video, audio, document, etc.)
     ch: bool, optional
         It defaults to `False`.
         Show the name of the channel that published the claim.
@@ -93,6 +98,17 @@ def print_summary(show="all",
     name: bool, optional
         It defaults to `True`.
         Show the name of the claim.
+    title: bool, optional
+        It defaults to `False`.
+        Show the title of the claim.
+    path: bool, optional
+        It defaults to `False`.
+        Show the full path of the saved media file.
+    sanitize: bool, optional
+        It defaults to `False`, in which case it will not remove the emojis
+        from the name of the claim and channel.
+        If it is `True` it will remove these unicode characters.
+        This option requires the `emoji` package to be installed.
     start: int, optional
         It defaults to 1.
         Show claims starting from this index in the list of items.
@@ -156,9 +172,11 @@ def print_summary(show="all",
 
         print()
         status = prnt.print_items(items=items, show=show,
-                                  title=title, typ=typ, path=path,
-                                  cid=cid, blobs=blobs, ch=ch,
-                                  ch_online=False, name=name,
+                                  blocks=blocks, cid=cid, blobs=blobs,
+                                  size=size,
+                                  typ=typ, ch=ch, ch_online=False,
+                                  name=name, title=title, path=path,
+                                  sanitize=sanitize,
                                   start=start, end=end, channel=channel,
                                   file=file, fdate=fdate, sep=sep,
                                   server=server)
@@ -171,9 +189,11 @@ def print_summary(show="all",
 
         print()
         status = prnt.print_items(items=items, show=show,
-                                  title=title, typ=typ, path=path,
-                                  cid=cid, blobs=blobs, ch=ch,
-                                  ch_online=ch_online, name=name,
+                                  blocks=blocks, cid=cid, blobs=blobs,
+                                  size=size,
+                                  typ=typ, ch=ch, ch_online=ch_online,
+                                  name=name, title=title, path=path,
+                                  sanitize=sanitize,
                                   start=start, end=end, channel=channel,
                                   file=file, fdate=fdate, sep=sep,
                                   server=server)
