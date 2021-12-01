@@ -54,7 +54,7 @@ That is
 
 Developed and tested with Python 3.8.
 """
-from lbrytools.z_defaults import z_defaults
+from lbrytools.zeed_defaults import z_defaults
 
 from lbrytools.funcs import check_lbry
 from lbrytools.funcs import server_exists
