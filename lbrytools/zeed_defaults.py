@@ -131,41 +131,23 @@ def z_defaults(cfg):
     else:
         print(f"sm_file: '{cfg.sm_file}'")
 
-    if "sm_sep" not in config:
-        cfg.sm_sep = ";"
-        print(f"sm_sep: '{cfg.sm_sep}' (use default)")
-    else:
-        print(f"sm_sep: '{cfg.sm_sep}'")
-
     if "sm_fdate" not in config:
         cfg.sm_fdate = True
         print(f"sm_fdate: {cfg.sm_fdate} (use default)")
     else:
         print(f"sm_fdate: {cfg.sm_fdate}")
 
+    if "sm_sep" not in config:
+        cfg.sm_sep = ";"
+        print(f"sm_sep: '{cfg.sm_sep}' (use default)")
+    else:
+        print(f"sm_sep: '{cfg.sm_sep}'")
+
     if "sm_show" not in config:
         cfg.sm_show = "all"
         print(f"sm_show: '{cfg.sm_show}' (use default)")
     else:
         print(f"sm_show: '{cfg.sm_show}'")
-
-    if "sm_title" not in config:
-        cfg.sm_title = False
-        print(f"sm_title: {cfg.sm_title} (use default)")
-    else:
-        print(f"sm_title: {cfg.sm_title}")
-
-    if "sm_type" not in config:
-        cfg.sm_type = False
-        print(f"sm_type: {cfg.sm_type} (use default)")
-    else:
-        print(f"sm_type: {cfg.sm_type}")
-
-    if "sm_path" not in config:
-        cfg.sm_path = False
-        print(f"sm_path: {cfg.sm_path} (use default)")
-    else:
-        print(f"sm_path: {cfg.sm_path}")
 
     if "sm_cid" not in config:
         cfg.sm_cid = True
@@ -178,6 +160,12 @@ def z_defaults(cfg):
         print(f"sm_blobs: {cfg.sm_blobs} (use default)")
     else:
         print(f"sm_blobs: {cfg.sm_blobs}")
+
+    if "sm_type" not in config:
+        cfg.sm_type = False
+        print(f"sm_type: {cfg.sm_type} (use default)")
+    else:
+        print(f"sm_type: {cfg.sm_type}")
 
     if "sm_ch" not in config:
         cfg.sm_ch = False
@@ -196,5 +184,17 @@ def z_defaults(cfg):
         print(f"sm_name: {cfg.sm_name} (use default)")
     else:
         print(f"sm_name: {cfg.sm_name}")
+
+    if "sm_title" not in config:
+        cfg.sm_title = False
+        print(f"sm_title: {cfg.sm_title} (use default)")
+    else:
+        print(f"sm_title: {cfg.sm_title}")
+
+    if "sm_path" not in config:
+        cfg.sm_path = False
+        print(f"sm_path: {cfg.sm_path} (use default)")
+    else:
+        print(f"sm_path: {cfg.sm_path}")
 
     return cfg
