@@ -158,7 +158,7 @@ it will default to loading a configuration under the name `zeedit_config.py`;
 if this is not available, it will simply exit.
 
 To keep everything contained, the `lbrytools` package can be placed in the same
-directory as `zeedit.py` and `zeedit_config.py`.
+directory as `zeedit.py` and its `zeedit_config.py`.
 ```
 zeedit/
       zeedit.py
