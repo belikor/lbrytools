@@ -122,7 +122,13 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
     info_get = output["result"]
 
     if not save_file:
-        requests.get(info_get["streaming_url"])
+        if "streaming_url" in info_get:
+            requests.get(info_get["streaming_url"])
+        else:
+            print(">>> Claim has no 'streaming_url', "
+                  "only the first blob will be downloaded. "
+                  "Retry download.")
+            return False
 
     return info_get
 
