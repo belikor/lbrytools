@@ -35,166 +35,169 @@ def z_defaults(cfg):
     """Define the default variables for the zeedit script."""
     config = dir(cfg)
 
-    print(80 * "-")
+    lines = []
     # 0. Server
     if "server" not in config:
         cfg.server = "http://localhost:5279"
-        print(f"server: '{cfg.server}' (use default)")
+        lines += [f"server: '{cfg.server}' (default value)"]
     else:
-        print(f"server: '{cfg.server}'")
+        lines += [f"server: '{cfg.server}'"]
 
     # 1. Download
     if "channels" not in config:
         print("Error: 'channels' list is mandatory in the configuration")
         return False
     else:
-        print(f"channels: [{cfg.channels[0]}, ...]")
+        lines += [f"channels: [{cfg.channels[0]}, ...]"]
 
     if "ddir" not in config:
         cfg.ddir = os.path.expanduser("~")
-        print(f"ddir: '{cfg.ddir}' (use default)")
+        lines += [f"ddir: '{cfg.ddir}' (default value)"]
     else:
-        print(f"ddir: '{cfg.ddir}'")
+        lines += [f"ddir: '{cfg.ddir}'"]
 
     if "own_dir" not in config:
         cfg.own_dir = True
-        print(f"own_dir: {cfg.own_dir} (use default)")
+        lines += [f"own_dir: {cfg.own_dir} (default value)"]
     else:
-        print(f"own_dir: {cfg.own_dir}")
+        lines += [f"own_dir: {cfg.own_dir}"]
 
     if "save_file" not in config:
         cfg.save_file = True
-        print(f"save_file: {cfg.save_file} (use default)")
+        lines += [f"save_file: {cfg.save_file} (default value)"]
     else:
-        print(f"save_file: {cfg.save_file}")
+        lines += [f"save_file: {cfg.save_file}"]
 
     if "number" not in config:
         cfg.number = 2
-        print(f"number: {cfg.number} (use default)")
+        lines += [f"number: {cfg.number} (default value)"]
     else:
-        print(f"number: {cfg.number}")
+        lines += [f"number: {cfg.number}"]
 
     if "shuffle" not in config:
         cfg.shuffle = True
-        print(f"shuffle: {cfg.shuffle} (use default)")
+        lines += [f"shuffle: {cfg.shuffle} (default value)"]
     else:
-        print(f"shuffle: {cfg.shuffle}")
+        lines += [f"shuffle: {cfg.shuffle}"]
 
     # 2. Seeding
     if "seeding_only" not in config:
         cfg.seeding_only = False
-        print(f"seeding_only: {cfg.seeding_only} (use default)")
+        lines += [f"seeding_only: {cfg.seeding_only} (default value)"]
     else:
-        print(f"seeding_only: {cfg.seeding_only}")
+        lines += [f"seeding_only: {cfg.seeding_only}"]
 
     # 3. Cleanup
     if "main_dir" not in config:
         cfg.main_dir = os.path.expanduser("~")
-        print(f"main_dir: '{cfg.main_dir}' (use default)")
+        lines += [f"main_dir: '{cfg.main_dir}' (default value)"]
     else:
-        print(f"main_dir: '{cfg.main_dir}'")
+        lines += [f"main_dir: '{cfg.main_dir}'"]
 
     if "size" not in config:
         cfg.size = 1000
-        print(f"size: {cfg.size} (use default)")
+        lines += [f"size: {cfg.size} (default value)"]
     else:
-        print(f"size: {cfg.size}")
+        lines += [f"size: {cfg.size}"]
 
     if "percent" not in config:
         cfg.percent = 90
-        print(f"percent: {cfg.percent} (use default)")
+        lines += [f"percent: {cfg.percent} (default value)"]
     else:
-        print(f"percent: {cfg.percent}")
+        lines += [f"percent: {cfg.percent}"]
 
     if "never_delete" not in config:
         cfg.never_delete = None
-        print(f"never_delete: {cfg.never_delete} (use default)")
+        lines += [f"never_delete: {cfg.never_delete} (default value)"]
     else:
-        print(f"never_delete: [{cfg.never_delete[0]}, ...]")
+        lines += [f"never_delete: [{cfg.never_delete[0]}, ...]"]
 
     if "what_to_delete" not in config:
         cfg.what_to_delete = "media"
-        print(f"what_to_delete: '{cfg.what_to_delete}' (use default)")
+        lines += [f"what_to_delete: '{cfg.what_to_delete}' (default value)"]
     else:
-        print(f"what_to_delete: '{cfg.what_to_delete}'")
+        lines += [f"what_to_delete: '{cfg.what_to_delete}'"]
 
     # 4. Summary
     if "sm_summary" not in config:
         cfg.sm_summary = True
-        print(f"sm_summary: {cfg.sm_summary} (use default)")
+        lines += [f"sm_summary: {cfg.sm_summary} (default value)"]
     else:
-        print(f"sm_summary: {cfg.sm_summary}")
+        lines += [f"sm_summary: {cfg.sm_summary}"]
 
     if "sm_file" not in config:
         cfg.sm_file = os.path.join(cfg.ddir, "lbry_summary.txt")
-        print(f"sm_file: '{cfg.sm_file}' (use default)")
+        lines += [f"sm_file: '{cfg.sm_file}' (default value)"]
     else:
-        print(f"sm_file: '{cfg.sm_file}'")
+        lines += [f"sm_file: '{cfg.sm_file}'"]
 
     if "sm_fdate" not in config:
         cfg.sm_fdate = True
-        print(f"sm_fdate: {cfg.sm_fdate} (use default)")
+        lines += [f"sm_fdate: {cfg.sm_fdate} (default value)"]
     else:
-        print(f"sm_fdate: {cfg.sm_fdate}")
+        lines += [f"sm_fdate: {cfg.sm_fdate}"]
 
     if "sm_sep" not in config:
         cfg.sm_sep = ";"
-        print(f"sm_sep: '{cfg.sm_sep}' (use default)")
+        lines += [f"sm_sep: '{cfg.sm_sep}' (default value)"]
     else:
-        print(f"sm_sep: '{cfg.sm_sep}'")
+        lines += [f"sm_sep: '{cfg.sm_sep}'"]
 
     if "sm_show" not in config:
         cfg.sm_show = "all"
-        print(f"sm_show: '{cfg.sm_show}' (use default)")
+        lines += [f"sm_show: '{cfg.sm_show}' (default value)"]
     else:
-        print(f"sm_show: '{cfg.sm_show}'")
+        lines += [f"sm_show: '{cfg.sm_show}'"]
 
     if "sm_cid" not in config:
         cfg.sm_cid = True
-        print(f"sm_cid: {cfg.sm_cid} (use default)")
+        lines += [f"sm_cid: {cfg.sm_cid} (default value)"]
     else:
-        print(f"sm_cid: {cfg.sm_cid}")
+        lines += [f"sm_cid: {cfg.sm_cid}"]
 
     if "sm_blobs" not in config:
         cfg.sm_blobs = True
-        print(f"sm_blobs: {cfg.sm_blobs} (use default)")
+        lines += [f"sm_blobs: {cfg.sm_blobs} (default value)"]
     else:
-        print(f"sm_blobs: {cfg.sm_blobs}")
+        lines += [f"sm_blobs: {cfg.sm_blobs}"]
 
     if "sm_type" not in config:
         cfg.sm_type = False
-        print(f"sm_type: {cfg.sm_type} (use default)")
+        lines += [f"sm_type: {cfg.sm_type} (default value)"]
     else:
-        print(f"sm_type: {cfg.sm_type}")
+        lines += [f"sm_type: {cfg.sm_type}"]
 
     if "sm_ch" not in config:
         cfg.sm_ch = False
-        print(f"sm_ch: {cfg.sm_ch} (use default)")
+        lines += [f"sm_ch: {cfg.sm_ch} (default value)"]
     else:
-        print(f"sm_ch: {cfg.sm_ch}")
+        lines += [f"sm_ch: {cfg.sm_ch}"]
 
     if "sm_ch_online" not in config:
         cfg.sm_ch_online = True
-        print(f"sm_ch_online: {cfg.sm_ch_online} (use default)")
+        lines += [f"sm_ch_online: {cfg.sm_ch_online} (default value)"]
     else:
-        print(f"sm_ch_online: {cfg.sm_ch_online}")
+        lines += [f"sm_ch_online: {cfg.sm_ch_online}"]
 
     if "sm_name" not in config:
         cfg.sm_name = True
-        print(f"sm_name: {cfg.sm_name} (use default)")
+        lines += [f"sm_name: {cfg.sm_name} (default value)"]
     else:
-        print(f"sm_name: {cfg.sm_name}")
+        lines += [f"sm_name: {cfg.sm_name}"]
 
     if "sm_title" not in config:
         cfg.sm_title = False
-        print(f"sm_title: {cfg.sm_title} (use default)")
+        lines += [f"sm_title: {cfg.sm_title} (default value)"]
     else:
-        print(f"sm_title: {cfg.sm_title}")
+        lines += [f"sm_title: {cfg.sm_title}"]
 
     if "sm_path" not in config:
         cfg.sm_path = False
-        print(f"sm_path: {cfg.sm_path} (use default)")
+        lines += [f"sm_path: {cfg.sm_path} (default value)"]
     else:
-        print(f"sm_path: {cfg.sm_path}")
+        lines += [f"sm_path: {cfg.sm_path}"]
+
+    print(80 * "-")
+    print("\n".join(lines))
 
     return cfg
