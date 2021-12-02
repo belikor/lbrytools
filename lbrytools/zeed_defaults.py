@@ -48,7 +48,21 @@ def z_defaults(cfg):
         print("Error: 'channels' list is mandatory in the configuration")
         return False
     else:
-        lines += [f"channels: [{cfg.channels[0]}, ...]"]
+        if not cfg.channels:
+            print("Error: 'channels' list is must have at least one element")
+            return False
+
+        n = len(cfg.channels)
+        limit = 3
+        if n < limit:
+            limit = int(n)
+
+        sub = "["
+        for i in range(0, limit):
+            sub += str(cfg.channels[i]) + ", "
+        sub += "...]"
+
+        lines += [f"channels: {sub}"]
 
     if "ddir" not in config:
         cfg.ddir = os.path.expanduser("~")
@@ -110,7 +124,21 @@ def z_defaults(cfg):
         cfg.never_delete = None
         lines += [f"never_delete: {cfg.never_delete} (default value)"]
     else:
-        lines += [f"never_delete: [{cfg.never_delete[0]}, ...]"]
+        if not cfg.never_delete:
+            cfg.never_delete = None
+            lines += [f"never_delete: {cfg.never_delete} (default value)"]
+        else:
+            n = len(cfg.never_delete)
+            limit = 3
+            if n < limit:
+                limit = int(n)
+
+            sub = "["
+            for i in range(0, limit):
+                sub += str(cfg.never_delete[i]) + ", "
+            sub += "...]"
+
+            lines += [f"never_delete: {sub}"]
 
     if "what_to_delete" not in config:
         cfg.what_to_delete = "media"
