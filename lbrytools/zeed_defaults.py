@@ -177,6 +177,12 @@ def z_defaults(cfg):
     else:
         lines += [f"sm_show: '{cfg.sm_show}'"]
 
+    if "sm_blocks" not in config:
+        cfg.sm_blocks = False
+        lines += [f"sm_blocks: '{cfg.sm_blocks}' (default value)"]
+    else:
+        lines += [f"sm_blocks: '{cfg.sm_blocks}'"]
+
     if "sm_cid" not in config:
         cfg.sm_cid = True
         lines += [f"sm_cid: {cfg.sm_cid} (default value)"]
@@ -188,6 +194,12 @@ def z_defaults(cfg):
         lines += [f"sm_blobs: {cfg.sm_blobs} (default value)"]
     else:
         lines += [f"sm_blobs: {cfg.sm_blobs}"]
+
+    if "sm_size" not in config:
+        cfg.sm_size = True
+        lines += [f"sm_size: {cfg.sm_size} (default value)"]
+    else:
+        lines += [f"sm_size: {cfg.sm_size}"]
 
     if "sm_type" not in config:
         cfg.sm_type = False
@@ -224,6 +236,12 @@ def z_defaults(cfg):
         lines += [f"sm_path: {cfg.sm_path} (default value)"]
     else:
         lines += [f"sm_path: {cfg.sm_path}"]
+
+    if "sm_sanitize" not in config:
+        cfg.sm_sanitize = False
+        lines += [f"sm_sanitize: {cfg.sm_sanitize} (default value)"]
+    else:
+        lines += [f"sm_sanitize: {cfg.sm_sanitize}"]
 
     print(80 * "-")
     print("\n".join(lines))
