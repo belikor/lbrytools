@@ -224,14 +224,20 @@ Normally only items that have all blobs also have a media file; however,
 if the claim is currently being downloaded a partial media file may be present.
 
 Various options control the type of information that is printed,
-including title, type, download path, claim id, number of blobs,
-name of channel, and name of claim.
+including block height, claim id, number of blobs, length (video and audio)
+and size in mebibytes (MB), type, name of channel, name of claim,
+title of claim, and download path.
+The `sanitize` parameter removes the emojis that may be found in the name
+of the claim or channel, or in the title. This may be useful if you are
+copying this information to a document that doesn't display emojis properly.
 We may specify the separator between the data fields; since a claim name
 can have a comma as part of the name, a semicolon `;` is used by default.
 ```py
-p = lbryt.print_summary(title=True, typ=False, path=False,
-                        cid=True, blobs=True, ch=False,
-                        name=True, sep=";")
+p = lbryt.print_summary(blocks=False, cid=True, blobs=True, size=True,
+                        typ=False, ch=False,
+                        name=True, title=True, path=False,
+                        sanitize=False,
+                        sep=";")
 ```
 
 We can also restrict printing only a range of items, or only the claims
