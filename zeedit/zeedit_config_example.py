@@ -138,11 +138,11 @@ sm_summary = 1
 # Path and filename of the summary.
 sm_file = "/home/user/Documents/lbry_summary.txt"
 
-# Separator used in the summary to separate the data fields.
-sm_sep = ";"
-
 # Add the day and time to the summary filename.
 sm_fdate = 1
+
+# Separator used in the summary to separate the data fields.
+sm_sep = ";"
 
 # Which downloaded claims will be printed in the summary?
 # "all", print all items
@@ -152,20 +152,20 @@ sm_fdate = 1
 # "missing", items that don't have the media file but may have all their blobs
 sm_show = "all"
 
-# Print the title of the claim.
-sm_title = 0
+# Print the block height of the claim.
+sm_blocks = 0
 
-# Print the type of the claim (video, audio, document, etc.).
-sm_type = 0
-
-# Print the path where the file was saved.
-sm_path = 0
-
-# Print the `claim_id`.
+# Print the `claim_id`, the 40-character unique ID.
 sm_cid = 1
 
 # Print the total number of blobs and how many are actually downloaded.
 sm_blobs = 1
+
+# Print the size of the claim in mebibytes (MB).
+sm_size = 1
+
+# Print the type of the claim (video, audio, document, etc.).
+sm_type = 0
 
 # Print the name of the channel.
 # Slow: sm_ch=1, sm_ch_online=1
@@ -180,3 +180,12 @@ sm_ch_online = 1
 
 # Print the name of the claim.
 sm_name = 1
+
+# Print the title of the claim.
+sm_title = 0
+
+# Print the path where the file was saved.
+sm_path = 0
+
+# Remove the emojis, if any, from the claim name, title, and channel name
+sm_sanitize = 0
