@@ -493,10 +493,12 @@ def print_items(items=None, show="all",
             if channel and channel not in st_channel:
                 continue
 
+            if sanitize:
+                st_channel = funcs.sanitize_name(st_channel)
+
         if sanitize:
             st_claim_name = funcs.sanitize_name(st_claim_name)
             st_title = funcs.sanitize_name(st_title)
-            st_channel = funcs.sanitize_name(st_channel)
 
         line = f"{num:4d}/{n_items:4d}" + f"{sep} "
 
