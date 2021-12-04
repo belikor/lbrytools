@@ -500,42 +500,42 @@ def print_items(items=None, show="all",
             st_claim_name = funcs.sanitize_name(st_claim_name)
             st_title = funcs.sanitize_name(st_title)
 
-        line = f"{num:4d}/{n_items:4d}" + f"{sep} "
+        line = f"{num:4d}/{n_items:4d}"
 
         if blocks:
-            line += f"{st_height:8d}" + f"{sep} "
+            line += f"{sep} " + f"{st_height:8d}"
 
-        line += f"{st_time}" + f"{sep} "
+        line += f"{sep} " + f"{st_time}"
 
         if cid:
-            line += f"{st_claim_id}" + f"{sep} "
+            line += f"{sep} " + f"{st_claim_id}"
 
         if blobs:
-            line += f"{st_blobs:3d}/{st_blobs_in_stream:3d}" + f"{sep} "
+            line += f"{sep} " + f"{st_blobs:3d}/{st_blobs_in_stream:3d}"
 
         if size:
-            line += f"{rem_min:3d}:{rem_s:02d}" + f"{sep} "
-            line += f"{st_size:9.4f} MB" + f"{sep} "
+            line += f"{sep} " + f"{rem_min:3d}:{rem_s:02d}"
+            line += f"{sep} " + f"{st_size:9.4f} MB"
 
         if typ:
-            line += f"{st_type:9s}" + f"{sep} "
+            line += f"{sep} " + f"{st_type:9s}"
 
         if st_path:
-            line += "media   " + f"{sep} "
+            line += f"{sep} " + "media   "
         else:
-            line += "no-media" + f"{sep} "
+            line += f"{sep} " + "no-media"
 
         if ch:
-            line += f"{st_channel}" + f"{sep} "
+            line += f"{sep} " + f"{st_channel}"
 
         if name:
-            line += f'"{st_claim_name}"' + f"{sep} "
+            line += f"{sep} " + f'"{st_claim_name}"'
 
         if title:
-            line += f'"{st_title}"' + f"{sep} "
+            line += f"{sep} " + f'"{st_title}"'
 
         if path:
-            line += f'"{st_path}"'
+            line += f"{sep} " + f'"{st_path}"'
 
         out.append(line)
 
