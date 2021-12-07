@@ -35,6 +35,7 @@ import lbrytools.download as dld
 
 
 def ch_download_latest(channel=None, number=2,
+                       repost=True,
                        ddir=None, own_dir=True, save_file=True,
                        server="http://localhost:5279"):
     """Download the latest claims published by a specific channel.
@@ -51,6 +52,12 @@ def ch_download_latest(channel=None, number=2,
     number: int, optional
         It defaults to 2.
         The number of items to download that were last posted by `channel`.
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claims
+        are reposts, and if they are, the original claims will be downloaded.
+        If it is `False`, it won't check the claims for reposts,
+        so if they are reposts they won't be downloaded
+        as reposts can't be directly downloaded.
     ddir: str, optional
         It defaults to `$HOME`.
         The path to the download directory.
@@ -109,6 +116,7 @@ def ch_download_latest(channel=None, number=2,
     for it, item in enumerate(items, start=1):
         print(f"Claim {it}/{n_items}")
         info_get = dld.download_single(cid=item["claim_id"],
+                                       repost=repost,
                                        ddir=ddir, own_dir=own_dir,
                                        save_file=save_file,
                                        server=server)
@@ -118,8 +126,10 @@ def ch_download_latest(channel=None, number=2,
     return list_info_get
 
 
-def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
-                             save_file=True, number=None, shuffle=True,
+def ch_download_latest_multi(channels=None,
+                             repost=True,
+                             number=None, shuffle=True,
+                             ddir=None, own_dir=True, save_file=True,
                              server="http://localhost:5279"):
     """Download the latest claims published by a list of a channels.
 
@@ -136,19 +146,12 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
                          ['GoodChannel#f', 4],
                          ['Fast_channel', 2]
                        ]
-    ddir: str, optional
-        It defaults to `$HOME`.
-        The path to the download directory.
-    own_dir: bool, optional
-        It defaults to `True`, in which case it places the downloaded
-        content inside a subdirectory named after the channel in `ddir`.
-    save_file: bool, optional
-        It defaults to `True`, in which case all blobs of the stream
-        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
-        will be placed in the downloaded directory.
-        If it is `False` it will only download the first blob (`sd_hash`)
-        in the stream, so the file will be in the local database
-        but the complete file won't be placed in the download directory.
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claims
+        are reposts, and if they are, the original claims will be downloaded.
+        If it is `False`, it won't check the claims for reposts,
+        so if they are reposts they won't be downloaded
+        as reposts can't be directly downloaded.
     number: int, optional
         It defaults to `None`.
         If this is present, it will override the individual
@@ -166,6 +169,19 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
         So by processing the channels in random order, we increase
         the probability of processing all channels by running this function
         multiple times.
+    ddir: str, optional
+        It defaults to `$HOME`.
+        The path to the download directory.
+    own_dir: bool, optional
+        It defaults to `True`, in which case it places the downloaded
+        content inside a subdirectory named after the channel in `ddir`.
+    save_file: bool, optional
+        It defaults to `True`, in which case all blobs of the stream
+        will be downloaded, and the media file (mp4, mp3, mkv, etc.)
+        will be placed in the downloaded directory.
+        If it is `False` it will only download the first blob (`sd_hash`)
+        in the stream, so the file will be in the local database
+        but the complete file won't be placed in the download directory.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -282,6 +298,7 @@ def ch_download_latest_multi(channels=None, ddir=None, own_dir=True,
 
         print(f"Channel {it}/{n_channels}, {channel}")
         ch_info = ch_download_latest(channel=channel, number=_number,
+                                     repost=repost,
                                      ddir=ddir, own_dir=own_dir,
                                      save_file=save_file,
                                      server=server)
