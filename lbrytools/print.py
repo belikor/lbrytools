@@ -74,7 +74,7 @@ def print_info_pre_get(item=None, offline=False):
     if offline:
         item["value"] = item["metadata"]
 
-    cl_time = 0
+    cl_time = "0"
     if "release_time" in item["value"]:
         cl_time = int(item["value"]["release_time"])
         cl_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",

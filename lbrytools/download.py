@@ -172,7 +172,8 @@ def download_collection(collection, max_claims=2, reverse=False,
     return info_get
 
 
-def download_single(uri=None, cid=None, name=None, invalid=False,
+def download_single(uri=None, cid=None, name=None,
+                    repost=True, invalid=False,
                     collection=False, max_claims=2, reverse_collection=False,
                     ddir=None, own_dir=True, save_file=True,
                     server="http://localhost:5279"):
@@ -210,6 +211,11 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claim
+        is a repost, and if it is, it will download the original claim.
+        If it is `False`, it won't check for a repost, it will simply return
+        `False` because it won't be able to download a repost.
     invalid: bool, optional
         It defaults to `False`, in which case it will assume the claim
         is still valid in the online database.
@@ -286,6 +292,7 @@ def download_single(uri=None, cid=None, name=None, invalid=False,
     # It also checks if it's a reposted claim, and returns the original
     # claim in case it is.
     item = srch.search_item(uri=uri, cid=cid, name=name, offline=False,
+                            repost=repost,
                             server=server)
     if not item:
         return False
