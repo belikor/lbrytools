@@ -30,7 +30,7 @@ import requests
 import lbrytools.funcs as funcs
 
 
-def check_repost(item):
+def check_repost(item, repost=True):
     """Check if the item is a repost, and return the original item.
 
     A claim that is just the repost of another cannot be downloaded directly,
@@ -41,28 +41,36 @@ def check_repost(item):
     item: dict
         A dictionary with the information on an item, obtained
         from `lbrynet resolve` or `lbrynet claim search`.
+    repost: bool, optional
+        It defaults to `True`, in which case the returned `item`
+        will be the reposted claim, that is,
+        the value of `item['reposted_claim']`.
+        If it's `False` it will return the original input `item`.
 
     Returns
     -------
     dict
-        The original `item` dictionary if it is not a repost,
-        or its `'reposted_claim'` dictionary, if it is.
+        The original `item` dictionary if it is not a repost
+        or if it's a repost but `repost=False`.
+        Otherwise, it will return `item['reposted_claim']`.
     """
     if "reposted_claim" in item:
-        _uri = item["canonical_url"]
-
-        item = item["reposted_claim"]
-        uri = item["canonical_url"]
+        old_uri = item["canonical_url"]
+        uri = item["reposted_claim"]["canonical_url"]
 
         print("This is a repost.")
-        print(f"canonical_url:  {_uri}")
+        print(f"canonical_url:  {old_uri}")
         print(f"reposted_claim: {uri}")
         print()
+
+        if repost:
+            item = item["reposted_claim"]
 
     return item
 
 
-def search_item_uri(uri=None, print_error=True,
+def search_item_uri(uri=None, repost=True,
+                    print_error=True,
                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the URI.
 
@@ -77,6 +85,11 @@ def search_item_uri(uri=None, print_error=True,
             uri = 'some-video-name'
 
         The URI is also called the `'canonical_url'` of the claim.
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claim
+        is a repost, and if it is, it will return the original claim.
+        If it is `False`, it won't check for a repost, it will simply return
+        the found claim.
     print_error: bool, optional
         It defaults to `True`, in which case it will print the error message
         that `lbrynet resolve` returns.
@@ -139,11 +152,13 @@ def search_item_uri(uri=None, print_error=True,
 
     # The found item may be a repost so we check it,
     # and return the original source item.
-    item = check_repost(item)
+    item = check_repost(item, repost=repost)
+
     return item
 
 
-def search_item_cid(cid=None, name=None, offline=False, print_error=True,
+def search_item_cid(cid=None, name=None, offline=False, repost=True,
+                    print_error=True,
                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the claim id or name.
 
@@ -169,6 +184,11 @@ def search_item_cid(cid=None, name=None, offline=False, print_error=True,
         `cid` or `name` in the offline database.
         This is required for 'invalid' claims, which have been removed from
         the online database and only exist locally.
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claim
+        is a repost, and if it is, it will return the original claim.
+        If it is `False`, it won't check for a repost, it will simply return
+        the found claim.
     print_error: bool, optional
         It defaults to `True`, in which case it will print an error message
         if the claim is not found.
@@ -258,12 +278,14 @@ def search_item_cid(cid=None, name=None, offline=False, print_error=True,
     # usually the last item is the oldest and thus the original.
     item = data["items"][-1]
 
-    # We still check for a repost.
-    item = check_repost(item)
+    # The found item may be a repost so we check it,
+    # and return the original source item.
+    item = check_repost(item, repost=repost)
+
     return item
 
 
-def search_item(uri=None, cid=None, name=None, offline=False,
+def search_item(uri=None, cid=None, name=None, offline=False, repost=True,
                 print_error=True,
                 server="http://localhost:5279"):
     """Find a single item in the LBRY network resolving URI, claim id, or name.
@@ -300,6 +322,11 @@ def search_item(uri=None, cid=None, name=None, offline=False,
         `cid` or `name` in the offline database.
         This is required for 'invalid' claims, which have been removed from
         the online database and only exist locally.
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claim
+        is a repost, and if it is, it will return the original claim.
+        If it is `False`, it won't check for a repost, it will simply return
+        the found claim.
     print_error: bool, optional
         It defaults to `True`, in which case it will print the error message
         that `lbrynet resolve` or `lbrynet claim search` returns.
@@ -333,10 +360,12 @@ def search_item(uri=None, cid=None, name=None, offline=False,
         return False
 
     if uri:
-        item = search_item_uri(uri=uri, print_error=print_error,
+        item = search_item_uri(uri=uri, repost=repost,
+                               print_error=print_error,
                                server=server)
     else:
         item = search_item_cid(cid=cid, name=name, offline=offline,
+                               repost=repost,
                                print_error=print_error,
                                server=server)
 
