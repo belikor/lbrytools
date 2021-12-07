@@ -75,9 +75,31 @@ Only the blobs are required to seed the file in the network.
 d = lbryt.download_single("murray-sabrin's-new-book-on-escaping", ddir=ddir, save_file=False)
 ```
 
-This argument, `save_file`, is `True` by default, and is also used
-by other functions that download multiple claims such as `ch_download_latest`,
+This argument, `save_file`, is `True` by default, and is also present
+in other functions that download multiple claims such as `ch_download_latest`,
 `redownload_latest`, `download_claims`, and `ch_download_latest_multi`.
+
+## Download reposts
+
+A "repost" is a special type of claim that contains a reference
+to another claim. It can be thought of as a symbolic link to another claim
+created by the same or a different channel.
+We cannot download a repost directly but we can extract
+the reposted (original) claim, and then download it.
+This is controlled with the `repost` parameter:
+```py
+d = lbryt.download_single(uri="some-repost", repost=True, ddir=ddir)  # download the original claim
+d = lbryt.download_single(uri="some-repost", repost=False, ddir=ddir)  # will not download the claim
+```
+
+This argument, `repost`, is `True` by default, and is also present
+in other functions that download multiple claims such as `ch_download_latest`
+and `ch_download_latest_multi`.
+
+The `repost` argument cannot be used with `redownload_latest`
+nor `download_claims`, as these only operate on actually downloaded claims,
+and a repost cannot be downloaded, it only exists online as a reference
+to other online claims.
 
 # Download invalid claims
 
