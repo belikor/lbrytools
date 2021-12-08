@@ -41,6 +41,7 @@ def print_summary(show="all",
                   name=True, title=False, path=False,
                   sanitize=False,
                   start=1, end=0, channel=None, invalid=False,
+                  reverse=False,
                   file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
     """Print a summary of the items downloaded from the LBRY network.
@@ -136,6 +137,10 @@ def print_summary(show="all",
         Using this parameter sets `ch_online=False` as the channel name
         of invalid claims cannot be resolved online, only from the offline
         database.
+    reverse: bool, optional
+        It defaults to `False`, in which case older items come first
+        in the output list.
+        If it is `True` newer claims are at the beginning of the list.
     file: str, optional
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
@@ -164,7 +169,7 @@ def print_summary(show="all",
         return False
 
     if invalid:
-        items = sort.sort_invalid(server=server)
+        items = sort.sort_invalid(reverse=False, server=server)
         if not items or len(items) < 1:
             if file:
                 print("No file written.")
@@ -178,10 +183,11 @@ def print_summary(show="all",
                                   name=name, title=title, path=path,
                                   sanitize=sanitize,
                                   start=start, end=end, channel=channel,
+                                  reverse=reverse,
                                   file=file, fdate=fdate, sep=sep,
                                   server=server)
     else:
-        items = sort.sort_items(server=server)
+        items = sort.sort_items(reverse=False, server=server)
         if not items or len(items) < 1:
             if file:
                 print("No file written.")
@@ -195,6 +201,7 @@ def print_summary(show="all",
                                   name=name, title=title, path=path,
                                   sanitize=sanitize,
                                   start=start, end=end, channel=channel,
+                                  reverse=reverse,
                                   file=file, fdate=fdate, sep=sep,
                                   server=server)
     return status

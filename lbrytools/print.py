@@ -272,6 +272,7 @@ def print_items(items=None, show="all",
                 name=True, title=False, path=False,
                 sanitize=False,
                 start=1, end=0, channel=None,
+                reverse=False,
                 file=None, fdate=False, sep=";",
                 server="http://localhost:5279"):
     """Print information on each claim in the given list of claims.
@@ -358,6 +359,10 @@ def print_items(items=None, show="all",
 
         Using this parameter sets `ch=True`, and is slow because
         it needs to perform an additional search for the channel.
+    reverse: bool, optional
+        It defaults to `False`, in which case older items come first
+        in the output list.
+        If it is `True` newer claims are at the beginning of the list.
     file: str, optional
         It defaults to `None`.
         It must be a user writable path to which the summary will be written.
@@ -393,7 +398,7 @@ def print_items(items=None, show="all",
               f"blocks={blocks}, cid={cid}, blobs={blobs}, size={size}, "
               f"typ={typ}, ch={ch}, ch_online={ch_online}, "
               f"name={name}, title={title}, path={path}, "
-              f"sanitize={sanitize}, "
+              f"sanitize={sanitize}, reverse={reverse}, "
               f"start={start}, end={end}, channel={channel}, "
               f"file={file}, fdate={fdate}, sep={sep}")
         if file:
@@ -401,6 +406,9 @@ def print_items(items=None, show="all",
         return False
 
     n_items = len(items)
+
+    if reverse:
+        items.reverse()
 
     if (not isinstance(show, str)
             or show not in ("all", "media", "missing", "incomplete", "full")):

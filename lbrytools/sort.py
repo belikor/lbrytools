@@ -32,6 +32,7 @@ import lbrytools.search_ch as srch_ch
 
 
 def sort_items(channel=None,
+               reverse=False,
                server="http://localhost:5279"):
     """Return a list of claims that were downloaded, sorted by time.
 
@@ -49,6 +50,10 @@ def sort_items(channel=None,
         If a simplified name is used, and there are various channels
         with the same name, the one with the highest LBC bid will be selected.
         Enter the full name to choose the right one.
+    reverse: bool, optional
+        It defaults to `False`, in which case older items come first
+        in the output list.
+        If it is `True` newer claims are at the beginning of the list.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -137,12 +142,14 @@ def sort_items(channel=None,
 
     # Sort by using the original 'release_time'; older items first
     sorted_items = sorted(new_items,
-                          key=lambda v: int(v["metadata"]["release_time"]))
+                          key=lambda v: int(v["metadata"]["release_time"]),
+                          reverse=reverse)
 
     return sorted_items
 
 
 def sort_invalid(channel=None,
+                 reverse=False,
                  server="http://localhost:5279"):
     """Return a list of invalid claims that were previously downloaded.
 
@@ -162,6 +169,10 @@ def sort_invalid(channel=None,
         If a simplified name is used, and there are various channels
         with the same name, the one with the highest LBC bid will be selected.
         Enter the full name to choose the right one.
+    reverse: bool, optional
+        It defaults to `False`, in which case older items come first
+        in the output list.
+        If it is `True` newer claims are at the beginning of the list.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -190,7 +201,7 @@ def sort_invalid(channel=None,
     if not funcs.server_exists(server=server):
         return False
 
-    items = sort_items(channel=channel,
+    items = sort_items(channel=channel, reverse=reverse,
                        server=server)
     if not items:
         return False

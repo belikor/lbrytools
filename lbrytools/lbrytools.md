@@ -264,11 +264,14 @@ p = lbryt.print_summary(blocks=False, cid=True, blobs=True, size=True,
 
 We can also restrict printing only a range of items, or only the claims
 by a specific channel (it implies `ch=True`).
+By default older claims (by release time) are printed first,
+but we can reverse the order so that newer items appear first.
 ```py
 p = lbryt.print_summary(start=20)  # From this index until the end
 p = lbryt.print_summary(end=40)  # From the beginning until this index
 p = lbryt.print_summary(start=100, end=500)  # Delimited range
 p = lbryt.print_summary(channel="Veritasium")
+p = lbryt.print_summary(reverse=True)
 ```
 
 When printing the channel's name we can choose whether to find
