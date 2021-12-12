@@ -169,7 +169,10 @@ def print_summary(show="all",
         return False
 
     if invalid:
-        items = sort.sort_invalid(reverse=False, server=server)
+        output = sort.sort_items_size(reverse=False, invalid=True,
+                                      server=server)
+        items = output["claims"]
+
         if not items or len(items) < 1:
             if file:
                 print("No file written.")
@@ -187,7 +190,10 @@ def print_summary(show="all",
                                   file=file, fdate=fdate, sep=sep,
                                   server=server)
     else:
-        items = sort.sort_items(reverse=False, server=server)
+        output = sort.sort_items_size(reverse=False, invalid=False,
+                                      server=server)
+        items = output["claims"]
+
         if not items or len(items) < 1:
             if file:
                 print("No file written.")

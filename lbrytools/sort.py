@@ -28,6 +28,7 @@ import requests
 
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
+import lbrytools.search_utils as sutils
 import lbrytools.search_ch as srch_ch
 
 
@@ -232,3 +233,33 @@ def sort_invalid(channel=None,
         print(f"Invalid items found: {n_invalid}")
 
     return invalid_items
+
+
+def sort_items_size(channel=None,
+                    reverse=False,
+                    invalid=False,
+                    server="http://localhost:5279"):
+    """Sort and return the size of the claims."""
+    if invalid:
+        claims = sort_invalid(channel=channel, reverse=reverse,
+                              server=server)
+    else:
+        claims = sort_items(channel=channel, reverse=reverse,
+                            server=server)
+
+    if not claims:
+        return {"claims": [],
+                "total_size": 0}
+
+    print()
+    total_size = sutils.downloadable_size(claims, local=True)
+
+    n_claims = len(claims)
+    GB = total_size / (1024**3)  # to GiB
+
+    print(40 * "-")
+    print(f"Total unique claims: {n_claims}")
+    print(f"Total download size: {GB:.4f} GiB")
+
+    return {"claims": claims,
+            "total_size": total_size}

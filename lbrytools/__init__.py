@@ -72,8 +72,10 @@ from lbrytools.search_ch import find_channel
 
 from lbrytools.sort import sort_items
 from lbrytools.sort import sort_invalid
+from lbrytools.sort import sort_items_size
 
 from lbrytools.print import print_multi_list
+from lbrytools.print import print_items
 from lbrytools.print_claims import print_sch_claims
 
 from lbrytools.printf import print_summary
@@ -150,8 +152,10 @@ True if find_channel else False
 
 True if sort_items else False
 True if sort_invalid else False
+True if sort_items_size else False
 
 True if print_multi_list else False
+True if print_items else False
 True if print_sch_claims else False
 
 True if print_summary else False
