@@ -20,7 +20,7 @@ Defaults
 
 In this configuration file all variables are optional, that is, they can be
 missing or commented out. The defaults are loaded from the
-`lbrytools.z_defaults.py` module. The only variable that is mandatory
+`lbrytools.zeed_defaults.py` module. The only variable that is mandatory
 is `channels`.
 """
 # =============================================================================
