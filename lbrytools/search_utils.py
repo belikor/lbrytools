@@ -89,13 +89,21 @@ def sort_and_filter(claims, number=0, reverse=False):
     return unique_claims
 
 
-def downloadable_size(claims):
-    """Calculate the size of the downloadable claims.
+def downloadable_size(claims, local=False):
+    """Calculate the total size of input claims.
 
     Parameters
     ----------
     claims: list of dict
-        List of claims obtained from `claim_search`.
+        List of claims obtained from `claim_search`,
+        or if using `local=True`, from `file_list`.
+    local: bool, optional
+        It defaults to `False` in which case it assumes the claims
+        were resolved online from `claim_search`.
+        If it is `True` it assumes the claims come from `file_list`,
+        that is, from the claims locally downloaded.
+        This is necessary because the information is in different fields
+        depending on where it comes from.
 
     Returns
     -------
@@ -104,18 +112,29 @@ def downloadable_size(claims):
         It can be divided by 1024 to obtain kibibytes, by another 1024
         to obtain mebibytes, and by another 1024 to obtain gibibytes.
     """
-    print("Calculate size of downloadable claims")
+    if local:
+        print("Calculate size of fully downloaded blobs")
+    else:
+        print("Calculate size of downloadable claims")
+
     n_claims = len(claims)
     total_size = 0
 
     for num, claim in enumerate(claims, start=1):
-        vtype = claim["value_type"]
-
-        if "source" in claim["value"]:
-            file_name = claim["value"]["source"].get("name", "None")
-            size = int(claim["value"]["source"].get("size", 0))
+        if local:
+            vtype = claim["mime_type"]
+            source_info = claim["metadata"]
+            alt_name = claim["stream_name"]
         else:
-            file_name = claim["name"]
+            vtype = claim["value_type"]
+            source_info = claim["value"]
+            alt_name = claim["name"]
+
+        if "source" in source_info:
+            file_name = source_info["source"].get("name", "None")
+            size = int(source_info["source"].get("size", 0))
+        else:
+            file_name = alt_name
             size = 0
             print(f"{num:4d}/{n_claims:4d}; type: {vtype}; "
                   f'no source: "{file_name}"')
