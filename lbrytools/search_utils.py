@@ -107,18 +107,25 @@ def downloadable_size(claims, local=False):
 
     Returns
     -------
-    int
-        Total size of the claims in bytes.
-        It can be divided by 1024 to obtain kibibytes, by another 1024
-        to obtain mebibytes, and by another 1024 to obtain gibibytes.
+    dict
+        A dictionary with two keys:
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+          The duration can be divided by 3600 to obtain hours,
+          then by 24 to obtain days.
     """
     if local:
-        print("Calculate size of fully downloaded blobs")
+        print("Calculate size of fully downloaded claims")
     else:
         print("Calculate size of downloadable claims")
 
     n_claims = len(claims)
     total_size = 0
+    total_duration = 0
 
     for num, claim in enumerate(claims, start=1):
         if local:
@@ -138,13 +145,22 @@ def downloadable_size(claims, local=False):
             size = 0
             print(f"{num:4d}/{n_claims:4d}; type: {vtype}; "
                   f'no source: "{file_name}"')
-        total_size += size
 
-    return total_size
+        seconds = 0
+        if "video" in source_info:
+            seconds = source_info["video"].get("duration", 0)
+        elif "audio" in source_info:
+            seconds = source_info["audio"].get("duration", 0)
+
+        total_size += size
+        total_duration += seconds
+
+    return {"size": total_size,
+            "duration": total_duration}
 
 
 def sort_filter_size(claims, number=0, reverse=False):
-    """Sort, filter the claims, and provide their entire download size.
+    """Sort, filter the claims, and provide the download size and duration.
 
     Parameters
     ----------
@@ -162,22 +178,43 @@ def sort_filter_size(claims, number=0, reverse=False):
 
     Returns
     -------
-    list of dict, int
-        A tuple of two values.
-        - The first is a list of claims obtained from `claim_search`,
-          with the duplicates removed.
-        - The second is the total size in bytes of all items.
+    dict
+        A dictionary with three keys:
+        - 'claims': a list of dictionaries where every dictionary represents
+          a claim returned by `claim_search`.
+          The list is ordered in ascending order by default (old claims first),
+          and in descending order (new claims first) if `reverse=True`.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+          The duration can be divided by 3600 to obtain hours,
+          then by 24 to obtain days.
     """
     claims = sort_and_filter(claims, number=number, reverse=reverse)
 
     print()
-    total_size = downloadable_size(claims)
+    output = downloadable_size(claims)
+    total_size = output["size"]
+    total_duration = output["duration"]
 
     n_claims = len(claims)
     GB = total_size / (1024**3)  # to GiB
 
+    hrs = total_duration / 3600
+    days = hrs / 24
+
+    hr = total_duration // 3600
+    mi = (total_duration % 3600) // 60
+    sec = (total_duration % 3600) % 60
+
     print(40 * "-")
     print(f"Total unique claims: {n_claims}")
     print(f"Total download size: {GB:.4f} GiB")
+    print(f"Total duration: {hr} h {mi} min {sec} s, or {days:.4f} days")
 
-    return claims, total_size
+    return {"claims": claims,
+            "size": total_size,
+            "duration": total_duration}

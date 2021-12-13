@@ -269,7 +269,7 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
     Returns
     -------
     dict
-        A dictionary with two keys:
+        A dictionary with three keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `file_list`.
           The list is ordered in ascending order by default (old claims first),
@@ -279,6 +279,11 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
         - 'size': total size of the claims in bytes.
           It can be divided by 1024 to obtain kibibytes, by another 1024
           to obtain mebibytes, and by another 1024 to obtain gibibytes.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+          The duration can be divided by 3600 to obtain hours,
+          then by 24 to obtain days.
     False
         If there is a problem it will return `False`.
     """
@@ -296,14 +301,25 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
         return False
 
     print()
-    total_size = sutils.downloadable_size(claims, local=True)
+    output = sutils.downloadable_size(claims, local=True)
+    total_size = output["size"]
+    total_duration = output["duration"]
 
     n_claims = len(claims)
     GB = total_size / (1024**3)  # to GiB
 
+    hrs = total_duration / 3600
+    days = hrs / 24
+
+    hr = total_duration // 3600
+    mi = (total_duration % 3600) // 60
+    sec = (total_duration % 3600) % 60
+
     print(40 * "-")
     print(f"Total unique claims: {n_claims}")
     print(f"Total download size: {GB:.4f} GiB")
+    print(f"Total duration: {hr} h {mi} min {sec} s, or {days:.4f} days")
 
     return {"claims": claims,
-            "total_size": total_size}
+            "size": total_size,
+            "duration": total_duration}
