@@ -168,48 +168,31 @@ def print_summary(show="all",
     if not funcs.server_exists(server=server):
         return False
 
+    output = sort.sort_items_size(reverse=False, invalid=invalid,
+                                  server=server)
+
+    items = output["claims"]
+
+    if not items or len(items) < 1:
+        if file:
+            print("No file written.")
+        return False
+
     if invalid:
-        output = sort.sort_items_size(reverse=False, invalid=True,
-                                      server=server)
-        items = output["claims"]
+        ch_online = False
 
-        if not items or len(items) < 1:
-            if file:
-                print("No file written.")
-            return False
+    print()
+    status = prnt.print_items(items=items, show=show,
+                              blocks=blocks, cid=cid, blobs=blobs,
+                              size=size,
+                              typ=typ, ch=ch, ch_online=ch_online,
+                              name=name, title=title, path=path,
+                              sanitize=sanitize,
+                              start=start, end=end, channel=channel,
+                              reverse=reverse,
+                              file=file, fdate=fdate, sep=sep,
+                              server=server)
 
-        print()
-        status = prnt.print_items(items=items, show=show,
-                                  blocks=blocks, cid=cid, blobs=blobs,
-                                  size=size,
-                                  typ=typ, ch=ch, ch_online=False,
-                                  name=name, title=title, path=path,
-                                  sanitize=sanitize,
-                                  start=start, end=end, channel=channel,
-                                  reverse=reverse,
-                                  file=file, fdate=fdate, sep=sep,
-                                  server=server)
-    else:
-        output = sort.sort_items_size(reverse=False, invalid=False,
-                                      server=server)
-        items = output["claims"]
-
-        if not items or len(items) < 1:
-            if file:
-                print("No file written.")
-            return False
-
-        print()
-        status = prnt.print_items(items=items, show=show,
-                                  blocks=blocks, cid=cid, blobs=blobs,
-                                  size=size,
-                                  typ=typ, ch=ch, ch_online=ch_online,
-                                  name=name, title=title, path=path,
-                                  sanitize=sanitize,
-                                  start=start, end=end, channel=channel,
-                                  reverse=reverse,
-                                  file=file, fdate=fdate, sep=sep,
-                                  server=server)
     return status
 
 
