@@ -154,6 +154,7 @@ if __name__ == "__main__":
                             title=cfg.sm_title,
                             path=cfg.sm_path,
                             sanitize=cfg.sm_sanitize,
+                            reverse=cfg.sm_reverse,
                             file=cfg.sm_file,
                             fdate=cfg.sm_fdate,
                             sep=cfg.sm_sep,

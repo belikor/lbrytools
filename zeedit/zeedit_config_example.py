@@ -187,5 +187,9 @@ sm_title = 0
 # Print the path where the file was saved.
 sm_path = 0
 
-# Remove the emojis, if any, from the claim name, title, and channel name
+# Remove the emojis, if any, from the claim name, title, and channel name.
+# Then the output can be used in interfaces that don't support emojis.
 sm_sanitize = 0
+
+# Reverse the list so that newer claims by release time appear first.
+sm_reverse = 0

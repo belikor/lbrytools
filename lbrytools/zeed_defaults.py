@@ -243,6 +243,12 @@ def z_defaults(cfg):
     else:
         lines += [f"sm_sanitize: {cfg.sm_sanitize}"]
 
+    if "sm_reverse" not in config:
+        cfg.sm_reverse = False
+        lines += [f"sm_reverse: {cfg.sm_reverse} (default value)"]
+    else:
+        lines += [f"sm_reverse: {cfg.sm_reverse}"]
+
     print(80 * "-")
     print("\n".join(lines))
 
