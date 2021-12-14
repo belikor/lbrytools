@@ -162,9 +162,11 @@ def sort_filter_size(claims, number=0, reverse=False):
 
     Returns
     -------
-    list of dict
-        List of claims obtained from `claim_search`, with the duplicates
-        removed.
+    list of dict, int
+        A tuple of two values.
+        - The first is a list of claims obtained from `claim_search`,
+          with the duplicates removed.
+        - The second is the total size in bytes of all items.
     """
     claims = sort_and_filter(claims, number=number, reverse=reverse)
 

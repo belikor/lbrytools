@@ -32,8 +32,7 @@ import lbrytools.search_utils as sutils
 import lbrytools.search_ch as srch_ch
 
 
-def sort_items(channel=None,
-               reverse=False,
+def sort_items(channel=None, reverse=False,
                server="http://localhost:5279"):
     """Return a list of claims that were downloaded, sorted by time.
 
@@ -75,7 +74,7 @@ def sort_items(channel=None,
         Certain claims don't have `'release_time'` so for them we add
         this key, and use the value of `'timestamp'` for it.
     False
-        If there is a problem it will return False.
+        If there is a problem it will return `False`.
     """
     if not funcs.server_exists(server=server):
         return False
@@ -149,8 +148,7 @@ def sort_items(channel=None,
     return sorted_items
 
 
-def sort_invalid(channel=None,
-                 reverse=False,
+def sort_invalid(channel=None, reverse=False,
                  server="http://localhost:5279"):
     """Return a list of invalid claims that were previously downloaded.
 
@@ -197,7 +195,7 @@ def sort_invalid(channel=None,
         Certain claims don't have `'release_time'` so for them we add
         this key, and use the value of `'timestamp'` for it.
     False
-        If there is a problem it will return False.
+        If there is a problem it will return `False`.
     """
     if not funcs.server_exists(server=server):
         return False
@@ -235,11 +233,58 @@ def sort_invalid(channel=None,
     return invalid_items
 
 
-def sort_items_size(channel=None,
-                    reverse=False,
-                    invalid=False,
+def sort_items_size(channel=None, reverse=False, invalid=False,
                     server="http://localhost:5279"):
-    """Sort and return the size of the claims."""
+    """Return a list of claims that were downloaded, their size and length.
+
+    Parameters
+    ----------
+    channel: str, optional
+        It defaults to `None`.
+        A channel's name, full or partial:
+        `'@MyChannel#5'`, `'MyChannel#5'`, `'MyChannel'`
+
+        If a simplified name is used, and there are various channels
+        with the same name, the one with the highest LBC bid will be selected.
+        Enter the full name to choose the right one.
+    reverse: bool, optional
+        It defaults to `False`, in which case older items come first
+        in the output list.
+        If it is `True` newer claims are at the beginning of the list.
+    invalid: bool, optional
+        It defaults to `False`, in which case it will return all items
+        previously downloaded.
+        If it is `True` it will only return those claims that were removed
+        by their authors from the network after they were initially downloaded.
+        These can no longer be resolved online, nor can they be re-downloaded.
+        The blobs belonging to these claims can be considered orphaned
+        and can be removed to save hard disk space.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        A dictionary with two keys:
+        - 'claims': a list of dictionaries where every dictionary represents
+          a claim returned by `file_list`.
+          The list is ordered in ascending order by default (old claims first),
+          and in descending order (newer claims first) if `reverse=True`.
+          Certain claims don't have `'release_time'` so for them we add
+          this key, and use the value of `'timestamp'` for it.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
+    False
+        If there is a problem it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
     if invalid:
         claims = sort_invalid(channel=channel, reverse=reverse,
                               server=server)
@@ -248,8 +293,7 @@ def sort_items_size(channel=None,
                             server=server)
 
     if not claims:
-        return {"claims": [],
-                "total_size": 0}
+        return False
 
     print()
     total_size = sutils.downloadable_size(claims, local=True)
