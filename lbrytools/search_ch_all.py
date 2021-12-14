@@ -127,8 +127,7 @@ def search_pages(channel,
     return results
 
 
-def ch_search_n_claims(channel,
-                       number=1000,
+def ch_search_n_claims(channel, number=1000,
                        last_height=99_000_900,
                        reverse=False,
                        server="http://localhost:5279"):
@@ -151,17 +150,28 @@ def ch_search_n_claims(channel,
         It defaults to `False`, in which case older items come first
         in the output list.
         If it is `True` newer claims are at the beginning of the list.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
     dict
-        A dictionary with two keys:
-        - claims: a list of dictionaries where every dictionary represents
+        A dictionary with three keys:
+        - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
-          and in ascending order (newer claims first) if `reverse=True`.
-        - total_size: number of bytes of all downloadable claims (streams)
+          and in descending order (newer claims first) if `reverse=True`.
+        - 'size': number of bytes of all downloadable claims (streams)
           put together.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+          The duration can be divided by 3600 to obtain hours,
+          then by 24 to obtain days.
     False
         It there is a problem it will return `False`.
     """
@@ -180,7 +190,6 @@ def ch_search_n_claims(channel,
         return False
 
     all_claims = []
-    total_size = 0
 
     cycles = number // 1000 + 1
     remainder = number % 1000
@@ -215,12 +224,13 @@ def ch_search_n_claims(channel,
             break
 
     print()
-    all_claims, total_size = sutils.sort_filter_size(all_claims,
-                                                     number=number,
-                                                     reverse=reverse)
+    output = sutils.sort_filter_size(all_claims,
+                                     number=number,
+                                     reverse=reverse)
 
-    return {"claims": all_claims,
-            "total_size": total_size}
+    return {"claims": output["claims"],
+            "size": output["size"],
+            "duration": output["duration"]}
 
 
 def ch_search_all_claims(channel,
@@ -244,17 +254,28 @@ def ch_search_all_claims(channel,
         It defaults to `False`, in which case older items come first
         in the output list.
         If it is `True` newer claims are at the beginning of the list.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
     dict
-        A dictionary with two keys:
-        - claims: a list of dictionaries where every dictionary represents
+        A dictionary with three keys:
+        - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
-          and in ascending order (newer claims first) if `reverse=True`.
-        - total_size: number of bytes of all downloadable claims (streams)
+          and in descending order (newer claims first) if `reverse=True`.
+        - 'size': number of bytes of all downloadable claims (streams)
           put together.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+          The duration can be divided by 3600 to obtain hours,
+          then by 24 to obtain days.
     False
         It there is a problem it will return `False`.
     """
@@ -313,12 +334,13 @@ def ch_search_all_claims(channel,
             finished = True
 
     print()
-    all_claims, total_size = sutils.sort_filter_size(all_claims,
-                                                     number=0,
-                                                     reverse=reverse)
+    output = sutils.sort_filter_size(all_claims,
+                                     number=0,
+                                     reverse=reverse)
 
-    return {"claims": all_claims,
-            "total_size": total_size}
+    return {"claims": output["claims"],
+            "size": output["size"],
+            "duration": output["duration"]}
 
 
 def get_all_claims(channel,
@@ -326,6 +348,8 @@ def get_all_claims(channel,
                    reverse=False,
                    server="http://localhost:5279"):
     """Return all claims of a channel, ordered by release time.
+
+    Not used at the moment, but this is closer to miko's original code.
 
     Parameters
     ----------
@@ -341,17 +365,28 @@ def get_all_claims(channel,
     reverse: bool, optional
         It defaults to `False`, in which case older items come first
         on the output list.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
 
     Returns
     -------
     dict
-        A dictionary with two keys:
-        - claims: a list of dictionaries where every dictionary represents
+        A dictionary with three keys:
+        - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
-          and in ascending order (new claims first) if `reverse=True`.
-        - total_size: number of bytes of all downloadable claims (streams)
+          and in descending order (new claims first) if `reverse=True`.
+        - 'size': number of bytes of all downloadable claims (streams)
           put together.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+          The duration can be divided by 3600 to obtain hours,
+          then by 24 to obtain days.
     False
         It there is a problem it will return `False`.
     """
@@ -366,7 +401,6 @@ def get_all_claims(channel,
     cycle = 1
     page = 1
     claims = []
-    total_size = 0
 
     while not finished:
         # Find claims in the blocks smaller than the last block height.
@@ -416,12 +450,13 @@ def get_all_claims(channel,
             cycle += 1
 
     print()
-    all_claims, total_size = sutils.sort_filter_size(claims,
-                                                     number=0,
-                                                     reverse=reverse)
+    output = sutils.sort_filter_size(claims,
+                                     number=0,
+                                     reverse=reverse)
 
-    return {"claims": all_claims,
-            "total_size": total_size}
+    return {"claims": output["claims"],
+            "size": output["size"],
+            "duration": output["duration"]}
 
 
 if __name__ == "__main__":

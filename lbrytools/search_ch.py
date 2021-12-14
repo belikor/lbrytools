@@ -202,15 +202,15 @@ def ch_search_latest(channel=None, number=2,
         claims = ch_search_fifty_claims(channel, number=number,
                                         server=server)
     elif number > 50:
-        claims = srchall.ch_search_n_claims(channel, number=number,
+        output = srchall.ch_search_n_claims(channel, number=number,
                                             reverse=True,
                                             server=server)
-        claims = claims["claims"]
+        claims = output["claims"]
     elif number == 0:
-        claims = srchall.ch_search_all_claims(channel,
+        output = srchall.ch_search_all_claims(channel,
                                               reverse=True,
                                               server=server)
-        claims = claims["claims"]
+        claims = output["claims"]
 
     return claims
 
