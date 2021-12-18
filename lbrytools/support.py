@@ -133,13 +133,20 @@ def list_supports(claim_id=False,
         m = s["meta"]
         existing_support = float(s["amount"]) + float(m["support_amount"])
 
-        combined = (m["trending_global"] + m["trending_group"]
-                    + m["trending_local"] + m["trending_mixed"])
+        trend_gl = m.get("trending_global", 0)
+        trend_gr = m.get("trending_group", 0)
+        trend_loc = m.get("trending_local", 0)
+        trend_mix = m.get("trending_mixed", 0)
 
-        tr_gl = f'{m["trending_global"]:7.2f}'
-        tr_gr = f'{m["trending_group"]:7.2f}'
-        tr_loc = f'{m["trending_local"]:7.2f}'
-        tr_mix = f'{m["trending_mixed"]:7.2f}'
+        combined = (trend_gl
+                    + trend_gr
+                    + trend_loc
+                    + trend_mix)
+
+        tr_gl = f'{trend_gl:7.2f}'
+        tr_gr = f'{trend_gr:7.2f}'
+        tr_loc = f'{trend_loc:7.2f}'
+        tr_mix = f'{trend_mix:7.2f}'
         tr_combined = f'{combined:7.2f}'
         is_spent = item["is_spent"]
 
