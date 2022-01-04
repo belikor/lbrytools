@@ -112,6 +112,14 @@ def server_exists(server="http://localhost:5279"):
     return True
 
 
+def get_data_dir(server="http://localhost:5279"):
+    """Return the directory where LBRY stores its data."""
+    msg = {"method": "settings_get"}
+    out_set = requests.post(server, json=msg).json()
+    data_dir = out_set["result"]["data_dir"]
+    return data_dir
+
+
 def print_content(output_list, file=None, fdate=None):
     """Print contents to the terminal or to a file."""
     fd = 0

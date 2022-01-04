@@ -38,9 +38,10 @@ counting back from today.
 """
 import datetime as dt
 import os
-import requests
 import sys
 import time
+
+import lbrytools.funcs as funcs
 
 try:
     import numpy as np
@@ -50,26 +51,6 @@ try:
 except ModuleNotFoundError as err:
     print(err)
     PLOTTING = False
-
-
-def server_exists(server="http://localhost:5279"):
-    """Return True if the server is up, and False if not."""
-    try:
-        requests.post(server)
-    except requests.exceptions.ConnectionError:
-        print(f"Cannot establish connection to 'lbrynet' on {server}")
-        print("Start server with:")
-        print("  lbrynet start")
-        return False
-    return True
-
-
-def get_data_dir(server="http://localhost:5279"):
-    """Return the directory where LBRY stores its data."""
-    msg = {"method": "settings_get"}
-    out_set = requests.post(server, json=msg).json()
-    data_dir = out_set["result"]["data_dir"]
-    return data_dir
 
 
 def count_updown_blobs(filename):
@@ -229,7 +210,7 @@ def plot_histogram(up_times_days, down_times_days, now=0.0,
         plt.show()
 
 
-def print_blobs_ratio(data_dir=None, plot_hst=True,
+def print_blobs_ratio(data_dir=None, plot_hst=False,
                       file=None, fdate=False, sep=";", tk_frame=None,
                       server="http://localhost:5279"):
     """Estimate the number of blobs uploaded and downloaded from the logs.
@@ -244,10 +225,11 @@ def print_blobs_ratio(data_dir=None, plot_hst=True,
         If it is given it must be the parent directory where the `lbrynet.log`
         files are located.
     plot_hst: bool, optional
-        It defaults to `True`, in which case it will try plotting
-        histograms of the blob activity in the past days. It assumes Numpy
-        and Matplotlib are available.
-        If it is `False` it won't create any plot.
+        It defaults to `False` it which case it won't create any plot.
+        If it is `True` it will try plotting histograms of the blob activity
+        in the past days.
+        It assumes Numpy and Matplotlib are available, if they are not,
+        no plot is generated either.
     file: str, optional
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
@@ -285,7 +267,7 @@ def print_blobs_ratio(data_dir=None, plot_hst=True,
     """
     # if not server_exists(server=server):
     #     return 1
-    data_dir = data_dir or get_data_dir(server=server)
+    data_dir = data_dir or funcs.get_data_dir(server=server)
 
     if not data_dir:
         return False
@@ -404,30 +386,7 @@ def print_blobs_ratio(data_dir=None, plot_hst=True,
     if not PLOTTING:
         print("Numpy and Matplotlib not available; no plot generated")
 
-    fd = 0
-
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
-
-        file = os.path.join(dirn, fdate + base)
-
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
-
-    if file and fd:
-        print("\n".join(out), file=fd)
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print("\n".join(out))
+    funcs.print_content(out, file=file, fdate=fdate)
 
     if plot_hst and PLOTTING:
         plot_histogram(up_times_days, down_times_days, now=now,
