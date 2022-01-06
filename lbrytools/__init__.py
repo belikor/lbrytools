@@ -114,6 +114,9 @@ from lbrytools.blobs_act import redownload_blobs
 from lbrytools.blobs_move import blobs_move
 from lbrytools.blobs_move import blobs_move_all
 
+from lbrytools.blobs_auto import print_network_sd_blobs
+from lbrytools.blobs_auto import sd_blobs_compared
+
 from lbrytools.claims import claims_bids
 from lbrytools.claims import print_trending_claims
 from lbrytools.claims import print_search_claims
@@ -193,6 +196,9 @@ True if redownload_blobs else False
 
 True if blobs_move else False
 True if blobs_move_all else False
+
+True if print_network_sd_blobs else False
+True if sd_blobs_compared else False
 
 True if claims_bids else False
 True if print_trending_claims else False
