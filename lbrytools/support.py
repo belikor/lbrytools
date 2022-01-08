@@ -30,6 +30,71 @@ import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
+def get_all_supports(server="http://localhost:5279"):
+    """Get all supports in a dictionary; all, valid, and invalid.
+
+    Returns
+    -------
+    dict
+        A dictionary with information on the supports.
+        The keys are the following:
+        - 'all_supports': list with dictionaries of all supports.
+        - 'all_resolved': list with dictionaries of all resolved claims
+          corresponding to all supports.
+          Invalid claims will simply be `False`.
+        - 'valid_supports': list with dictionaries of supports
+          for valid claims only.
+        - 'valid_resolved': list with dictionaries of resolved claims
+          corresponding to `'valid_supports'` only.
+        - 'invalid_supports': list with dictionaries of supports
+          for invalid claims. The claim IDs in these dictionaries
+          cannot be resolved anymore.
+    False
+        If there is a problem or no list of supports, it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    msg = {"method": "support_list",
+           "params": {"page_size": 99000}}
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        return False
+
+    items = output["result"]["items"]
+    n_items = len(items)
+
+    if n_items < 1:
+        print(f"Supports found: {n_items}")
+        return False
+
+    valid = []
+    valid_resolved = []
+    invalid = []
+
+    all_supports = []
+    all_resolved = []
+
+    for item in items:
+        s = srch.search_item(cid=item["claim_id"])
+
+        if not s:
+            invalid.append(item)
+        else:
+            valid.append(item)
+            valid_resolved.append(s)
+
+        all_supports.append(item)
+        all_resolved.append(s)
+
+    return {"all_supports": all_supports,
+            "all_resolved": all_resolved,
+            "valid_supports": valid,
+            "valid_resolved": valid_resolved,
+            "invalid_supports": invalid}
+
+
 def list_supports(claim_id=False, invalid=False,
                   combine=True, claims=True, channels=True,
                   file=None, fdate=False, sep=";",
