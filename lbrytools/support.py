@@ -30,7 +30,7 @@ import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
-def list_supports(claim_id=False,
+def list_supports(claim_id=False, invalid=False,
                   combine=True, claims=True, channels=True,
                   file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
@@ -42,6 +42,12 @@ def list_supports(claim_id=False,
         It defaults to `False`, in which case only the name of the claim
         is shown.
         If it is `True` the `'claim_id'` will be shown as well.
+    invalid: bool, optional
+        It defaults to `False`, in which case it will show all supported
+        claims, even those that are invalid.
+        If it is `True` it will only show invalid claims. Invalid are those
+        which were deleted by their authors, so the claim (channel
+        or content) is no longer available in the blockchain.
     combine: bool, optional
         It defaults to `True`, in which case the `global`, `group`, `local`,
         and `mixed` trending scores are added into one combined score.
@@ -100,8 +106,6 @@ def list_supports(claim_id=False,
     resolved = []
     for item in items:
         s = srch.search_item(cid=item["claim_id"])
-        if not s:
-            continue
         resolved.append(s)
 
     out_list = []
@@ -123,12 +127,23 @@ def list_supports(claim_id=False,
             obj += f'"{cid}"' + f"{sep} "
 
         _name = f'"{name}"'
+
+        if not s:
+            _name = "[" + _name + "]"
+
         obj += f'{_name:58s}'
 
         _amount = float(item["amount"])
         amount = f"{_amount:14.8f}"
 
-        m = s["meta"]
+        if not s:
+            m = {"support_amount": "0.0"}
+            s = {"amount": item["amount"]}
+        else:
+            if invalid:
+                continue
+            m = s["meta"]
+
         existing_support = float(s["amount"]) + float(m["support_amount"])
 
         trend_gl = m.get("trending_global", 0)

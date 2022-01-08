@@ -1029,6 +1029,14 @@ w = lbryt.list_supports(claims=False)
 w = lbryt.list_supports(claim_id=True, sep=";.;")
 ```
 
+There may be claims that are 'invalid', meaning that they were removed
+but are still supported by us. These will be displayed with their name
+between `[brackets]`.
+We can display only these claims:
+```py
+w = lbryt.list_supports(invalid=True)
+```
+
 There are four trending scores; they are normally combined into one
 so that the information displayed is more compact.
 This can be controlled with the `combine` argument:
