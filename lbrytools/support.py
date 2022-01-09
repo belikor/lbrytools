@@ -24,9 +24,7 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Auxiliary functions for handling supports."""
-import os
 import requests
-import time
 
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
@@ -166,32 +164,7 @@ def list_supports(claim_id=False,
             continue
         out_list.append(out)
 
-    fd = 0
-
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
-
-        file = os.path.join(dirn, fdate + base)
-
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
-
-    if file and fd:
-        for line in out_list:
-            print(line, file=fd)
-
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print("\n".join(out_list))
+    funcs.print_content(out_list, file=file, fdate=fdate)
 
     return resolved
 
