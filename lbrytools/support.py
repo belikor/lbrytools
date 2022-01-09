@@ -171,7 +171,23 @@ def list_supports(claim_id=False,
 
 def get_base_support(uri=None, cid=None, name=None,
                      server="http://localhost:5279"):
-    """Get the existing, base, and our support."""
+    """Get the existing, base, and our support from a claim.
+
+    Returns
+    -------
+    dict
+        A dictionary with information on the support on a claim.
+        The keys are the following:
+        - 'canonical_url'
+        - 'claim_id'
+        - 'existing_support': total support that the claim has;
+          this is `'base_support'` + `'old_support'`.
+        - 'base_support': support that the claim has without our support.
+        - 'old_support': support that we have added to this claim;
+          it may be zero if this claim does not have any support from us.
+    False
+        If there is a problem or no list of supports, it will return `False`.
+    """
     if not funcs.server_exists(server=server):
         return False
 
