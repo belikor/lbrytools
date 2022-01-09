@@ -154,24 +154,13 @@ def list_supports(claim_id=False, invalid=False,
     if not funcs.server_exists(server=server):
         return False
 
-    msg = {"method": "support_list",
-           "params": {"page_size": 99000}}
-    output = requests.post(server, json=msg).json()
-
-    if "error" in output:
+    supports = get_all_supports(server=server)
+    if not supports:
         return False
 
-    items = output["result"]["items"]
+    items = supports["all_supports"]
+    resolved = supports["all_resolved"]
     n_items = len(items)
-
-    if n_items < 1:
-        print(f"Supports found: {n_items}")
-        return False
-
-    resolved = []
-    for item in items:
-        s = srch.search_item(cid=item["claim_id"])
-        resolved.append(s)
 
     out_list = []
     for num, pair in enumerate(zip(items, resolved), start=1):
