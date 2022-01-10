@@ -419,6 +419,54 @@ def create_support(uri=None, cid=None, name=None,
             "txid": txid}
 
 
+def calculate_abandon(claim_id=None, keep=0.0,
+                      server="http://localhost:5279"):
+    """Actually abandon the support and get the data."""
+    new_support = 0.0
+    t_input = 0.0
+    t_output = 0.0
+    t_fee = 0.0
+    txid = None
+
+    msg = {"method": "support_abandon",
+           "params": {"claim_id": claim_id}}
+
+    if keep:
+        msg["params"]["keep"] = f"{keep:.8f}"
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        error = output["error"]
+        if "data" in error:
+            print(">>> Error: {}, {}".format(error["data"]["name"],
+                                             error["message"]))
+        else:
+            print(f">>> Error: {error}")
+        print(f">>> Requested amount: {keep:.8f}")
+        return False, False
+
+    new_support = keep
+    t_input = float(output["result"]["total_input"])
+    t_output = float(output["result"]["total_output"])
+    t_fee = float(output["result"]["total_fee"])
+    txid = output["result"]["txid"]
+
+    calc = {"new_support": new_support,
+            "t_input": t_input,
+            "t_output": t_output,
+            "t_fee": t_fee,
+            "txid": txid}
+
+    text = [f"Applied:          {new_support:14.8f}",
+            f"total_input:      {t_input:14.8f}",
+            f"total_output:     {t_output:14.8f}",
+            f"total_fee:        {t_fee:14.8f}",
+            f"txid: {txid}"]
+
+    return calc, text
+
+
 def abandon_support(uri=None, cid=None, name=None,
                     keep=0.0,
                     server="http://localhost:5279"):
