@@ -538,35 +538,13 @@ def abandon_support(uri=None, cid=None, name=None,
     base_support = supports["base_support"]
     old_support = supports["old_support"]
 
-    new_support = 0.0
-    t_input = 0.0
-    t_output = 0.0
-    t_fee = 0.0
-    txid = None
-
-    msg = {"method": "support_abandon",
-           "params": {"claim_id": claim_id}}
-
-    if keep:
-        msg["params"]["keep"] = f"{keep:.8f}"
-
-    output = requests.post(server, json=msg).json()
-
-    if "error" in output:
-        error = output["error"]
-        if "data" in error:
-            print(">>> Error: {}, {}".format(error["data"]["name"],
-                                             error["message"]))
-        else:
-            print(f">>> Error: {error}")
-        print(f">>> Requested amount: {keep:.8f}")
+    calc, text = calculate_abandon(claim_id=claim_id, keep=keep,
+                                   server=server)
+    if not calc:
         return False
 
-    new_support = keep
-    t_input = float(output["result"]["total_input"])
-    t_output = float(output["result"]["total_output"])
-    t_fee = float(output["result"]["total_fee"])
-    txid = output["result"]["txid"]
+    new_support = calc["new_support"]
+    txid = calc["txid"]
 
     out = [f"canonical_url: {uri}",
            f"claim_id: {claim_id}",
@@ -574,12 +552,8 @@ def abandon_support(uri=None, cid=None, name=None,
            f"Base support:     {base_support:14.8f}",
            f"Old support:      {old_support:14.8f}",
            f"New support:      {keep:14.8f}",
-           "",
-           f"Applied:          {new_support:14.8f}",
-           f"total_input:      {t_input:14.8f}",
-           f"total_output:     {t_output:14.8f}",
-           f"total_fee:        {t_fee:14.8f}",
-           f"txid: {txid}"]
+           ""]
+    out += text
 
     print("\n".join(out))
 
