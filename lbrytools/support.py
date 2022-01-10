@@ -566,6 +566,130 @@ def abandon_support(uri=None, cid=None, name=None,
             "txid": txid}
 
 
+def abandon_support_inv(invalids=None, cid=None, name=None,
+                        keep=0.0,
+                        server="http://localhost:5279"):
+    """Abandon or change a support for invalid claims.
+
+    Parameters
+    ----------
+    invalids: list of dict, optional
+        A list where each element is a dictionary indicating the support
+        for an 'invalid' claim.
+        Invalid claims no longer resolve online (the output has been spent)
+        but they may still have an existing support.
+        If this list is `None`, the list will be obtained
+        from `get_all_supports()['invalid_supports']`.
+    cid: str, optional
+        A `'claim_id'` for a claim on the LBRY network.
+        It is a 40 character alphanumeric string.
+    name: str, optional
+        A name of a claim on the LBRY network.
+        It is normally the last part of a full URI.
+        ::
+            uri = 'lbry://@MyChannel#3/some-video-name#2'
+            name = 'some-video-name'
+    keep: float, optional
+        It defaults to `0.0`.
+        It is the amount of LBC support that should remain in the claim
+        after we remove our previous support. That is, we can use
+        this parameter to assign a new support value.
+        If it is `0.0` all support is removed.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        A dictionary with information on the result of the support.
+        The keys are the following:
+        - 'claim_name': name of the claim; the canonical URI is not available
+          because the claim can't be resolved online any more.
+        - 'claim_id': unique 40 character alphanumeric string.
+        - 'existing_support': existing support before we add or remove ours;
+          this should be the same as `old_support`.
+        - 'base_support': since this claim does not resolve any more,
+          it should be zero.
+        - 'old_support': support that we have added to this claim in the past;
+          it cannot be zero because we use this method only with claims
+          that have been previously supported (and are now invalid).
+        - 'new_support': new support that was successfully deposited
+          in the claim, equal to `keep`.
+        - 'txid': transaction ID in the blockchain that records the operation.
+    False
+        If there is a problem or non existing claim, or lack of funds,
+        it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    if not cid and not name:
+        print(80 * "-")
+        print(f'cid={cid}\n'
+              f'name="{name}"')
+        return False
+
+    existing = 0
+    base_support = 0
+    old_support = 0
+    found = False
+
+    if not invalids:
+        all_supports = get_all_supports(server=server)
+
+        if not all_supports:
+            return False
+
+        invalids = all_supports["invalid_supports"]
+
+    for supp in invalids:
+        if ((cid and cid in supp["claim_id"])
+                or (name and name in supp["name"])):
+            existing = float(supp["amount"])
+            old_support = float(supp["amount"])
+            claim_id = supp["claim_id"]
+            c_name = supp["name"]
+            found = True
+
+    if not found:
+        print(80 * "-")
+        print("Claim not found among the invalid claims")
+        print(f'cid={cid}\n'
+              f'name="{name}"')
+        return False
+
+    calc, text = calculate_abandon(claim_id=claim_id, keep=keep,
+                                   server=server)
+    if not calc:
+        return False
+
+    new_support = calc["new_support"]
+    txid = calc["txid"]
+
+    out = [f"claim_name: {c_name}",
+           f"claim_id: {claim_id}",
+           f"Existing support: {existing:14.8f}",
+           f"Base support:     {base_support:14.8f}",
+           f"Old support:      {old_support:14.8f}",
+           f"New support:      {keep:14.8f}",
+           ""]
+    out += text
+
+    print("\n".join(out))
+
+    return {"claim_name": c_name,
+            "claim_id": claim_id,
+            "existing_support": existing,
+            "base_support": base_support,
+            "old_support": old_support,
+            "new_support": new_support,
+            "txid": txid}
+
+
 def target_support(uri=None, cid=None, name=None,
                    target=0.0,
                    server="http://localhost:5279"):

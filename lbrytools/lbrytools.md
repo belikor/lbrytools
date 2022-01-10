@@ -45,6 +45,7 @@ from lbrytools import list_supports
 from lbrytools import print_blobs_ratio
 from lbrytools import create_support
 from lbrytools import abandon_support
+from lbrytools import abandon_support_inv
 from lbrytools import target_support
 from lbrytools import print_trending_claims
 from lbrytools import print_search_claims
@@ -1088,6 +1089,28 @@ target = base + our_support
 target = (author + others) + our_support
 ```
 
+## Abandon or change support for invalid claims
+
+Invalid claims cannot be resolved online but they may still have
+an active support. It is best to completely remove the support or diminish it
+as much as possible.
+
+In this case, we cannot use a canonical URL, we can use the `name` or `cid`,
+which should refer to a claim that is invalid, otherwise it will be skipped:
+```py
+w = lbryt.abandon_support_inv(name="@InvalidChannel")
+w = lbryt.abandon_support_inv(cid="ff013pghnav...", keep=10)
+```
+
+To know if the claim is invalid, it will search the list of all supports
+which may take a while. We can also pass this list directly,
+by extracting the information from the output of `get_all_supports`.
+```py
+all_supports = lbryt.get_all_supports()
+invalids = all_supports['invalid_supports']
+w = lbryt.abandon_support_inv(invalids=invalids, name="cancelled-claim")
+```
+
 # Seeding ratio
 
 The blob seeding ratio is estimated from the number of times that the words
@@ -1151,6 +1174,7 @@ lbryt.list_supports(..., server=server)
 lbryt.print_blobs_ratio(..., server=server)
 lbryt.create_support(..., server=server)
 lbryt.abandon_support(..., server=server)
+lbryt.abandon_support_inv(..., server=server)
 lbryt.target_support(..., server=server)
 lbryt.print_trending_claims(..., server=server)
 lbryt.print_search_claims(..., server=server)
