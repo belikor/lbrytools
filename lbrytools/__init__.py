@@ -111,8 +111,8 @@ from lbrytools.blobs_act import blob_get
 from lbrytools.blobs_act import blobs_action
 from lbrytools.blobs_act import redownload_blobs
 
-from lbrytools.blobs_move import blobs_move
-from lbrytools.blobs_move import blobs_move_all
+from lbrytools.blobs_mv import blobs_move
+from lbrytools.blobs_mv import blobs_move_all
 
 from lbrytools.blobs_auto import print_network_sd_blobs
 from lbrytools.blobs_auto import sd_blobs_compared
