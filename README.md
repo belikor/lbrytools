@@ -175,6 +175,33 @@ lbryt.print_ch_claims(...)
 Read the [lbrytools.md](./lbrytools.md) file for a short explanation
 on the most useful functions in the library.
 
+## Submodule
+
+This library can be used as a submodule in other projects,
+for example,
+[zeedit](https://github.com/belikor/zeedit)
+and
+[lbrydseed](https://github.com/belikor/lbrydseed).
+
+To install this repository as a submodule in your own repository:
+```py
+git submodule add https://github.com/belikor/lbrytools
+```
+
+If this repository is already used as a submodule in a `custom_project`,
+it can be updated from the toplevel of the project:
+```sh
+cd custom_project
+git submodule update --remote --rebase lbrytools/
+```
+
+If this causes merging errors we may have to update the submodule manually:
+```
+cd custom_project/lbrytools/
+git fetch
+git reset --hard FETCH_HEAD
+```
+
 ## Development
 
 Ideally, this collection of tools can be merged into the official
