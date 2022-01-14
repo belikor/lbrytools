@@ -8,9 +8,9 @@ It also includes methods to clean up older files and free space, so
 the functions are suitable for use in a headless computer that will download
 files, and seed them to the network with little user intervention.
 
-This libary is released as free software under the MIT license.
+This library is released as free software under the MIT license.
 
-# Motivation
+## Motivation
 
 The [LBRY Desktop application](https://github.com/lbryio/lbry-desktop)
 provides basic functionality to manage downloaded claims.
@@ -25,17 +25,61 @@ which provides basic functions, and a configuration file to download and seed
 claims. Initially tuxfoo's code was extended slightly but eventually an entire
 library was written from scratch to provide more functionality.
 
-# Installation
-
-You must have the LBRY Desktop application or the `lbrynet` client.
-Get them from [lbry.com/get](https://lbry.com/get).
+## Installation
 
 You must have Python installed. Most Linux distributions come with Python
 ready to use; for Windows you may need to get the official package,
 or a full featured distribution such as Anaconda.
+In Windows, make sure the Python executable is added to the `PATH`
+so that it can be launched from anywhere in your system.
 
-Copy the internal [lbrytools](./lbrytools) directory, and place it inside
-a `site-packages` directory that is searched by Python.
+You must have the LBRY Desktop application or the `lbrynet` client.
+Get them from [lbry.com/get](https://lbry.com/get).
+
+## Requisites
+
+This library was developed and tested with Python 3.8 but it may also work with
+earlier versions with small changes.
+It uses standard modules such as `importlib`, `os`, `random`, `regex`,
+`sys`, and `time`.
+
+The `requests` library is necessary to communicate
+with the running LBRY daemon:
+```sh
+python -m pip install --user requests
+python3 -m pip install --user requests  # for Ubuntu
+```
+
+You can install these and other libraries by using `pip`,
+the Python package manager. If this is not installed it can be installed:
+```sh
+sudo apt install python-pip
+sudo apt install python3-pip  # for Ubuntu
+sudo pacman -S python-pip  # for Arch
+```
+
+### Updating
+
+To update the library's code, make sure you are in the `lbrytools/` directory:
+```sh
+cd lbrytools/
+git pull
+```
+
+If this causes merging errors you may have to update the code manually:
+```sh
+cd lbrytools/
+git fetch
+git reset --hard FETCH_HEAD
+```
+
+### System wide installation
+
+This is optional, and only required if we want to have the library
+available in our entire system.
+
+Copy the `lbrytools` directory,
+and place it inside a `site-packages` directory that is searched by Python.
 This can be in the user's home directory,
 ```
 /home/user/.local/lib/python3.8/site-packages/lbrytools
@@ -47,19 +91,26 @@ or in a system-wide directory:
 /usr/lib/python3/dist-packages/lbrytools
 ```
 
-You can also modify the `PYTHONPATH` environmental variable
-to include the parent directory where `lbrytools` is located:
-```sh
-PYTHONPATH=/opt/git/lbrytools:$PYTHONPATH
+Then the `lbrytools` package can be imported from anywhere in our system.
+
+### Environmental variables
+
+This is optional. Instead of moving the `lbrytools` package,
+simply add it to the `PYTHONPATH` environmental variable.
+We must add the parent directory containing this library.
+
+For example, if
+```
+/top1/pkg/
+    lbrytools/
 ```
 
-This library was developed and tested with Python 3.8 but it may also work with
-earlier versions with small changes.
-It uses standard modules such as `importlib`, `os`, `random`, `regex`,
-`sys`, and `time`.
+The variable will be
+```sh
+PYTHONPATH="/top1/pkg:$PYTHONPATH"
+```
 
-The `requests` module is necessary to communicate with the `lbrynet` daemon.
-It may already be installed in your system as a dependency to another package.
+### Optional
 
 The `numpy` and `matplotlib` packages are optional; they are used
 to create a plot with `print_blobs_ratio`.
@@ -67,15 +118,16 @@ to create a plot with `print_blobs_ratio`.
 The `emoji` package is optional; it is used to remove emojis from
 strings that contain them.
 ```sh
-python -m pip install --user requests emoji numpy matplotlib
+python -m pip install --user emoji numpy matplotlib
+python3 -m pip install --user emoji numpy matplotlib  # for Ubuntu
 ```
 
-# Usage
+## Usage
 
 Make sure the `lbrynet` daemon is running either by launching
 the full LBRY Desktop application, or by starting the console `lbrynet`
 program.
-```
+```sh
 lbrynet start
 ```
 
@@ -120,60 +172,14 @@ lbryt.print_search_claims(...)
 lbryt.print_ch_claims(...)
 ```
 
-Read the [lbrytools.md](./lbrytools/lbrytools.md) file for a short explanation
+Read the [lbrytools.md](./lbrytools.md) file for a short explanation
 on the most useful functions in the library.
 
-# Zeedit script
-
-This script uses the `lbrytools` methods to achieve the same objective as
-tuxfoo's original [lbry-seedit](https://github.com/tuxfoo/lbry-seedit).
-It downloads content from various channels, and then seeds the blobs to
-the network. 
-This script should be run periodically to constantly download new content,
-and remove the older files if they take too much space.
-See [zeedit.py](./zeedit/zeedit.py).
-
-If `lbrytools` is correctly installed in the Python path, the script can be
-executed directly, or through the Python interpreter.
-```
-python zeedit.py [config.py]
-```
-
-A configuration file should be passed as the first argument.
-```
-python zeedit.py funny_config.py
-python zeedit.py tech_channels_config.py
-python zeedit.py cooking_conf.py
-```
-
-The configuration file specifies the channels to download content from,
-the download directory, the limit in gigabytes before cleanup of older files
-is started, and whether to write a summary of all downloaded claims.
-Modify the [zeedit_config_example.py](./zeedit/zeedit_config_example.py)
-to your liking, and read the comments in it to understand what each variable
-does. Only the `channels` variable is mandatory, all others have a default
-value if they are missing in the configuration file.
-
-If no argument is given, or if the provided configuration file does not exist,
-it will default to loading a configuration under the name `zeedit_config.py`;
-if this is not available, it will simply exit.
-
-To keep everything contained, the `lbrytools` package can be placed in the same
-directory as `zeedit.py` and its `zeedit_config.py`.
-```
-zeedit/
-      zeedit.py
-      zeedit_config.py
-      lbrytools/
-               __init___.py
-               blobs.py
-               ...
-```
-
-# Development
+## Development
 
 Ideally, this collection of tools can be merged into the official
-LBRY sources so that everybody has access to them.
+LBRY sources so that everybody has access to them without installing separate
+programs.
 Where possible, the tools should also be available from a graphical
 interface such as the LBRY Desktop application.
 * [lbryio/lbry-sdk](https://github.com/lbryio/lbry-sdk)
