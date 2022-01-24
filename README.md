@@ -170,6 +170,7 @@ lbryt.target_support(...)
 lbryt.print_trending_claims(...)
 lbryt.print_search_claims(...)
 lbryt.print_ch_claims(...)
+lbryt.list_comments(...)
 ```
 
 Read the [lbrytools.md](./lbrytools.md) file for a short explanation

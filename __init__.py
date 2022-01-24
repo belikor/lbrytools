@@ -137,6 +137,7 @@ from lbrytools.support import target_support
 
 from lbrytools.blobs_ratio import print_blobs_ratio
 
+from lbrytools.comments import list_comments
 
 # Use of the modules so that code checkers don't complain (flake8)
 True if z_defaults else False
@@ -221,3 +222,5 @@ True if abandon_support_inv else False
 True if target_support else False
 
 True if print_blobs_ratio else False
+
+True if list_comments else False

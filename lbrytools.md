@@ -50,6 +50,7 @@ from lbrytools import target_support
 from lbrytools import print_trending_claims
 from lbrytools import print_search_claims
 from lbrytools import print_ch_claims
+from lbrytools import list_comments
 ```
 
 # Download
@@ -1133,6 +1134,41 @@ vv = lbryt.print_blobs_ratio(data_dir="many_logs/",
                              file="summary_ratio.txt", fdate=True)
 ```
 
+# Comments
+
+To list the comments from a claim specify the claim by URI, claim ID,
+or claim name:
+```py
+cc = lbryt.list_comments(uri="how-to-shred-an-expert-witness-on-cross:7")
+cc = lbryt.list_comments(cid="58414df292294ce894a0907dc064e7a686edb538")
+cc = lbryt.list_comments(name="linux-easy-anti-cheat-can't-be-easier")
+```
+
+By default, it will show all comments, but we can also list only the
+hidden comments or only the visible comments:
+```py
+cc = lbryt.list_comments("...", hidden=True)
+cc = lbryt.list_comments("...", visible=True)
+```
+
+By default, it will show all comments with their replies. If we want only
+the root level comments, we can use `sub_replies=False`:
+```py
+cc = lbryt.list_comments("...", sub_replies=False)
+```
+
+Comments are not part of the LBRY protocol, they are stored in a comments
+server, which is Odysee's by default; a different server can be specified:
+```py
+cc = lbryt.list_comments("...", comm_server="https://comments.odysee.com/api/v2")
+```
+
+The comments can be printed to a file:
+```py
+list_comments("what-were-medieval-guilds-really-like",
+              file="comments.txt", fdate=True)
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -1179,4 +1215,5 @@ lbryt.target_support(..., server=server)
 lbryt.print_trending_claims(..., server=server)
 lbryt.print_search_claims(..., server=server)
 lbryt.print_ch_claims(..., server=server)
+lbryt.list_comments(..., server=server)
 ```
