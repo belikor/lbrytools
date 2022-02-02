@@ -1157,6 +1157,13 @@ the root level comments, we can use `sub_replies=False`:
 cc = lbryt.list_comments("...", sub_replies=False)
 ```
 
+By default, the comments are only a preview, meaning it will show only
+the first 80 characters of the first line of the comment. To show the entire
+comments we can use `full=True`:
+```py
+cc = lbryt.list_comments("...", full=True)
+```
+
 Comments are not part of the LBRY protocol, they are stored in a comments
 server, which is Odysee's by default; a different server can be specified:
 ```py
