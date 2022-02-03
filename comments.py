@@ -111,11 +111,13 @@ def print_r_comments(comments, sub_replies=True, full=False,
         of the first line of the comment will be printed.
         If it is `True` it will print the full comment, which may be
         as big as 2000 characters.
-    fd: int, optional
+    fd: io.StringIO, optional
         It defaults to `None`, in which case the output will be printed
         to the terminal.
-        If it is present, it is meant to be an open file descriptor
-        into which the output will be printed.
+        If it is present, it is an object created by `open()`
+        ready to be used for writting text.
+        After calling this function, we must `fd.close()`
+        to close the object.
     """
     n_base = len(comments)
     indentation = indent * " "
