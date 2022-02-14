@@ -52,6 +52,7 @@ from lbrytools import print_trending_claims
 from lbrytools import print_search_claims
 from lbrytools import print_ch_claims
 from lbrytools import list_comments
+from lbrytools import list_peers
 ```
 
 # Download
@@ -1235,8 +1236,41 @@ cc = lbryt.list_comments("...", comm_server="https://comments.odysee.com/api/v2"
 
 The comments can be printed to a file:
 ```py
-list_comments("what-were-medieval-guilds-really-like",
-              file="comments.txt", fdate=True)
+cc = lbryt.list_comments("what-were-medieval-guilds-really-like",
+                         file="comments.txt", fdate=True)
+```
+
+# Peers
+
+The LBRY network allows anybody to host downloaded files and share them
+with the rest of the peers in the network.
+Only claims that can be downloaded (streams) will have peers,
+other types such as reposts or collections will not have peers.
+
+## Peers in a single channel
+
+We can get the peers that are hosting the latest claims of a particular channel,
+starting from the newest claim and going back in time:
+```py
+ff = lbryt.list_peers("@GTV-Japan", number=50)
+```
+
+By default it uses maximum 32 threads to search for the peers of 32 claims
+in parallel but we can increase or reduce this value.
+We can also choose to display the claim ID of the claims, their type,
+and show their titles instead of the claim name.
+If we sanitize the name or title, it will remove the emojis from the output,
+which may be useful if we use the output in applications
+that don't support emojis:
+```py
+ff = lbryt.list_peers("@fireship", number=50, threads=64,
+                      claim_id=True, typ=True, title=True,
+                      sanitize=True)
+
+The summary of the peer search per claim can be printed to a file:
+```py
+ff = lbryt.list_peers("@fireship", number=50,
+                      file="peers.txt", fdate=True, sep=";")
 ```
 
 # Server
@@ -1287,4 +1321,5 @@ lbryt.print_trending_claims(..., server=server)
 lbryt.print_search_claims(..., server=server)
 lbryt.print_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
+lbryt.list_peers(..., server=server)
 ```
