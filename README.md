@@ -10,6 +10,8 @@ files, and seed them to the network with little user intervention.
 
 This library is released as free software under the MIT license.
 
+![submodule](./img/lbrytools-terminal.png)
+
 ## Motivation
 
 The [LBRY Desktop application](https://github.com/lbryio/lbry-desktop)
@@ -178,6 +180,8 @@ on the most useful functions in the library.
 
 ## Submodule
 
+![submodule](./img/lbrytools-relations.png)
+
 This library can be used as a submodule in other projects,
 for example,
 [zeedit](https://github.com/belikor/zeedit)
@@ -185,12 +189,16 @@ and
 [lbrydseed](https://github.com/belikor/lbrydseed).
 
 To install this repository as a submodule in your own repository:
-```py
+```sh
 git submodule add https://github.com/belikor/lbrytools
 ```
 
-If this repository is already used as a submodule in a `custom_project`,
-it can be updated from the toplevel of the project:
+Then in your `custom_project` you can clone and download the submodule at the same time:
+```sh
+git clone --recurse-submodules https://github.com/user/custom_project
+```
+
+Then, if needed, the submodule can be updated from the toplevel of the project:
 ```sh
 cd custom_project
 git submodule update --remote --rebase lbrytools/
