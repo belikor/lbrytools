@@ -364,6 +364,23 @@ def create_comment(comment=None,
     with the channel key. This is necessary to create the comment
     on the comment server.
 
+    {
+      "method": "comment.Create",
+      "id": 1,
+      "jsonrpc": "2.0",
+      "params": {
+        "channel_id": "81bec0b66ff34a1378581751958f5b98f9043d17",
+        "channel_name": "@vertbyqb",
+        "claim_id": "2ba7ec34033a42c76468cdfc463943e5de7e364a",
+        "parent_id": "", # Optional, for replies
+        "comment": "l test",
+        "signature": sig,
+        "signing_ts": "1642638072"
+      }
+    }
+    # hexdata is the hex encoded version of the comment
+    sig = "lbrynet channel sign --channel_name=@channel --hexdata=hexdata"
+
     Parameters
     ----------
     comment: str
