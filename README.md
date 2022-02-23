@@ -175,6 +175,7 @@ lbryt.print_search_claims(...)
 lbryt.print_ch_claims(...)
 lbryt.list_comments(...)
 lbryt.list_peers(...)
+lbryt.list_ch_peers(...)
 ```
 
 Read the [lbrytools.md](./lbrytools.md) file for a short explanation

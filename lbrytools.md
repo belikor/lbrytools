@@ -53,6 +53,7 @@ from lbrytools import print_search_claims
 from lbrytools import print_ch_claims
 from lbrytools import list_comments
 from lbrytools import list_peers
+from lbrytools import list_ch_peers
 ```
 
 # Download
@@ -1273,6 +1274,53 @@ ff = lbryt.list_peers("@fireship", number=50,
                       file="peers.txt", fdate=True, sep=";")
 ```
 
+## Peers in multiple channels
+
+We can list the peers for multiple channels at the same time.
+
+Define a list where each element is a list of two elements; the first item
+is the name of the channel, and the second is a number indicating how
+many claims will be searched for that channel.
+If the number is missing it will use the default value (2).
+```py
+channels = [
+    ["@BrodieRobertson#5", 10],
+    ["@GTV-Japan", 100],
+    ["@VGDocs#6", 50],
+]
+```
+
+```py
+gg = lbryt.list_ch_peers(channels=channels)
+```
+
+By using the `number` parameter, the individual numbers in `channels`
+are overriden, so the number of claims searched for peers
+will be the same for all channels. If the list of channels is long,
+they can be shuffled so the channels and claims are searched in a random order:
+```py
+gg = lbryt.list_ch_peers(channels=channels, number=25, shuffle=True)
+```
+
+We can specify threads for searching channels in parallel (8 by default),
+and similarly, for each channel, threads for searching claims in parallel
+(32 by default).
+If the number of claims to search and the number of channels is large,
+the channel threads should be increased while the claim threads
+should be decreased.
+The total number of threads shouldn't be increased too much because
+it may cause the peer search to fail completely:
+```py
+gg = lbryt.list_ch_peers(channels=channels, number=50,
+                         ch_threads=8, claim_threads=32)
+```
+
+The summary of the peer search per channel can be printed to a file:
+```py
+gg = lbryt.list_ch_peers(channels=channels, number=25,
+                         file="ch_peers.txt", fdate=True, sep=";")
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -1322,4 +1370,5 @@ lbryt.print_search_claims(..., server=server)
 lbryt.print_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
 lbryt.list_peers(..., server=server)
+lbryt.list_ch_peers(..., server=server)
 ```
