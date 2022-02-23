@@ -38,7 +38,7 @@ from lbrytools import print_channel_analysis
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 from lbrytools import claims_bids
-from lbrytools import channel_subs
+from lbrytools import list_ch_subs
 from lbrytools import list_accounts
 from lbrytools import list_playlists
 from lbrytools import list_supports
@@ -957,26 +957,48 @@ k = lbryt.print_ch_claims("@TomWoodsTV", start=445, end=600)
 The list of claims can be printed directly to a file:
 ```py
 k = lbryt.print_ch_claims("@TomWoodsTV",
-	                  file="ch_claims.txt", fdate=True, sep=";")
+                          file="ch_claims.txt", fdate=True, sep=";")
 ```
 
 # Channel subscriptions
 
 Display the channels to which we are subscribed,
-and whether we receive notifications from them.
+and whether they are valid (resolved) and have notifications
+enabled or not:
 ```py
-q = lbryt.channel_subs(notifications=True)
+q = lbryt.list_ch_subs()
 ```
 
-By default, the command searches the `"shared"` database,
-but it can also search the `"local"` database.
+By default, it will display all channels.
+We can restrict the output to only those
+channels that are valid (resolved) or invalid:
 ```py
-q = lbryt.channel_subs(shared=False)
+q = lbryt.list_ch_subs(show_all=False, filtering="valid", valid=True)
+q = lbryt.list_ch_subs(show_all=False, filtering="valid", valid=False)
 ```
 
-The information can be printed to a file as well.
+Or to those with or without notifications enabled:
 ```py
-q = lbryt.channel_subs(file="subs.txt", fdate=True)
+q = lbryt.list_ch_subs(show_all=False, filtering="notifications", notifications=True)
+q = lbryt.list_ch_subs(show_all=False, filtering="notifications", notifications=False)
+```
+
+By default, the method searches the `"shared"` database,
+but it can also search the `"local"` database:
+```py
+q = lbryt.list_ch_subs(shared=False)
+```
+
+By default, the method uses a maximum of 32 threads
+to resolve the channels online.
+The number can be lowered or increased depending on the CPU power:
+```py
+q = lbryt.list_ch_subs(threads=64)
+```
+
+The information can be printed to a file as well:
+```py
+q = lbryt.list_ch_subs(file="subs.txt", fdate=True, sep=";")
 ```
 
 # Accounts
@@ -1210,7 +1232,7 @@ lbryt.print_channel_analysis(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 lbryt.claims_bids(..., server=server)
-lbryt.channel_subs(..., server=server)
+lbryt.list_ch_subs(..., server=server)
 lbryt.list_accounts(..., server=server)
 lbryt.list_playlists(..., server=server)
 lbryt.list_supports(..., server=server)

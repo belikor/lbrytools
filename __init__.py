@@ -121,7 +121,7 @@ from lbrytools.claims import claims_bids
 from lbrytools.claims import print_trending_claims
 from lbrytools.claims import print_search_claims
 
-from lbrytools.channels import channel_subs
+from lbrytools.channels import list_ch_subs
 
 from lbrytools.accounts import list_accounts
 
@@ -207,7 +207,7 @@ True if claims_bids else False
 True if print_trending_claims else False
 True if print_search_claims else False
 
-True if channel_subs else False
+True if list_ch_subs else False
 
 True if list_accounts else False
 

@@ -24,17 +24,63 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to display channel information like subscriptions."""
-import os
+import concurrent.futures as fts
+
 import requests
-import time
 
 import lbrytools.funcs as funcs
+import lbrytools.search as srch
 
 
-def channel_subs(shared=True, notifications=True,
-                 file=None, fdate=False,
-                 server="http://localhost:5279"):
-    """Display the channel subscriptions.
+def validate_ch(channel, server="http://localhost:5279"):
+    """Add 'valid' key to the channel dictionary."""
+    channel["valid"] = srch.search_item(uri=channel["uri"],
+                                        print_error=False,
+                                        server=server)
+    return channel
+
+
+def filter_valid(resolved_channels, f_valid=True):
+    """Filter list by value of 'valid' key."""
+    ch_valid_filtered = []
+
+    for channel in resolved_channels:
+        valid = channel["valid"]
+
+        if ((f_valid and not valid)
+                or (not f_valid and valid)):
+            continue
+
+        ch_valid_filtered.append(channel)
+
+    return ch_valid_filtered
+
+
+def filter_notif(resolved_channels, f_notifications=False):
+    """Filter list by value of 'notificationsDisabled' key."""
+    ch_notif_filtered = []
+
+    for channel in resolved_channels:
+        if "notificationsDisabled" in channel:
+            ch_nots = not channel["notificationsDisabled"]
+        else:
+            ch_nots = False
+
+        if ((f_notifications and not ch_nots)
+                or (not f_notifications and ch_nots)):
+            continue
+
+        ch_notif_filtered.append(channel)
+
+    return ch_notif_filtered
+
+
+def search_ch_subs(shared=True,
+                   show_all=True, filtering="valid",
+                   valid=True, notifications=False,
+                   threads=32,
+                   server="http://localhost:5279"):
+    """Search the wallet for the channel subscriptions.
 
     Parameters
     ----------
@@ -42,19 +88,40 @@ def channel_subs(shared=True, notifications=True,
         It defaults to `True`, in which case it uses the shared database
         synchronized with Odysee online.
         If it is `False` it will use only the local database
-        to the LBRY Desktop application.
+        to `lbrynet`, for example, used by the LBRY Desktop application.
+    show_all: bool, optional
+        It defaults to `True`, in which case all followed channels
+        will be printed, regardless of `filtering`, `valid`,
+        or `notifications`.
+        If it is `False` then we can control what channels to show
+        with `filtering`, `valid`, or `notifications`.
+    filtering: str, optional
+        It defaults to `'valid'`. It is the type of filtering that
+        will be done as long as `show_all=False`.
+        It can be `'valid'` (depending on the value of `valid` parameter),
+        `'notifications'` (depending on the value of `notifications`),
+        or `'both'` (depending on the values of `valid` and `notifications`).
+        If `'both'`, the list of channels will be filtered by `valid` first,
+        and then by `notifications`.
+    valid: bool, optional
+        It defaults to `True` in which case only the channels that resolve
+        online will be returned.
+        If it is `False` it will return only those channels that no longer
+        resolve online.
+        This parameter only works when `show_all=False`
+        and `filtering='valid'` or `'both'`.
     notifications: bool, optional
-        It defaults to `True`, in which case it will show only
-        the channels for which notifications have been enabled.
-        If it is `False` it will show only the channels
-        with disabled notifications.
-    file: str, optional
-        It defaults to `None`.
-        It must be a writable path to which the summary will be written.
-        Otherwise the summary will be printed to the terminal.
-    fdate: bool, optional
-        It defaults to `False`.
-        If it is `True` it will add the date to the name of the summary file.
+        It defaults to `False` in which case only the channels
+        that have notifications disabled will be returned.
+        If it is `True` it will return only those channels
+        that have notifications enabled.
+        This parameter only works when `show_all=False`
+        and `filtering='notifications'` or `'both'`.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve channels
+        online, meaning that many channels will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -66,13 +133,15 @@ def channel_subs(shared=True, notifications=True,
     -------
     list of dict
         It returns the list of dictionaries representing
-        the filtered channels depending on the values of `shared`
-        and `notifications`.
+        the filtered channels depending on the values of `shared`, `show_all`,
+        `filtering`, `valid`, and `notifications`.
 
-        Each dictionary has two elements, `'uri'` which is
-        the `'permanent_url'` of the channel, and `'notificationsDisabled'`
-        which is a boolean value, indicating whether the notification
-        is enabled for that channel.
+        Each dictionary has three keys:
+        - 'uri': the `'permanent_url'` of the channel.
+        - 'notificationsDisabled': a boolean value, indicating whether
+          the notification is enabled for that channel or not.
+        - 'valid': it's the dictionary of the resolved channel,
+          or `False` if the channel is invalid and doesn't exist.
     False
         If there is a problem it will return `False`.
     """
@@ -89,10 +158,7 @@ def channel_subs(shared=True, notifications=True,
 
     result = output["result"]
 
-    if "enable-sync" in result:
-        sync = result["enable-sync"]
-    else:
-        sync = False
+    sync = result.get("enable-sync", False)
 
     r_local = result["local"]
 
@@ -102,7 +168,11 @@ def channel_subs(shared=True, notifications=True,
     print("Channel subscriptions")
     print(80 * "-")
     print(f"Synchronization: {sync}")
-    print(f"Notifications: {bool(notifications)}")
+    print("Show all:", bool(show_all))
+    if not show_all:
+        print(f"Filtering: '{filtering}'")
+        print("- Valid:", bool(valid))
+        print("- Notifications:", bool(notifications))
 
     following_local = r_local["value"]["following"]
 
@@ -110,62 +180,188 @@ def channel_subs(shared=True, notifications=True,
         following_shared = r_shared["value"]["following"]
 
     if shared and "shared" in result:
-        print(f"Database: shared")
+        print("Database: shared")
         channels = following_shared
-        n_items = len(following_shared)
+        n_channels = len(following_shared)
     else:
         if shared:
             print("No shared database, will use local")
         else:
-            print(f"Database: local")
+            print("Database: local")
         channels = following_local
-        n_items = len(following_local)
+        n_channels = len(following_local)
 
+    res_channels = []
+
+    # Iterables to be passed to the ThreadPoolExecutor
+    servers = (server for n in range(n_channels))
+
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            res_channels = executor.map(validate_ch, channels, servers)
+            print(f"Resolving channels; max threads: {threads}")
+            res_channels = list(res_channels)  # generator to list
+    else:
+        for channel in channels:
+            result = validate_ch(channel, server=server)
+            res_channels.append(result)
+
+    if show_all:
+        return res_channels
+
+    ch_valid_filtered = filter_valid(res_channels,
+                                     f_valid=valid)
+
+    ch_notif_filtered = filter_notif(res_channels,
+                                     f_notifications=notifications)
+
+    ch_both = filter_notif(ch_valid_filtered,
+                           f_notifications=notifications)
+
+    if filtering in "valid":
+        ch_filtered = ch_valid_filtered
+    elif filtering in "notifications":
+        ch_filtered = ch_notif_filtered
+    elif filtering in "both":
+        ch_filtered = ch_both
+
+    return ch_filtered
+
+
+def print_ch_subs(channels=None,
+                  claim_id=False,
+                  file=None, fdate=None, sep=";"):
+    """Print channels found from the subscriptions."""
     out = []
-    ch_filtered = []
+    n_channels = len(channels)
 
-    for it, channel in enumerate(channels, start=1):
-        line = f"{it:3d}/{n_items:3d}, "
-        uri, cid = channel["uri"].lstrip("lbry://").split("#")
-        uri = uri + "#" + cid[0:3] + ","
+    for num, channel in enumerate(channels, start=1):
+        name, cid = channel["uri"].lstrip("lbry://").split("#")
+        f_name = name + "#" + cid[0:3]
+        f_name = f'"{f_name}"'
 
         if "notificationsDisabled" in channel:
-            ch_notifications = not channel["notificationsDisabled"]
+            ch_nots = not channel["notificationsDisabled"]
         else:
-            ch_notifications = False
+            ch_nots = False
+        ch_nots = f"{ch_nots}"
 
-        line += f"{uri:34s} notifications: {ch_notifications}"
-
-        if ((notifications and not ch_notifications)
-                or (not notifications and ch_notifications)):
-            continue
-
-        ch_filtered.append(channel)
-        out += [line]
-
-    fd = 0
-
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+        if "valid" in channel:
+            valid = bool(channel["valid"])
         else:
-            fdate = ""
+            valid = "_____"
+        valid = f"{valid}"
 
-        file = os.path.join(dirn, fdate + base)
+        line = f"{num:4d}/{n_channels:4d}" + f"{sep} "
+        if claim_id:
+            line += f"{cid}" + f"{sep} "
+        line += f"{f_name:48s}" + f"{sep} "
+        line += f"valid: {valid:5s}" + f"{sep} "
+        line += f"notifications: {ch_nots:5s}"
 
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
+        out.append(line)
 
-    if file and fd:
-        print("\n".join(out), file=fd)
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print("\n".join(out))
+    funcs.print_content(out, file=file, fdate=fdate)
+
+
+def list_ch_subs(shared=True,
+                 show_all=True, filtering="valid",
+                 valid=True, notifications=False,
+                 threads=32,
+                 claim_id=False,
+                 file=None, fdate=False, sep=";",
+                 server="http://localhost:5279"):
+    """Search and print the channels from our subscriptions.
+
+    Parameters
+    ----------
+    shared: bool, optional
+        It defaults to `True`, in which case it uses the shared database
+        synchronized with Odysee online.
+        If it is `False` it will use only the local database
+        to `lbrynet`, for example, used by the LBRY Desktop application.
+    show_all: bool, optional
+        It defaults to `True`, in which case all followed channels
+        will be printed, regardless of `filtering`, `valid`,
+        or `notifications`.
+        If it is `False` then we can control what channels to show
+        with `filtering`, `valid`, or `notifications`.
+    filtering: str, optional
+        It defaults to `'valid'`. It is the type of filtering that
+        will be done as long as `show_all=False`.
+        It can be `'valid'` (depending on the value of `valid` parameter),
+        `'notifications'` (depending on the value of `notifications`),
+        or `'both'` (depending on the values of `valid` and `notifications`).
+        If `'both'`, the list of channels will be filtered by `valid` first,
+        and then by `notifications`.
+    valid: bool, optional
+        It defaults to `True` in which case only the channels that resolve
+        online will be returned.
+        If it is `False` it will return only those channels that no longer
+        resolve online.
+        This parameter only works when `show_all=False`
+        and `filtering='valid'` or `'both'`.
+    notifications: bool, optional
+        It defaults to `False` in which case only the channels
+        that have notifications disabled will be returned.
+        If it is `True` it will return only those channels
+        that have notifications enabled.
+        This parameter only works when `show_all=False`
+        and `filtering='notifications'` or `'both'`.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve channels
+        online, meaning that many channels will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
+    claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the `claim_id` of the channel.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of dict
+        It returns the list of dictionaries representing
+        the filtered channels depending on the values of `shared`, `show_all`,
+        `filtering`, `valid`, and `notifications`.
+
+        Each dictionary has three keys:
+        - 'uri': the `'permanent_url'` of the channel.
+        - 'notificationsDisabled': a boolean value, indicating whether
+          the notification is enabled for that channel or not.
+        - 'valid': it's the dictionary of the resolved channel,
+          or `False` if the channel is invalid and doesn't exist.
+    False
+        If there is a problem it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    ch_filtered = search_ch_subs(shared=shared,
+                                 show_all=show_all, filtering=filtering,
+                                 valid=valid,
+                                 notifications=notifications,
+                                 threads=threads,
+                                 server=server)
+
+    print_ch_subs(ch_filtered, claim_id=claim_id,
+                  file=file, fdate=fdate, sep=sep)
 
     return ch_filtered
