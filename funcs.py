@@ -25,6 +25,7 @@
 # --------------------------------------------------------------------------- #
 """Auxiliary functions for other methods of the lbrytools package."""
 import os
+import random
 import regex
 import requests
 import subprocess
@@ -194,3 +195,131 @@ def sanitize_name(text="random_string"):
             name_normalized += character
 
     return name_normalized
+
+
+def process_ch_num(channels=None,
+                   number=None, shuffle=True):
+    """Process the channels which are contained in a list.
+
+    It returns a properly formatted list of pairs.
+
+    Parameters
+    ----------
+    channels: list of elements
+        Each element of the `channels` list may be a string,
+        a list with a single element, or a list with two elements.
+
+        For example, given
+        ::
+            ch1 = "Channel"
+            ch2 = ["@Ch1"]
+            ch3 = ["Mychan", 2]
+
+        A valid input is
+        ::
+            channels = [ch1, ch2, ch3]
+            channels = ["Channel", ["@Ch1"], ["MyChan", 2]]
+    number: int, optional
+        It defaults to `None`.
+        If this is present, it will override the individual
+        numbers in `channels`.
+    shuffle: bool, optional
+        It defaults to `True`, in which case it will shuffle
+        the list of channels so that they are not processed in the order
+        that they come.
+
+    Returns
+    --------
+    list of dict
+        It returns a list of dictionaries, where each element corresponds
+        to a channel. The two keys are:
+            - 'channel', the actual channel name; if the input is invalid,
+              this will be set to `None`.
+            - 'number', the number of items from this channel;
+              if the input is invalid this value will be set to 0.
+    False
+        If there is a problem such as an empty input it will return `False`.
+    """
+    if isinstance(channels, str):
+        channels = [channels]
+
+    if not channels or not isinstance(channels, (list, tuple)):
+        m = ["Specify channels and a number of claims.",
+             "  [",
+             "    ['@MyChannel', 2],",
+             "    ['@AwesomeCh:8', 1],",
+             "    ['@A-B-C#a', 3]",
+             "  ]"]
+        print("\n".join(m))
+        print(f"channels={channels}")
+        return False
+
+    DEFAULT_NUM = 2
+
+    if number:
+        if not isinstance(number, int) or number < 0:
+            number = DEFAULT_NUM
+            print("Number must be a positive integer, "
+                  f"set to default value, number={number}")
+
+        print("Global value overrides per channel number, "
+              f"number={number}")
+
+    n_channels = len(channels)
+
+    if n_channels <= 0:
+        print(">>> No channels in the list")
+        return False
+
+    out_ch_info = []
+
+    if shuffle:
+        if isinstance(channels, tuple):
+            channels = list(channels)
+        random.shuffle(channels)
+        random.shuffle(channels)
+
+    for num, channel in enumerate(channels, start=1):
+        ch_info = {"channel": None,
+                   "number": 0}
+
+        if isinstance(channel, str):
+            c_number = DEFAULT_NUM
+        elif isinstance(channel, (list, tuple)):
+            if len(channel) < 2:
+                c_number = DEFAULT_NUM
+            else:
+                c_number = channel[1]
+
+                if not isinstance(c_number, (int, float)) or c_number < 0:
+                    print(f">>> Number set to {DEFAULT_NUM}")
+                    c_number = DEFAULT_NUM
+
+                c_number = int(c_number)
+
+            channel = channel[0]
+
+        if not isinstance(channel, str):
+            print(f"Channel {num}/{n_channels}, {channel}")
+            print(">>> Error: channel must be a string. Skip channel.")
+            print()
+            out_ch_info.append(ch_info)
+            continue
+
+        if channel.startswith("[") and channel.endswith("]"):
+            # Sometimes we want to have the channel surrounded
+            # by brackets `[@channels]` to indicate it is invalid.
+            # We just allow the channel as is.
+            pass
+        elif not channel.startswith("@"):
+            channel = "@" + channel
+
+        # Number overrides the individual number for all channels
+        if number:
+            c_number = number
+
+        ch_info["channel"] = channel
+        ch_info["number"] = c_number
+        out_ch_info.append(ch_info)
+
+    return out_ch_info
