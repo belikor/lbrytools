@@ -29,6 +29,7 @@ import time
 
 import lbrytools.funcs as funcs
 import lbrytools.peers as peers
+import lbrytools.channels as chs
 
 
 def ch_search_ch_peers(channels=None,
@@ -349,6 +350,121 @@ def list_ch_peers(channels=None,
 
     print_ch_peers_info(ch_peers_info,
                         file=file, fdate=fdate, sep=sep)
+
+    return ch_peers_info
+
+
+def list_ch_subs_peers(number=2, shuffle=False,
+                       start=1, end=0,
+                       shared=True, valid=True,
+                       ch_threads=32, claim_threads=16,
+                       file=None, fdate=None, sep=";",
+                       server="http://localhost:5279"):
+    """Print the summary of peers for claims for subscribed channels.
+
+    The list of channels to which we are subscribed is found
+    in the wallet file in the local machine, assuming it is synchronized
+    with Odysee.
+
+    Parameters
+    ----------
+    number: int, optional
+        It defaults to 2.
+        The maximum number of claims that will be searched for peers
+        for every subscribed channel.
+    shuffle: bool, optional
+        It defaults to `False`, in which case it will process
+        the channels in the order that they are found in the wallet file.
+        If it is `True`, the list of channels is shuffled
+        so that they are processed in random order.
+    start: int, optional
+        It defaults to 1.
+        Process channels starting from this index in the list of channels.
+    end: int, optional
+        It defaults to 0.
+        Process channels until and including this index in the list
+        of channels.
+        If it is 0, it is the same as the last index in the list.
+    shared: bool, optional
+        It defaults to `True`, in which case it uses the shared database
+        synchronized with Odysee online.
+        If it is `False` it will use only the local database
+        to `lbrynet`, for example, used by the LBRY Desktop application.
+    valid: bool, optional
+        It defaults to `True`, in which case it will only list the valid
+        channels which can be resolved online.
+        If it is `False` it will list all channels in the wallet, even those
+        that do not resolve online, meaning that probably they were deleted.
+        These invalid channels will be shown with brackets around
+        the channel's name, for example, `[@channel]`.
+    ch_threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to process channels,
+        meaning that many channels will be searched in parallel.
+    claim_threads: int, optional
+        It defaults to 16.
+        It is the number of threads that will be used to search for peers,
+        meaning that many claims will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
+    file: str, optional
+        It defaults to `None`.
+        It must be a user writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    list of dict
+        Each element of the list is the output of `peers.search_ch_peers`,
+        with the peer information of every channel.
+    False
+        If there is a problem it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    sub_channels = chs.list_ch_subs(shared=shared,
+                                    show_all=not valid,
+                                    filtering="valid", valid=True,
+                                    threads=32,
+                                    claim_id=False,
+                                    file=None, fdate=False, sep=sep,
+                                    server=server)
+
+    channels = []
+
+    for num, channel in enumerate(sub_channels, start=1):
+        if num < start:
+            continue
+        if end != 0 and num > end:
+            break
+
+        name, cid = channel["uri"].lstrip("lbry://").split("#")
+        c_name = name + "#" + cid[0:3]
+
+        if not channel["valid"]:
+            c_name = "[" + c_name + "]"
+
+        channels.append([c_name, number])
+
+    ch_peers_info = list_ch_peers(channels=channels,
+                                  number=None, shuffle=shuffle,
+                                  ch_threads=ch_threads,
+                                  claim_threads=claim_threads,
+                                  file=file, fdate=fdate, sep=sep,
+                                  server=server)
 
     return ch_peers_info
 

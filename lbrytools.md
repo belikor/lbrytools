@@ -54,6 +54,7 @@ from lbrytools import print_ch_claims
 from lbrytools import list_comments
 from lbrytools import list_peers
 from lbrytools import list_ch_peers
+from lbrytools import list_ch_subs_peers
 ```
 
 # Download
@@ -1321,6 +1322,59 @@ gg = lbryt.list_ch_peers(channels=channels, number=25,
                          file="ch_peers.txt", fdate=True, sep=";")
 ```
 
+## Peers in subscribed channels
+
+We can search the peers of all channels to which we are subscribed.
+
+As the subscribed channels are not part of the blockchain data,
+this method searches the local wallet file which is read by `lbrynet`
+for the subscribed channels, then it calls `list_ch_peers` on that list.
+
+Search peers for a maximum of 50 claims for all channels
+in our subscribed list:
+```py
+mm = lbryt.list_ch_subs_peers(number=50)
+```
+
+By default it uses the shared database, which is synchronized with Odysee,
+but we can also use the local database if we want (`shared=False`).
+By default, only the channels that actually resolve online will be listed,
+however, we can also list all channels in our subscriber list (`valid=False`).
+In any case, only valid channels that resolve online
+will be searched for peers:
+```py
+mm = lbryt.list_ch_subs_peers(number=25, shared=True, valid=False)
+```
+
+If the number of channels to which we are subscribed is large, we can decide
+to restrict the number of channels searched for peers. We can also shuffle
+the list to search the channels randomly:
+```py
+mm = lbryt.list_ch_subs_peers(number=25, start=100)  # starting index
+mm = lbryt.list_ch_subs_peers(number=25, end=45)  # ending index
+mm = lbryt.list_ch_subs_peers(number=25, start=120, end=245)  # range
+mm = lbryt.list_ch_subs_peers(number=25, end=450, shuffle=True)
+```
+
+We can specify threads for searching channels in parallel (32 by default),
+and similarly, for each channel, threads for searching claims in parallel
+(16 by default).
+If the number of claims to search and the number of channels is large,
+the channel threads should be increased while the claim threads
+should be decreased.
+The total number of threads shouldn't be increased too much because
+it may cause the peer search to fail completely:
+```py
+mm = lbryt.list_ch_subs_peers(number=50,
+                              ch_threads=50, claim_threads=16)
+```
+
+The summary of the peer search per channel can be printed to a file:
+```py
+mm = lbryt.list_ch_subs_peers(number=50,
+                              file="ch_subs_peers.txt", fdate=True, sep=";")
+```
+
 # Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -1371,4 +1425,5 @@ lbryt.print_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
 lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
+lbryt.list_ch_subs_peers(..., server=server)
 ```
