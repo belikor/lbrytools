@@ -215,6 +215,36 @@ def ch_search_latest(channel=None, number=2,
     return claims
 
 
+def get_streams(channel=None, number=2, print_msg=True,
+                server="http://localhost:5279"):
+    """Get streams downloadable and discard other things."""
+    output = ch_search_latest(channel=channel, number=number,
+                              server=server)
+    if not output:
+        return False
+
+    claims = output
+
+    if print_msg:
+        print()
+    n_claims = len(claims)
+
+    streams = []
+    for num, stream in enumerate(claims, start=1):
+        if "value" in stream and "source" in stream["value"]:
+            streams.append(stream)
+            name = stream["name"]
+            sd_hash = stream["value"]["source"]["sd_hash"]
+            if print_msg:
+                print(f"{num:3d}/{n_claims:3d}; {name}; {sd_hash}")
+
+    n_streams = len(streams)
+    if not n_streams:
+        return False
+
+    return streams
+
+
 def find_channel(uri=None, cid=None, name=None,
                  full=True, canonical=False, offline=False,
                  server="http://localhost:5279"):
