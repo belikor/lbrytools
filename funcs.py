@@ -120,6 +120,17 @@ def get_data_dir(server="http://localhost:5279"):
     return data_dir
 
 
+def get_bdir(server="http://localhost:5279"):
+    """Get blobfiles directory."""
+    msg = {"method": "settings_get",
+           "params": {}}
+
+    output = requests.post(server, json=msg).json()
+    datadir = output["result"]["data_dir"]
+    blobdir = os.path.join(datadir, "blobfiles")
+    return blobdir
+
+
 def print_content(output_list, file=None, fdate=None):
     """Print contents to the terminal or to a file."""
     fd = 0
