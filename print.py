@@ -186,7 +186,7 @@ def print_info_post_get(info_get=None):
     return True
 
 
-def print_multi_list(list_ch_info=None, sep=";"):
+def print_multi_list(multi_ch_info=None, sep=";"):
     """Print the summary of downloaded claims from multiple channels.
 
     This is meant to be used with the returned list from
@@ -214,18 +214,18 @@ def print_multi_list(list_ch_info=None, sep=";"):
         without problems.
         If there is a problem or no list of items, it will return `False`.
     """
-    if not list_ch_info or not isinstance(list_ch_info, (list, tuple)):
+    if not multi_ch_info or not isinstance(multi_ch_info, (list, tuple)):
         print("Print information from a list of lists from multiple "
               "channels obtained from `ch_download_latest_multi`.")
         return False
 
-    if len(list_ch_info) < 1:
+    if len(multi_ch_info) < 1:
         print("Empty list.")
         return False
 
     # flat_list = [item for sublist in list_ch_info for item in sublist]
     flat_list = []
-    for sublist in list_ch_info:
+    for sublist in multi_ch_info:
         if not sublist:
             flat_list.append(None)
             continue
@@ -239,30 +239,31 @@ def print_multi_list(list_ch_info=None, sep=";"):
     n_items = len(flat_list)
 
     print("Summary of downloads")
-    out_list = []
+    out = []
 
     for it, item in enumerate(flat_list, start=1):
-        out = "{:2d}/{:2d}".format(it, n_items) + f"{sep} "
+        line = "{:2d}/{:2d}".format(it, n_items) + f"{sep} "
 
         if not item:
-            out += "empty item. Failure establishing server connection?"
-            out_list.append(out)
+            line += "empty item. Failure establishing server connection?"
+            out.append(line)
             continue
 
         if "claim_id" in item:
-            out += "{}".format(item["claim_id"]) + f"{sep} "
-            out += "{:3d}/{:3d}".format(item["blobs_completed"],
-                                        item["blobs_in_stream"]) + f"{sep} "
-            out += '"{}"'.format(item["channel_name"])
-            out += f"{sep} "
-            out += '"{}"'.format(item["claim_name"])
-            out_list.append(out)
+            line += "{}".format(item["claim_id"]) + f"{sep} "
+            line += "{:3d}/{:3d}".format(item["blobs_completed"],
+                                         item["blobs_in_stream"]) + f"{sep} "
+            line += '"{}"'.format(item["channel_name"])
+            line += f"{sep} "
+            line += '"{}"'.format(item["claim_name"])
+            out.append(line)
         elif "error" in item:
-            out_list.append(out + '"{}"'.format(item["error"]))
+            out.append(line + '"{}"'.format(item["error"]))
         else:
-            out_list.append(out + "not downloaded")
+            out.append(line + "not downloaded")
 
-    print("\n".join(out_list))
+    funcs.print_content(out, file=None, fdate=False)
+
     return True
 
 

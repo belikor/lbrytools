@@ -218,94 +218,35 @@ def ch_download_latest_multi(channels=None,
     if not funcs.server_exists(server=server):
         return False
 
-    if not channels or not isinstance(channels, (list, tuple)):
-        m = ["Download items from a list of channels and items.",
-             "  [",
-             "    ['@MyChannel', 2],",
-             "    ['@AwesomeCh:8', 1],",
-             "    ['@A-B-C#a', 3]",
-             "  ]"]
-        print("\n".join(m))
-        print(f"channels={channels}")
-        return False
-
     if (not ddir or not isinstance(ddir, str)
             or ddir == "~" or not os.path.exists(ddir)):
         ddir = os.path.expanduser("~")
         print(f"Download directory should exist; set to ddir='{ddir}'")
 
-    DEFAULT_NUM = 2
+    processed_chs = funcs.process_ch_num(channels=channels,
+                                         number=number, shuffle=shuffle)
 
-    if number:
-        if not isinstance(number, int) or number < 0:
-            number = DEFAULT_NUM
-            print("Number must be a positive integer, "
-                  f"set to default value, number={number}")
-
-        print("Global value overrides per channel number, "
-              f"number={number}")
-
-    n_channels = len(channels)
-
-    if n_channels <= 0:
-        print(">>> No channels in the list")
+    if not processed_chs or len(processed_chs) < 1:
         return False
 
-    list_ch_info = []
+    multi_ch_info = []
 
-    if shuffle:
-        if isinstance(channels, tuple):
-            channels = list(channels)
-        random.shuffle(channels)
-        random.shuffle(channels)
+    n_channels = len(processed_chs)
 
-    # Each element of the `channels` list may be a string,
-    # a list with a single element, or a list with multiple elements (two).
-    #     ch1 = "Channel"
-    #     ch2 = ["@Ch1"]
-    #     ch3 = ["Mychan", 2]
-    #     channels = [ch1, ch2, ch3]
+    for num, processed in enumerate(processed_chs, start=1):
+        channel = processed["channel"]
+        number = processed["number"]
 
-    for it, channel in enumerate(channels, start=1):
-        ch_info = []
-        if isinstance(channel, str):
-            _number = DEFAULT_NUM
-        elif isinstance(channel, (list, tuple)):
-            if len(channel) < 2:
-                _number = DEFAULT_NUM
-            else:
-                _number = channel[1]
-                if not isinstance(_number, (int, float)) or _number < 0:
-                    print(f">>> Number set to {DEFAULT_NUM}")
-                    _number = DEFAULT_NUM
-                _number = int(_number)
-
-            channel = channel[0]
-
-        if not isinstance(channel, str):
-            print(f"Channel {it}/{n_channels}, {channel}")
-            print(">>> Error: channel must be a string. Skip channel.")
-            print()
-            list_ch_info.append(ch_info)
-            continue
-
-        if not channel.startswith("@"):
-            channel = "@" + channel
-
-        # Number overrides the individual number for all channels
-        if number:
-            _number = number
-
-        print(f"Channel {it}/{n_channels}, {channel}")
-        ch_info = ch_download_latest(channel=channel, number=_number,
+        print(f"Channel {num}/{n_channels}, {channel}")
+        ch_info = ch_download_latest(channel=channel, number=number,
                                      repost=repost,
                                      ddir=ddir, own_dir=own_dir,
                                      save_file=save_file,
                                      server=server)
 
-        list_ch_info.append(ch_info)
+        multi_ch_info.append(ch_info)
 
-    return list_ch_info
+    return multi_ch_info
 
 
 def redownload_latest(number=2, ddir=None, own_dir=True, save_file=True,
