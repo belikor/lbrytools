@@ -201,6 +201,9 @@ def ch_search_latest(channel=None, number=2,
         number = 2
         print(f"Number set to default value, number={number}")
 
+    if channel.startswith("[") and channel.endswith("]"):
+        channel = channel[1:-1]
+
     if not channel.startswith("@"):
         channel = "@" + channel
 
