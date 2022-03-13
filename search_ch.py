@@ -197,14 +197,19 @@ def ch_search_latest(channel=None, number=2,
         print(f"channel={channel}, number={number}")
         return False
 
-    if not number or not isinstance(number, int):
+    if number is None or not isinstance(number, int):
         number = 2
         print(f"Number set to default value, number={number}")
 
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    if number <= 50:
+    if number == 0:
+        output = srchall.ch_search_all_claims(channel,
+                                              reverse=True,
+                                              server=server)
+        claims = output["claims"]
+    elif 0 < number <= 50:
         claims = ch_search_fifty_claims(channel, number=number,
                                         reverse=True,
                                         server=server)
@@ -212,11 +217,6 @@ def ch_search_latest(channel=None, number=2,
         output = srchall.ch_search_n_claims(channel, number=number,
                                             reverse=True,
                                             server=server)
-        claims = output["claims"]
-    elif number == 0:
-        output = srchall.ch_search_all_claims(channel,
-                                              reverse=True,
-                                              server=server)
         claims = output["claims"]
 
     return claims
