@@ -28,6 +28,7 @@ import requests
 
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
+import lbrytools.search_utils as sutils
 import lbrytools.search_ch_all as srchall
 
 
@@ -106,7 +107,7 @@ def resolve_channel(channel=None,
     return ch_item
 
 
-def ch_search_fifty_claims(channel, number=2,
+def ch_search_fifty_claims(channel, number=2, reverse=True,
                            server="http://localhost:5279"):
     """Return only the first page of results."""
     cmd = ["lbrynet",
@@ -144,6 +145,11 @@ def ch_search_fifty_claims(channel, number=2,
     if len(claims) < 1:
         print(">>> No items found; "
               f"check that the name is correct, channel={channel}")
+
+    output = sutils.sort_filter_size(claims,
+                                     number=number,
+                                     reverse=reverse)
+    claims = output["claims"]
 
     return claims
 
@@ -200,6 +206,7 @@ def ch_search_latest(channel=None, number=2,
 
     if number <= 50:
         claims = ch_search_fifty_claims(channel, number=number,
+                                        reverse=True,
                                         server=server)
     elif number > 50:
         output = srchall.ch_search_n_claims(channel, number=number,
