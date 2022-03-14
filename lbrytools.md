@@ -39,6 +39,7 @@ from lbrytools import blobs_move
 from lbrytools import blobs_move_all
 from lbrytools import claims_bids
 from lbrytools import list_ch_subs
+from lbrytools import list_ch_subs_latest
 from lbrytools import list_accounts
 from lbrytools import list_playlists
 from lbrytools import list_supports
@@ -1001,6 +1002,46 @@ The information can be printed to a file as well:
 q = lbryt.list_ch_subs(file="subs.txt", fdate=True, sep=";")
 ```
 
+## Latest claims from channel subscriptions
+
+Display the latest claims from each of the channels to which we are subscribed:
+```py
+qq = lbryt.list_ch_subs_latest(number=4)
+```
+
+By default, `number` cannot be 0; it will be set to 1.
+To allow `number=0` we can set `override=True`.
+If `number=0` it will search and display all claims of all subscribed channels,
+which may take a very long time depending on how many channels
+we are subscribed to, and how many claims they have.
+
+The options to filter the list of subscribed channels are the same
+from `list_ch_subs`:
+```py
+qq = lbryt.list_ch_subs_latest(number=3,
+                               shared=True,
+                               show_all=False, filtering="valid", valid=True,
+                               threads=128)
+```
+
+We can display some information on the claims, including the claim ID,
+type of claim and stream, and title (instead of claim name).
+If `sanitize=True`, it will remove emojis from the displayed names,
+which may be necessary if we want to use the output in other programs:
+```py
+qq = lbryt.list_ch_subs_latest(number=5,
+                               claim_id=True, type=True, title=False,
+                               sanitize=True)
+```
+
+We can filter the list of channels also by indices,
+and print the information directly to a file:
+```py
+qq = lbryt.list_ch_subs_latest(number=4,
+                               start=33, end=222,
+                               file="subs_claims.txt", fdate=True, sep=";")
+```
+
 # Accounts
 
 List the accounts in the current wallet,
@@ -1233,6 +1274,7 @@ lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
 lbryt.claims_bids(..., server=server)
 lbryt.list_ch_subs(..., server=server)
+lbryt.list_ch_subs_latest(..., server=server)
 lbryt.list_accounts(..., server=server)
 lbryt.list_playlists(..., server=server)
 lbryt.list_supports(..., server=server)
