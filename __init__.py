@@ -125,6 +125,8 @@ from lbrytools.channels import list_ch_subs
 from lbrytools.channels import list_ch_subs_latest
 
 from lbrytools.accounts import list_accounts
+from lbrytools.publishes import list_channels
+from lbrytools.publishes import list_claims
 
 from lbrytools.playlists import list_playlists
 
@@ -217,6 +219,8 @@ True if list_ch_subs else False
 True if list_ch_subs_latest else False
 
 True if list_accounts else False
+True if list_channels else False
+True if list_claims else False
 
 True if list_playlists else False
 

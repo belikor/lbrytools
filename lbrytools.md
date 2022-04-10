@@ -29,6 +29,8 @@
     - [Trending claims](#trending-claims)
     - [Search for claims](#search-for-claims)
     - [Search channel claims](#search-channel-claims)
+    - [List created channels](#list-created-channels)
+    - [List created claims](#list-created-claims)
 - [Channel subscriptions](#channel-subscriptions)
     - [Latest claims from subscriptions](#latest-claims-from-subscriptions)
 - [Accounts](#accounts)
@@ -89,6 +91,8 @@ from lbrytools import claims_bids
 from lbrytools import list_ch_subs
 from lbrytools import list_ch_subs_latest
 from lbrytools import list_accounts
+from lbrytools import list_channels
+from lbrytools import list_claims
 from lbrytools import list_playlists
 from lbrytools import list_supports
 from lbrytools import print_blobs_ratio
@@ -1066,6 +1070,102 @@ k = lbryt.print_ch_claims("@TomWoodsTV",
 
 [Go back to _Content_](#content)
 
+### List created channels
+
+Display the channels that we have created in the current wallet:
+```py
+cc = lbryt.list_channels()
+```
+
+In addition to showing channel name and title,
+various types of information can be displayed for each channel
+including time when the channel was created and last updated, claim ID,
+address of the transaction, account of the address,
+and amount of LBC staked (base and total):
+```py
+cc = lbryt.list_channels(updates=True, claim_id=True, addresses=True,
+                         accounts=True, amounts=True)
+```
+
+With `reverse=True` the newest channels will come first in the list.
+If `sanitize=True`, it will remove emojis from the displayed names and titles,
+which may be necessary if we want to use the output in other programs:
+```py
+cc = lbryt.list_channels(reverse=True, sanitize=True)
+```
+
+By default the channels will be searched from the wallet
+that is called `'default_wallet'`, but this can be changed if needed.
+The option `is_spent=True` will get the channel claims
+with a transaction that has already been spent.
+This means it may show some channels that are expired or no longer exist:
+```py
+cc = lbryt.list_channels(wallet_id="default_wallet", is_spent=True)
+```
+
+The list of channels can be printed directly to a file:
+```py
+cc = lbryt.list_channels(file="channels.txt", fdate=True, sep=";")
+```
+
+[Go back to _Content_](#content)
+
+### List created claims
+
+Display all claims that we have created in all channels of the current wallet:
+```py
+ss = lbryt.list_claims()
+```
+
+Display the claims corresponding to a single channel, given by name
+or claim ID (40-character string).
+These must be channels that we control, that is, that are in our wallet:
+```py
+ss = lbryt.list_claims(channel="@MyPersonalChannel")
+ss = lbryt.list_claims(channel_id="c64a02da7f080a81572cac1a51cf7f3464c67058")
+```
+
+To display claims for any random channel we can use `print_ch_claims`.
+
+To display only those claims that were published anonymously by us,
+that is, without channel:
+```py
+ss = lbryt.list_claims(anon=True)
+```
+
+Various types of information can be displayed for each claim
+including time when the claim was created and last updated, claim ID,
+address of the transaction, type of claim, type of stream,
+and media type (if any), amount of LBC staked (base and total),
+channel name, and claim title:
+```py
+ss = lbryt.list_claims(updates=True, claim_id=True, addresses=True,
+                       typ=True, amounts=True, ch_name=True, title=True)
+```
+
+With `reverse=True` the newest claims will come first in the list.
+If `sanitize=True`, it will remove emojis from the displayed names and titles,
+which may be necessary if we want to use the output in other programs:
+```py
+cc = lbryt.list_claims(reverse=True, sanitize=True)
+```
+
+By default the claims will be searched from the wallet
+that is called `'default_wallet'`, but this can be changed if needed.
+The option `is_spent=True` will get the claims
+with a transaction that has already been spent.
+This means it may show some claims that are expired or no longer exist:
+```py
+ss = lbryt.list_claims(wallet_id="default_wallet", is_spent=True)
+```
+
+The list of claims can be printed directly to a file:
+```py
+ss = lbryt.list_claims(file="claims.txt", fdate=True, sep=";")
+```
+
+[Go back to _Content_](#content)
+
 ## Channel subscriptions
 
 Display the channels to which we are subscribed,
@@ -1551,6 +1651,8 @@ lbryt.claims_bids(..., server=server)
 lbryt.list_ch_subs(..., server=server)
 lbryt.list_ch_subs_latest(..., server=server)
 lbryt.list_accounts(..., server=server)
+lbryt.list_channels(..., server=server)
+lbryt.list_claims(..., server=server)
 lbryt.list_playlists(..., server=server)
 lbryt.list_supports(..., server=server)
 lbryt.print_blobs_ratio(..., server=server)
