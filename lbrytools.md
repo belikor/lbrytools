@@ -1154,20 +1154,26 @@ qq = lbryt.list_ch_subs_latest(number=4,
 ## Accounts
 
 List the accounts in the current wallet,
-along with the balance in each account.
+along with the balance in each account, and the total balance:
 ```py
 a = lbryt.list_accounts()
 ```
 
-It can also show the individual addresses that have been
-used for each account.
+Normally the default wallet is specified, but another wallet
+can also be explicitly given:
+```py
+a = lbryt.list_accounts(wallet_id="default_wallet")
+```
+
+It can also show the individual addresses that have been used
+for each account:
 ```py
 a = lbryt.list_accounts(addresses=True)
 ```
 
 The information can be printed to a file as well.
 ```py
-a = lbryt.list_accounts(file="accounts.txt", fdate=True)
+a = lbryt.list_accounts(file="accounts.txt", fdate=True, sep=";")
 ```
 
 [Go back to _Content_](#content)
