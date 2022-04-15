@@ -89,7 +89,7 @@ def sort_and_filter(claims, number=0, reverse=False):
     return unique_claims
 
 
-def downloadable_size(claims, local=False):
+def downloadable_size(claims, local=False, print_msg=True):
     """Calculate the total size of input claims.
 
     Parameters
@@ -118,10 +118,11 @@ def downloadable_size(claims, local=False):
           The duration can be divided by 3600 to obtain hours,
           then by 24 to obtain days.
     """
-    if local:
-        print("Calculate size of fully downloaded claims")
-    else:
-        print("Calculate size of downloadable claims")
+    if print_msg:
+        if local:
+            print("Calculate size of fully downloaded claims")
+        else:
+            print("Calculate size of downloadable claims")
 
     n_claims = len(claims)
     total_size = 0
@@ -143,8 +144,9 @@ def downloadable_size(claims, local=False):
         else:
             file_name = alt_name
             size = 0
-            print(f"{num:4d}/{n_claims:4d}; type: {vtype}; "
-                  f'no source: "{file_name}"')
+            if print_msg:
+                print(f"{num:4d}/{n_claims:4d}; type: {vtype}; "
+                      f'no source: "{file_name}"')
 
         seconds = 0
         if "video" in source_info:
