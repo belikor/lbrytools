@@ -42,6 +42,7 @@
     - [Abandon support for invalid claims](#abandon-support-for-invalid-claims)
 - [Seeding ratio](#seeding-ratio)
 - [Comments](#comments)
+    - [Create comments](#create-comments)
 - [Peers](#peers)
     - [Peers in a single channel](#peers-in-a-single-channel)
     - [Peers in multiple channels](#peers-in-multiple-channels)
@@ -104,6 +105,7 @@ from lbrytools import print_trending_claims
 from lbrytools import print_search_claims
 from lbrytools import print_ch_claims
 from lbrytools import list_comments
+from lbrytools import create_comment
 from lbrytools import list_peers
 from lbrytools import list_ch_peers
 from lbrytools import list_ch_subs_peers
@@ -1473,6 +1475,48 @@ cc = lbryt.list_comments("what-were-medieval-guilds-really-like",
 
 [Go back to _Content_](#content)
 
+### Create comments
+
+To create a comment we specify the comment text including any newlines
+and markup formatting, a claim by URI or claim ID,
+and the author's URI or claim ID:
+```py
+comment = "Some long comment.\nSecond _line_ of the comment."
+
+cr = lbryt.create_comment(comment=comment,
+                          uri="some-claim-name",
+                          parent_id=None,
+                          author_uri="@MyChannel")
+
+cr = lbryt.create_comment(comment=comment,
+                          cid="3e17195d3aa12977e584e0d651bdd89689f80c10",
+                          parent_id=None,
+                          author_cid="4f26204g2bb02967m47301e752cnn99548g71d22")
+```
+
+If `parent_id` is given it should be a 64-bit ID of a previously
+published comment. Then the new comment will appear as a reply to it:
+```py
+parent_id="c7cf405b355f44e55ad2158ed99ed997906db4b1c40cee9d377c7c9f4a492a73"
+```
+
+We can only create comments with a channel that we control, meaning that
+we must have the private keys of the specified channel with `author_uri`
+or `author_cid`. By the default it will search the default wallet
+created by `lbrynet`, but we can specify another wallet if we want:
+```py
+cr = lbryt.create_comment("...", wallet_id="default_wallet")
+```
+
+Comments are not part of the LBRY protocol, they are stored in a comments
+server, which is Odysee's by default; a different server can be specified:
+```py
+cr = lbryt.create_comment("...",
+                          comm_server="https://comments.odysee.com/api/v2")
+```
+
+[Go back to _Content_](#content)
+
 ## Peers
 
 The LBRY network allows anybody to host downloaded files and share them
@@ -1665,6 +1709,7 @@ lbryt.print_trending_claims(..., server=server)
 lbryt.print_search_claims(..., server=server)
 lbryt.print_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
+lbryt.create_comment(..., server=server)
 lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)

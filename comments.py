@@ -29,6 +29,7 @@ import time
 
 import requests
 
+import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
@@ -451,61 +452,111 @@ def print_cmnt_result(result, file=None, fdate=False):
 def create_comment(comment=None,
                    uri=None, cid=None, name=None,
                    parent_id=None,
-                   ch_uri=None, ch_cid=None, ch_name=None,
+                   author_uri=None, author_cid=None, author_name=None,
+                   wallet_id="default_wallet",
                    comm_server="https://comments.odysee.com/api/v2",
                    server="http://localhost:5279"):
-    """Create a comment or reply to it.
-
-    AT THE MOMENT THIS DOESN'T WORK because we cannot sign the comment
-    with the channel key. This is necessary to create the comment
-    on the comment server.
-
-    {
-      "method": "comment.Create",
-      "id": 1,
-      "jsonrpc": "2.0",
-      "params": {
-        "channel_id": "81bec0b66ff34a1378581751958f5b98f9043d17",
-        "channel_name": "@vertbyqb",
-        "claim_id": "2ba7ec34033a42c76468cdfc463943e5de7e364a",
-        "parent_id": "", # Optional, for replies
-        "comment": "l test",
-        "signature": sig,
-        "signing_ts": "1642638072"
-      }
-    }
-    # hexdata is the hex encoded version of the comment
-    sig = "lbrynet channel sign --channel_name=@channel --hexdata=hexdata"
+    """Create a comment or reply to an existing comment.
 
     Parameters
     ----------
     comment: str
         String that represents the comment. It should be a string,
-        and may include newlines, and markdown text.
+        and may include newlines, and markdown formatting.
     uri, cid, name: str
         A unified resource identifier (URI), a `'claim_id'`,
         or a `'claim_name'` for a claim on the LBRY network.
         It is the claim under which the comment will be created.
-    parent_id: str
-        Identification string for the.
-    ch_uri, ch_cid, ch_name: str
+    parent_id: str, optional
+        It defaults to `None`.
+        If it exists, it is an identification string for an existing comment,
+        meaning that our `comment` will be a reply to it.
+    author_uri, author_cid, author_name: str
         A unified resource identifier (URI), a `'claim_id'`,
         or a `'claim_name'` for a claim on the LBRY network.
         This will be the channel that we control which will be the author
-        of the comment.
+        of the comment or reply.
+    wallet_id: str, optional
+        It defaults to 'default_wallet' which is the default wallet
+        created by `lbrynet`. It will be used for searching the channel
+        and its private key which will be the author of the comment.
     comm_server: str, optional
         It defaults to `'https://comments.odysee.com/api/v2'`
         It is the address of the comment server.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
-        This is the address of the local `lbrynet` daemon.
+        This is the address of the local `lbrynet` daemon used to resolve
+        the claims and sign the comment.
+
+    Returns
+    -------
+    dict
+        A dictionary with many keys
+        - 'comment': the same `comment` information.
+        - 'comment_id': the 64-character ID of the successful comment.
+        - 'claim_id': the claim ID corresponding to the input `uri`, `cid`,
+          or `name`.
+        - 'timestamp': the timestamp in seconds since 1970-01-01
+          known as the Unix epoch.
+        - 'parent_id': the 64-character ID of the parent comment
+          to this comment, if it is a reply.
+          If our comment is not a reply, that is, it has no parent comment,
+          then this key won't exist.
+        - 'signature': the 128-character signature of the transaction
+        - 'signing_ts': the signing timestamp in seconds since 1970-01-01
+          known as the Unix epoch.
+        - 'channel_id': 40-character ID of the channel
+          '44660089c9cb227d65c403a4328606173042cadc'
+        - 'channel_name': string indicating the generic channel name
+          `'@MyChannel'`
+        - 'channel_url': string indicating the signing channel; it includes
+          the `channel_name` and then the `channel_id`
+          `'lbry://@MyChannel#44660089c9cb227d65c403a4328606173042cadc'`
+        - 'currency': string indicating the currency, for example, 'LBC'
+        - 'support_amount': integer value indicating whether the comment
+          has a support
+        - 'is_hidden': boolean value indicating whether the comment is hidden
+        - 'is_pinned': boolean value indicating whether the comment is pinned
+        - 'is_fiat': boolean value indicating whether fiat currency was sent
+    False
+        If there is a problem, such as non-existing `wallet_id`, or empty
+        `comment`, or invalid claim, or invalid channel,
+        it will return `False`.
+
+    Signed data
+    -----------
+    The comment server requires various parameters.
+    ::
+        {
+          "method": "comment.Create",
+          "id": 1,
+          "jsonrpc": "2.0",
+          "params": {
+            "channel_id": "90abc0b66ff34a1378581751958f5b98f9043d17",
+            "channel_name": "@some-channel",
+            "claim_id": "4ba7ec34033a42c76468cdfc463943e5de7e364a",
+            "parent_id": "", # Optional, for replies
+            "comment": "some test comment",
+            "signature": signature,
+            "signing_ts": signing_timestamp
+          }
+        }
+
+    The `signature` and `signing_timestamp` are obtained from signing the
+    hexadecimal representation of the comment.
+    These values are provided by `sign_comment`.
     """
+    print("Create comment")
+    print(80 * "-")
+
     if not comment:
+        print(">>> Empty comment.")
         return False
 
     comment = comment.strip()
 
     if not comment:
+        print(">>> Empty comment.")
         return False
 
     item = srch.search_item(uri=uri, cid=cid, name=name,
@@ -515,7 +566,7 @@ def create_comment(comment=None,
 
     claim_id = item["claim_id"]
     uri = item["canonical_url"]
-    title = item["value"]["title"]
+    title = item["value"].get("title", "(None)")
 
     cl_time = 0
     if "release_time" in item["value"]:
@@ -523,7 +574,7 @@ def create_comment(comment=None,
         cl_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
                                 time.localtime(cl_time))
 
-    ch = srch.search_item(uri=ch_uri, cid=ch_cid, name=ch_name,
+    ch = srch.search_item(uri=author_uri, cid=author_cid, name=author_name,
                           server=server)
     if not ch:
         return False
@@ -532,15 +583,29 @@ def create_comment(comment=None,
     print(f"claim_id: {claim_id}")
     print(f"release_time: {cl_time}")
     print(f"title: {title}")
+    print("comment author:", ch["name"])
+    print("comment author ID:", ch["claim_id"])
     print(f"comment server: {comm_server}")
 
-    print(80 * "-")
+    print(40 * "-")
+
+    sign = sign_comment(comment, ch["name"],
+                        wallet_id=wallet_id,
+                        server=server)
+
+    if not sign:
+        print(">>> Unable to sign; "
+              "we must have the private keys of this channel "
+              "for this operation to succeed.")
+        return False
 
     params = {"comment": comment,
               "claim_id": claim_id,
               "parent_id": parent_id,
               "channel_id": ch["claim_id"],
-              "channel_name": ch["name"]}
+              "channel_name": ch["name"],
+              "signature": sign["signature"],
+              "signing_ts": sign["signing_ts"]}
 
     output = jsonrpc_post(comm_server, "comment.Create", params)
 
@@ -548,4 +613,8 @@ def create_comment(comment=None,
         print(">>> Error:", output["error"].get("message", None))
         return False
 
-    return output["result"]
+    result = output["result"]
+
+    print_cmnt_result(result, file=None, fdate=False)
+
+    return result

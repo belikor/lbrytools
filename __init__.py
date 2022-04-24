@@ -141,6 +141,7 @@ from lbrytools.support import target_support
 from lbrytools.blobs_ratio import print_blobs_ratio
 
 from lbrytools.comments import list_comments
+from lbrytools.comments import create_comment
 
 from lbrytools.peers import list_peers
 from lbrytools.peers_multi import list_ch_peers
@@ -235,6 +236,7 @@ True if target_support else False
 True if print_blobs_ratio else False
 
 True if list_comments else False
+True if create_comment else False
 
 True if list_peers else False
 True if list_ch_peers else False
