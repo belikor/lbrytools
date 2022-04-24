@@ -618,3 +618,124 @@ def create_comment(comment=None,
     print_cmnt_result(result, file=None, fdate=False)
 
     return result
+
+
+def get_ch_and_sign(comment=None,
+                    comment_id=None,
+                    wallet_id="default_wallet",
+                    comm_server="https://comments.odysee.com/api/v2",
+                    server="http://localhost:5279"):
+    """Get the channel from a comment ID and sign the comment ID."""
+    output = jsonrpc_post(comm_server,
+                          "comment.GetChannelFromCommentID",
+                          comment_id=comment_id)
+
+    if "error" in output:
+        print(">>> Error:", output["error"].get("message", None))
+        return False
+
+    ch = output["result"]
+
+    if comment:
+        field = comment
+    else:
+        field = comment_id
+
+    sign = sign_comment(field, ch["channel_name"],
+                        wallet_id=wallet_id,
+                        server=server)
+
+    if not sign:
+        print("channel_name:", ch["channel_name"])
+        print("channel_id:", ch["channel_id"])
+        print(">>> Unable to sign; "
+              "we must have the private keys of this channel "
+              "for this operation to succeed.")
+        return False
+
+    return {"channel": ch,
+            "sign": sign}
+
+
+def update_comment(comment=None, comment_id=None,
+                   wallet_id="default_wallet",
+                   comm_server="https://comments.odysee.com/api/v2",
+                   server="http://localhost:5279"):
+    """Update a previously created comment with a new text.
+
+    Parameters
+    ----------
+    comment: str
+        String that represents the comment. It should be a string,
+        and may include newlines, and markdown formatting.
+    comment_id: str
+        The 64-character ID of an existing comment which was published by us.
+        The channel that was used to publish the comment will be determined
+        from this ID.
+    wallet_id: str, optional
+        It defaults to 'default_wallet' which is the default wallet
+        created by `lbrynet`. It will be used for searching the channel
+        and its private key which will be the author of the comment.
+    comm_server: str, optional
+        It defaults to `'https://comments.odysee.com/api/v2'`
+        It is the address of the comment server.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the local `lbrynet` daemon used to resolve
+        the claims and sign the comment.
+
+    Returns
+    -------
+    dict
+        A dictionary with many fields of information. See `create_comment`.
+    False
+        If there is a problem, such as non-existing `wallet_id`, or empty
+        `comment`, it will return `False`.
+    """
+    print("Update comment")
+    print(80 * "-")
+
+    if not comment:
+        print(">>> Empty comment.")
+        return False
+
+    comment = comment.strip()
+
+    if not comment:
+        print(">>> Empty comment.")
+        return False
+
+    print(f"comment_id: {comment_id} ({len(comment_id)} bit)")
+    print(f"comment server: {comm_server}")
+
+    print(40 * "-")
+
+    result = get_ch_and_sign(comment=comment,
+                             comment_id=comment_id,
+                             wallet_id=wallet_id,
+                             comm_server=comm_server,
+                             server=server)
+
+    if not result:
+        return False
+
+    ch = result["channel"]
+    sign = result["sign"]
+
+    edited_comment = {"comment_id": comment_id,
+                      "comment": comment,
+                      "channel_id": ch["channel_id"],
+                      "channel_name": ch["channel_name"],
+                      "signature": sign["signature"],
+                      "signing_ts": sign["signing_ts"]}
+
+    output = jsonrpc_post(comm_server, "comment.Edit", edited_comment)
+    if "error" in output:
+        print(">>> Error:", output["error"].get("message", None))
+        return False
+
+    result = output["result"]
+
+    print_cmnt_result(result, file=None, fdate=False)
+
+    return result
