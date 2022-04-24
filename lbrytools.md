@@ -44,6 +44,7 @@
 - [Comments](#comments)
     - [Create comments](#create-comments)
     - [Update comments](#update-comments)
+    - [Abandon comments](#abandon-comments)
 - [Peers](#peers)
     - [Peers in a single channel](#peers-in-a-single-channel)
     - [Peers in multiple channels](#peers-in-multiple-channels)
@@ -108,6 +109,7 @@ from lbrytools import print_ch_claims
 from lbrytools import list_comments
 from lbrytools import create_comment
 from lbrytools import update_comment
+from lbrytools import abandon_comment
 from lbrytools import list_peers
 from lbrytools import list_ch_peers
 from lbrytools import list_ch_subs_peers
@@ -1544,6 +1546,28 @@ up = lbryt.update_comment("...",
 
 [Go back to _Content_](#content)
 
+### Abandon comments
+
+To abandon or remove a comment from the comment server
+we specify the 64-bit ID of the comment:
+```py
+ab = lbryt.abandon_comment(comment_id="c7cf405b305f24e35ad2158ed89ed187906db4b1c40cge9d367c7c9f4a492a73")
+```
+
+We can only remove comments made by a channel that we control, meaning that
+we have the private keys for this channel.
+The channel will be automatically inferred from the `comment_id`.
+By default it will search the default wallet created by `lbrynet`,
+but we can specify another wallet if we want.
+A different comment server can be specified also:
+```py
+ab = lbryt.abandon_comment("...",
+                           wallet_id="default_wallet",
+                           comm_server="https://comments.odysee.com/api/v2")
+```
+
+[Go back to _Content_](#content)
+
 ## Peers
 
 The LBRY network allows anybody to host downloaded files and share them
@@ -1738,6 +1762,7 @@ lbryt.print_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
 lbryt.create_comment(..., server=server)
 lbryt.update_comment(..., server=server)
+lbryt.abandon_comment(..., server=server)
 lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)

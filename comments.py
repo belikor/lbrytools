@@ -739,3 +739,76 @@ def update_comment(comment=None, comment_id=None,
     print_cmnt_result(result, file=None, fdate=False)
 
     return result
+
+
+def abandon_comment(comment_id=None,
+                    wallet_id="default_wallet",
+                    comm_server="https://comments.odysee.com/api/v2",
+                    server="http://localhost:5279"):
+    """Remove a previously created comment.
+
+    Parameters
+    ----------
+    comment_id: str
+        The 64-character ID of an existing comment which was published by us.
+        The channel that was used to publish the comment will be determined
+        from this ID.
+    wallet_id: str, optional
+        It defaults to 'default_wallet' which is the default wallet
+        created by `lbrynet`. It will be used for searching the channel
+        and its private key which will be the author of the comment.
+    comm_server: str, optional
+        It defaults to `'https://comments.odysee.com/api/v2'`
+        It is the address of the comment server.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the local `lbrynet` daemon used to resolve
+        the claims and sign the comment.
+
+    Returns
+    -------
+    dict
+        A dictionary with many fields of information. See `create_comment`.
+        It will contain a unique key
+        - 'abandoned': it will be `True` if the comment was successfully
+          removed from the comment server.
+    False
+        If there is a problem, such as non-existing `wallet_id`
+        it will return `False`.
+    """
+    print("Abandon comment")
+    print(80 * "-")
+
+    print(f"comment_id: {comment_id} ({len(comment_id)} bit)")
+    print(f"comment server: {comm_server}")
+
+    print(40 * "-")
+
+    result = get_ch_and_sign(comment=None,
+                             comment_id=comment_id,
+                             wallet_id=wallet_id,
+                             comm_server=comm_server,
+                             server=server)
+
+    if not result:
+        return False
+
+    ch = result["channel"]
+    sig = result["sign"]
+
+    params = {"comment_id": comment_id,
+              "channel_id": ch["channel_id"],
+              "channel_name": ch["channel_name"],
+              "signature": sig["signature"],
+              "signing_ts": sig["signing_ts"]}
+
+    output = jsonrpc_post(comm_server, "comment.Abandon", params)
+    if "error" in output:
+        print(">>> Error:", output["error"].get("message", None))
+        return False
+
+    result = output["result"]
+
+    print_cmnt_result(result, file=None, fdate=False)
+
+    return result
