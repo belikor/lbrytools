@@ -263,7 +263,8 @@ def list_comments(uri=None, cid=None, name=None,
               output['root_comments'] == output['levels'][0]
               output['root_comments'][5] == output['levels'][0][5]
     False
-        If there is a problem, like no existing item, it will return `False`.
+        If there is a problem, like a non-existing item,
+        it will return `False`.
     """
     item = srch.search_item(uri=uri, cid=cid, name=name,
                             server=server)
@@ -272,7 +273,7 @@ def list_comments(uri=None, cid=None, name=None,
 
     claim_id = item["claim_id"]
     uri = item["canonical_url"]
-    title = item["value"]["title"]
+    title = item["value"].get("title", "(None)")
 
     cl_time = 0
     if "release_time" in item["value"]:

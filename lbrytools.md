@@ -1461,7 +1461,8 @@ cc = lbryt.list_comments("...", full=True)
 Comments are not part of the LBRY protocol, they are stored in a comments
 server, which is Odysee's by default; a different server can be specified:
 ```py
-cc = lbryt.list_comments("...", comm_server="https://comments.odysee.com/api/v2")
+cc = lbryt.list_comments("...",
+                         comm_server="https://comments.odysee.com/api/v2")
 ```
 
 The comments can be printed to a file:
