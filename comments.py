@@ -360,6 +360,63 @@ def list_comments(uri=None, cid=None, name=None,
             "levels": lvl_comments}
 
 
+def sign_comment(data, channel, hexdata=None,
+                 wallet_id="default_wallet",
+                 server="http://localhost:5279"):
+    """Sign a text message with the channel's private key.
+
+    Parameters
+    ----------
+    data: str
+        The text to sign.
+    channel: str
+        The channel name that will be used to sign the `data`.
+        This channel must be under our control and thus exist in `wallet_id`.
+    hexdata: str, optional
+        It defaults to `None`.
+        If it exists, it is a string representing the hexadecimal encoded
+        `data`, that is, `hexdata = data.encoded().hex()`.
+        If hexdata is given, `data` is no longer used.
+    wallet_id: str, optional
+        It defaults to `'default_wallet'`, in which case it will search
+        the default wallet created by `lbrynet`, in order to resolve
+        `channel` and sign the data with its private key.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the local `lbrynet` daemon used to sign
+        the data.
+
+    Returns
+    -------
+    dict
+        There are two keys
+        - 'signature': the signature of the data.
+        - 'signature_ts': the timestamp used to sign the data.
+    False
+        If there is a problem, such as non-existing `wallet_id`,
+        it will return `False`.
+    """
+    if not hexdata:
+        hexdata = data.encode().hex()
+
+    if not channel.startswith("@"):
+        channel = "@" + channel
+
+    msg = {"method": "channel_sign",
+           "params": {"channel_name": channel,
+                      "hexdata": hexdata,
+                      "wallet_id": wallet_id}}
+
+    output = requests.post(server, json=msg).json()
+    if "error" in output:
+        name = output["error"]["data"]["name"]
+        mess = output["error"].get("message", "No error message")
+        print(f">>> {name}: {mess}")
+        return False
+
+    return output["result"]
+
+
 def create_comment(comment=None,
                    uri=None, cid=None, name=None,
                    parent_id=None,
