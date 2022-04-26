@@ -32,7 +32,7 @@ import requests
 import lbrytools.search as srch
 
 
-def jsonrpc_post(comm_server, method, params, **kwargs):
+def jsonrpc_post(comm_server, method, params=None, **kwargs):
     """General RPC interface for interacting with the comment server.
 
     Parameters
@@ -43,11 +43,18 @@ def jsonrpc_post(comm_server, method, params, **kwargs):
     method: str
         Method that the comment server accepts, for example,
         `comment.List`
-    params: dict
+    params: dict, optional
+        It defaults to `None`.
         Dictionary with key-value pairs of options
         that are accepted by the specific `method`.
-    kwargs: key-value pairs
+    kwargs: key-value pairs, optional
         Additional arguments which are added to the `params` dictionary.
+
+    Returns
+    -------
+    dict
+        It is the output of the `requests.post(comm_server, json=msg).json()`
+        where `msg` includes the `method` and `params`.
     """
     params = params or {}
     params.update(kwargs)
