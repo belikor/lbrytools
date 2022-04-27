@@ -160,7 +160,7 @@ def print_r_comments(comments, sub_replies=True, full=False,
 
 
 def print_f_comments(comments, sub_replies=True, full=False,
-                     file=None, fdate=None):
+                     file=None, fdate=False):
     """Open a file description or print to the terminal."""
     fd = 0
     if file:
@@ -189,7 +189,7 @@ def list_comments(uri=None, cid=None, name=None,
                   sub_replies=True,
                   hidden=False, visible=False,
                   full=False,
-                  file=None, fdate=None,
+                  file=None, fdate=False,
                   page=1, page_size=999,
                   comm_server="https://comments.odysee.com/api/v2",
                   server="http://localhost:5279"):
@@ -415,6 +415,37 @@ def sign_comment(data, channel, hexdata=None,
         return False
 
     return output["result"]
+
+
+def print_cmnt_result(result, file=None, fdate=False):
+    """Print the response of the comment server when successful."""
+    cmt_time = result["timestamp"]
+    cmt_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
+                             time.localtime(cmt_time))
+
+    sig_ts = int(result["signing_ts"])
+    sig_ts = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
+                           time.localtime(sig_ts))
+
+    out = ["claim_id: " + result["claim_id"],
+           "timestamp:  " + cmt_time,
+           "signing_ts: " + sig_ts,
+           "comment author: " + result["channel_name"],
+           "comment author ID: " + result["channel_id"],
+           "comment_id: " + result["comment_id"],
+           "parent_id:  " + result.get("parent_id", "(None)"),
+           "currency: " + result.get("currency", "(None)"),
+           "support_amount: " + str(result.get("support_amount", 0)),
+           "is_fiat: " + str(result.get("is_fiat", "")),
+           "is_hidden: " + str(result.get("is_hidden", "")),
+           "is_pinned: " + str(result.get("is_pinned", "")),
+           "abandoned: " + str(result.get("abandoned", "")),
+           "comment:",
+           "'''",
+           result["comment"],
+           "'''"]
+
+    funcs.print_content(out, file=file, fdate=fdate)
 
 
 def create_comment(comment=None,
