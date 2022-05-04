@@ -164,8 +164,8 @@ def print_content(output_list, file=None, fdate=None):
     return content
 
 
-def sanitize_name(text="random_string"):
-    """Sanitize names with complex unicode characters.
+def sanitize_text(text="random_string"):
+    """Sanitize text with complex unicode characters.
 
     Some names have complex unicode characters, especially emojis.
     With this method we remove these `grapheme clusters` so that applications
@@ -180,7 +180,7 @@ def sanitize_name(text="random_string"):
     # and 'F' 'R' is the France flag.
     flags = regex.findall(u'[\U0001F1E6-\U0001F1FF]', text)
 
-    name_normalized = ""
+    text_normalized = ""
 
     # Only remove the emojis if we have the `emoji` package loaded
     if EMOJI_LOADED:
@@ -190,11 +190,11 @@ def sanitize_name(text="random_string"):
 
     for character in text:
         if character in emoji_dict or character in flags:
-            name_normalized += "\u275A"  # monospace black box
+            text_normalized += "\u275A"  # monospace black box
         else:
-            name_normalized += character
+            text_normalized += character
 
-    return name_normalized
+    return text_normalized
 
 
 def process_ch_num(channels=None,

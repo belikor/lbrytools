@@ -557,7 +557,7 @@ def print_ch_subs_latest(ch_latest_claims,
                 c_name = source_info["title"]
 
             if sanitize:
-                c_name = funcs.sanitize_name(c_name)
+                c_name = funcs.sanitize_text(c_name)
 
             line = f" {k:2d}/{n_claims:2d}" + f"{sep} "
             line += r_time + f"{sep} "

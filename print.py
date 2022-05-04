@@ -503,11 +503,11 @@ def print_items(items=None, show="all",
                 continue
 
             if sanitize:
-                st_channel = funcs.sanitize_name(st_channel)
+                st_channel = funcs.sanitize_text(st_channel)
 
         if sanitize:
-            st_claim_name = funcs.sanitize_name(st_claim_name)
-            st_title = funcs.sanitize_name(st_title)
+            st_claim_name = funcs.sanitize_text(st_claim_name)
+            st_title = funcs.sanitize_text(st_title)
 
         line = f"{num:4d}/{n_items:4d}"
 

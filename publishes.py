@@ -219,7 +219,7 @@ def print_channels(channels,
         name = ch["name"]
 
         if sanitize:
-            name = funcs.sanitize_name(name)
+            name = funcs.sanitize_text(name)
         name = '"' + name + '"'
 
         timestamp = ch["timestamp"]
@@ -228,7 +228,7 @@ def print_channels(channels,
 
         title = value.get("title", 10 * "_")
         if sanitize:
-            title = funcs.sanitize_name(title)
+            title = funcs.sanitize_text(title)
         title = '"' + title + '"'
 
         claim_op = ch["claim_op"]
@@ -606,7 +606,7 @@ def print_s_claims(claims, output=None,
             name = value["title"]
 
         if sanitize:
-            name = funcs.sanitize_name(name)
+            name = funcs.sanitize_text(name)
         name = '"' + name + '"'
 
         claim_op = claim["claim_op"]
@@ -636,12 +636,12 @@ def print_s_claims(claims, output=None,
                 channel = _ch + "#" + _id[0:3]
 
             if sanitize:
-                channel = funcs.sanitize_name(channel)
+                channel = funcs.sanitize_text(channel)
         else:
             channel = 14 * "_"
 
         if sanitize:
-            channel = funcs.sanitize_name(channel)
+            channel = funcs.sanitize_text(channel)
 
         length_s = 0
         rem_s = 0
@@ -736,7 +736,7 @@ def print_claims(ch_claims,
             is_anon = True
 
         if sanitize:
-            chan_name = funcs.sanitize_name(chan_name)
+            chan_name = funcs.sanitize_text(chan_name)
 
         chan_name = '"' + chan_name + '"'
 

@@ -55,13 +55,13 @@ def print_tr_claims(claims,
         if "signing_channel" in claim:
             channel = claim["signing_channel"].get("name", 14 * "_")
             if sanitize:
-                channel = funcs.sanitize_name(channel)
+                channel = funcs.sanitize_text(channel)
         else:
             channel = 14 * "_"
 
         name = claim["name"]
         if sanitize:
-            name = funcs.sanitize_name(claim["name"])
+            name = funcs.sanitize_text(claim["name"])
 
         line = f"{num:2d}/{n_claims:2d}" + f"{sep} "
 
@@ -123,12 +123,12 @@ def print_sch_claims(claims,
             channel = claim["signing_channel"]["canonical_url"]
             channel = channel.lstrip("lbry://")
             if sanitize:
-                channel = funcs.sanitize_name(channel)
+                channel = funcs.sanitize_text(channel)
         else:
             channel = 14 * "_"
 
         if sanitize:
-            channel = funcs.sanitize_name(channel)
+            channel = funcs.sanitize_text(channel)
 
         name = claim["name"]
 
@@ -136,7 +136,7 @@ def print_sch_claims(claims,
             name = claim["value"]["title"]
 
         if sanitize:
-            name = funcs.sanitize_name(name)
+            name = funcs.sanitize_text(name)
 
         length_s = 0
         rem_s = 0

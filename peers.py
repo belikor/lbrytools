@@ -393,7 +393,7 @@ def print_p_lines(peers_info,
             name = stream["value"]["title"]
 
         if sanitize:
-            name = funcs.sanitize_name(name)
+            name = funcs.sanitize_text(name)
 
         vtype = stream["value_type"]
 

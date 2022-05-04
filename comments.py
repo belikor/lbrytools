@@ -143,7 +143,7 @@ def print_r_comments(comments, sub_replies=True, full=False,
         comm = comment["comment"]
 
         if sanitize:
-            comm = funcs.sanitize_name(comm)
+            comm = funcs.sanitize_text(comm)
 
         if full:
             cmmnt = f'"{comm}"'

@@ -58,7 +58,7 @@ from lbrytools.zeed_defaults import z_defaults
 
 from lbrytools.funcs import check_lbry
 from lbrytools.funcs import server_exists
-from lbrytools.funcs import sanitize_name
+from lbrytools.funcs import sanitize_text
 
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
@@ -156,7 +156,7 @@ True if z_defaults else False
 
 True if check_lbry else False
 True if server_exists else False
-True if sanitize_name else False
+True if sanitize_text else False
 
 True if check_repost else False
 True if search_item else False
