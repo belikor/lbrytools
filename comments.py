@@ -92,7 +92,7 @@ def find_replies(all_replies, base_comments):
 
 
 def print_r_comments(comments, sub_replies=True, full=False,
-                     indent=0, fd=None):
+                     indent=0, sanitize=False, fd=None):
     """Print the comments included in the comment list.
 
     This function calls itself recursively in order to get
@@ -109,16 +109,21 @@ def print_r_comments(comments, sub_replies=True, full=False,
         in the comment.
         If it is `False` only the root level comments (1st level)
         will be printed.
-    indent: int, optional
-        It defaults to 0, which indicates that the comment will be printed
-        with no indentation.
-        As this function is called recursively, it will print each level
-        with more indentation (2, 4, 6, etc.).
     full: bool, optional
         It defaults to `False`, in which case only 80 characters
         of the first line of the comment will be printed.
         If it is `True` it will print the full comment, which may be
         as big as 2000 characters.
+    indent: int, optional
+        It defaults to 0, which indicates that the comment will be printed
+        with no indentation.
+        As this function is called recursively, it will print each level
+        with more indentation (2, 4, 6, etc.).
+    sanitize: bool, optional
+        It defaults to `False`, in which case it will not remove the emojis
+        from the comments.
+        If it is `True` it will remove these unicode characters.
+        This option requires the `emoji` package to be installed.
     fd: io.StringIO, optional
         It defaults to `None`, in which case the output will be printed
         to the terminal.
@@ -136,6 +141,10 @@ def print_r_comments(comments, sub_replies=True, full=False,
         ch_name = ch[0] + "#" + ch[1][0:3]
 
         comm = comment["comment"]
+
+        if sanitize:
+            comm = funcs.sanitize_name(comm)
+
         if full:
             cmmnt = f'"{comm}"'
         else:
@@ -157,10 +166,11 @@ def print_r_comments(comments, sub_replies=True, full=False,
                 and "sub_replies" in comment
                 and comment["sub_replies"]):
             print_r_comments(comment["sub_replies"], sub_replies=True,
-                             indent=indent+2, fd=fd)
+                             indent=indent+2, sanitize=sanitize, fd=fd)
 
 
 def print_f_comments(comments, sub_replies=True, full=False,
+                     sanitize=False,
                      file=None, fdate=False):
     """Open a file description or print to the terminal."""
     fd = 0
@@ -180,7 +190,8 @@ def print_f_comments(comments, sub_replies=True, full=False,
         except (FileNotFoundError, PermissionError) as err:
             print(f"Cannot open file for writing; {err}")
 
-    print_r_comments(comments, sub_replies=sub_replies, full=full, fd=fd)
+    print_r_comments(comments, sub_replies=sub_replies, full=full,
+                     sanitize=sanitize, fd=fd)
 
     if file and fd:
         fd.close()
@@ -190,6 +201,7 @@ def list_comments(uri=None, cid=None, name=None,
                   sub_replies=True,
                   hidden=False, visible=False,
                   full=False,
+                  sanitize=False,
                   file=None, fdate=False,
                   page=1, page_size=999,
                   comm_server="https://comments.odysee.com/api/v2",
@@ -217,6 +229,11 @@ def list_comments(uri=None, cid=None, name=None,
         of the first line of the comment will be printed.
         If it is `True` it will print the full comment, which may be
         as big as 2000 characters.
+    sanitize: bool, optional
+        It defaults to `False`, in which case it will not remove the emojis
+        from the comments.
+        If it is `True` it will remove these unicode characters.
+        This option requires the `emoji` package to be installed.
     file: str, optional
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
@@ -354,6 +371,7 @@ def list_comments(uri=None, cid=None, name=None,
                     base["sub_replies"].append(rep)
 
     print_f_comments(root_comments, sub_replies=sub_replies, full=full,
+                     sanitize=sanitize,
                      file=file, fdate=fdate)
 
     return {"root_comments": root_comments,

@@ -1464,6 +1464,13 @@ comments we can use `full=True`:
 cc = lbryt.list_comments("...", full=True)
 ```
 
+By default, the comments are shown with all emojis intact,
+however, if we want to use the output in programs that don't suppor emojis
+we can remove them with the `sanitize` option:
+```py
+cc = lbryt.list_comments("...", full=True, sanitize=True)
+```
+
 Comments are not part of the LBRY protocol, they are stored in a comments
 server, which is Odysee's by default; a different server can be specified:
 ```py
