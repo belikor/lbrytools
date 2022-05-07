@@ -148,7 +148,12 @@ def print_r_comments(comments, sub_replies=True, full=False,
         if full:
             cmmnt = f'"{comm}"'
         else:
-            comm = comm.splitlines()[0]
+            comm = comm.splitlines()
+            if len(comm) > 0:
+                comm = comm[0]
+            else:
+                comm = ""
+
             if len(comm) > 80:
                 cmmnt = f'"{comm:.80s}..."'
             else:
@@ -707,14 +712,14 @@ def update_comment(comment=None, comment_id=None,
     dict
         A dictionary with many fields of information. See `create_comment`.
     False
-        If there is a problem, such as non-existing `wallet_id`, or empty
-        `comment`, it will return `False`.
+        If there is a problem, such as non-existing `wallet_id`,
+        or empty `comment` or `comment_id`, it will return `False`.
     """
     print("Update comment")
     print(80 * "-")
 
-    if not comment:
-        print(">>> Empty comment.")
+    if not comment or not comment_id:
+        print(">>> Empty comment or comment_id.")
         return False
 
     comment = comment.strip()
@@ -791,11 +796,15 @@ def abandon_comment(comment_id=None,
         - 'abandoned': it will be `True` if the comment was successfully
           removed from the comment server.
     False
-        If there is a problem, such as non-existing `wallet_id`
-        it will return `False`.
+        If there is a problem, such as non-existing `wallet_id`,
+        or empty `comment_id`, it will return `False`.
     """
     print("Abandon comment")
     print(80 * "-")
+
+    if not comment_id:
+        print(">>> Empty comment_id.")
+        return False
 
     print(f"comment_id: {comment_id} ({len(comment_id)} bit)")
     print(f"comment server: {comm_server}")
