@@ -216,7 +216,8 @@ def print_channels(channels,
         cid = ch["claim_id"]
         address = ch["address"]
 
-        name = ch["name"]
+        # name = ch["name"]
+        name = ch["canonical_url"].split("lbry://")[1]
 
         if sanitize:
             name = funcs.sanitize_text(name)
@@ -438,7 +439,9 @@ def get_channel_claims(wallet_id="default_wallet",
 
         ds = sutils.downloadable_size(claims, local=False, print_msg=False)
 
-        ch_claims.append({"name": channel["name"],
+        ch_name = channel["canonical_url"].split("lbry://")[1]
+
+        ch_claims.append({"name": ch_name,
                           "id": channel["claim_id"],
                           "address": channel["address"],
                           "claims": claims,
