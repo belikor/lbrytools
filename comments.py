@@ -326,7 +326,9 @@ def list_comments(uri=None, cid=None, name=None,
     if output["result"]["total_items"] < 1:
         items = []
     else:
-        items = output["result"]["items"]
+        # Ocassionally the `'items'` key doesn't exist
+        # even with `total_items = 1`, so we just set `items = []`
+        items = output["result"].get("items") or []
 
     root_comments = []
     all_replies = []
