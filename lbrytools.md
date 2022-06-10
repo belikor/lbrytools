@@ -49,6 +49,7 @@
     - [Peers in a single channel](#peers-in-a-single-channel)
     - [Peers in multiple channels](#peers-in-multiple-channels)
     - [Peers in subscribed channels](#peers-in-subscribed-channels)
+- [Status](#status)
 - [Server](#server)
 
 ## Initialization
@@ -113,6 +114,8 @@ from lbrytools import abandon_comment
 from lbrytools import list_peers
 from lbrytools import list_ch_peers
 from lbrytools import list_ch_subs_peers
+from lbrytools import list_lbrynet_status
+from lbrytools import list_lbrynet_settings
 ```
 
 [Go back to _Content_](#content)
@@ -1717,6 +1720,29 @@ mm = lbryt.list_ch_subs_peers(number=50,
 
 [Go back to _Content_](#content)
 
+## Status
+
+To show the status of the `lbrynet` daemon we can run
+```py
+ss = lbryt.list_lbrynet_status()
+```
+
+To show the settings of the `lbrynet` daemon we can run
+```py
+st = lbryt.list_lbrynet_settings()
+```
+
+These settings can be modified by editing the `daemon_settings.yml`,
+and restarting the `lbrynet` daemon.
+
+The information can also be printed to a file:
+```py
+ss = lbryt.list_lbrynet_status(file="status.txt", fdate=True)
+st = lbryt.list_lbrynet_settings(file="setts.txt", fdate=True)
+```
+
+[Go back to _Content_](#content)
+
 ## Server
 
 Internally, the functions communicate with the LBRY daemon through
@@ -1773,6 +1799,8 @@ lbryt.abandon_comment(..., server=server)
 lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)
+lbryt.list_lbrynet_status(..., server=server)
+lbryt.list_lbrynet_settings(..., server=server)
 ```
 
 [Go back to _Content_](#content)

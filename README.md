@@ -182,6 +182,8 @@ lbryt.abandon_comment(...)
 lbryt.list_peers(...)
 lbryt.list_ch_peers(...)
 lbryt.list_ch_subs_peers(...)
+lbryt.list_lbrynet_status(...)
+lbryt.list_lbrynet_settings(...)
 ```
 
 Read the [lbrytools.md](./lbrytools.md) file for a short explanation
