@@ -841,3 +841,53 @@ def abandon_comment(comment_id=None,
     print_cmnt_result(result, file=None, fdate=False)
 
     return result
+
+
+def hide_comment(comment_id=None,
+                 wallet_id="default_wallet",
+                 comm_server="https://comments.odysee.com/api/v2",
+                 server="http://localhost:5279"):
+    """Hide a previously created comment in a claim we control.
+
+    NOTE: it does not work. It should have worked in the past,
+    but nowadays the 'comment.Hide' method doesn't exist in the comment server
+    so this method does nothing.
+    """
+    print("Hide comment")
+    print(80 * "-")
+
+    if not comment_id:
+        print(">>> Empty comment_id.")
+        return False
+
+    # comment_ids = [comment_id]
+
+    print(f"comment_id: {comment_id} ({len(comment_id)} bit)")
+    print(f"comment server: {comm_server}")
+
+    print(40 * "-")
+
+    # output = jsonrpc_post(comm_server,
+    #                       "get_comments_by_id",
+    #                       comment_ids=comment_ids)
+    output = jsonrpc_post(comm_server,
+                          "comment.ByID",
+                          comment_id=comment_id,
+                          with_ancestors=True)
+
+    comment = output["result"]["items"]
+
+    pieces = []
+    piece = {'comment_id': comment['comment_id']}
+    pieces.append(piece)
+
+    # Does no longer exist
+    output = jsonrpc_post(comm_server, 'comment.Hide', pieces=pieces)
+
+    if "error" in output:
+        print(">>> Error:", output["error"].get("message", None))
+        return False
+
+    result = output["result"]
+
+    return result
