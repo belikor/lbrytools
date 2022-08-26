@@ -115,14 +115,16 @@ def server_exists(server="http://localhost:5279"):
 
 def get_data_dir(server="http://localhost:5279"):
     """Return the directory where LBRY stores its data."""
-    msg = {"method": "settings_get"}
-    out_set = requests.post(server, json=msg).json()
-    data_dir = out_set["result"]["data_dir"]
+    msg = {"method": "settings_get",
+           "params": {}}
+
+    output = requests.post(server, json=msg).json()
+    data_dir = output["result"]["data_dir"]
     return data_dir
 
 
 def get_bdir(server="http://localhost:5279"):
-    """Get blobfiles directory."""
+    """Return the directory where LBRY stores the blob files."""
     msg = {"method": "settings_get",
            "params": {}}
 
