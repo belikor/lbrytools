@@ -292,17 +292,13 @@ def count_blobs_all(blobfiles=None, channel=None,
 
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Count the blobs of the claim from the blobfiles directory")
-        print(f"blobfiles={blobfiles}")
-        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
-        home = os.path.expanduser("~")
-        blobfiles = os.path.join(home,
-                                 ".local", "share",
-                                 "lbry", "lbrynet", "blobfiles")
+        blobfiles = funcs.get_bdir(server=server)
 
         if not os.path.exists(blobfiles):
             print(f"Blobfiles directory does not exist: {blobfiles}")
+            print("This is typically "
+                  "'$HOME/.local/share/lbry/lbrynet/blobfiles'")
             return False
 
     if channel and not isinstance(channel, str):
@@ -326,6 +322,7 @@ def count_blobs_all(blobfiles=None, channel=None,
         print(f"Count all blob files for: {channel}")
     else:
         print("Count all blob files")
+
     print(80 * "-")
     print(f"Blobfiles: {blobfiles}")
 
@@ -337,22 +334,23 @@ def count_blobs_all(blobfiles=None, channel=None,
     claims_other_error = 0
     n_blobs = 0
 
-    for it, item in enumerate(items, start=1):
-        if it < start:
+    for num, item in enumerate(items, start=1):
+        if num < start:
             continue
-        if end != 0 and it > end:
+        if end != 0 and num > end:
             break
 
         if print_msg:
-            print(f"Claim {it}/{n_items}, {item['claim_name']}")
+            print(f"Claim {num}/{n_items}, {item['claim_name']}")
+
         blob_info = count_blobs(cid=item["claim_id"],
                                 blobfiles=blobfiles, print_msg=print_msg,
-                                print_each=print_each,
+                                print_each=print_each, insubfunc=True,
                                 server=server)
         if print_msg or "error_not_found" in blob_info:
             print()
 
-        info = {"num": it,
+        info = {"num": num,
                 "blob_info": blob_info}
         blob_all_info.append(info)
 
@@ -382,11 +380,13 @@ def count_blobs_all(blobfiles=None, channel=None,
           "(no valid URI or claim ID; possibly removed from the network)")
     print(f"claims with other errors: {claims_other_error}")
     print(8*"-")
+
     total = (claims_blobs_complete + claims_blobs_incomplete
              + claims_no_sd_hash + claims_not_found + claims_other_error)
     total_valid = (claims_blobs_complete + claims_blobs_incomplete
                    + claims_no_sd_hash)
     total_invalid = claims_not_found + claims_other_error
+
     print(f"total claims processed: {total}")
     print(f"total valid claims: {total_valid} "
           "(minimum number of 'sd_hash' blobs that must exist)")
