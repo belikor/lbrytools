@@ -34,6 +34,7 @@ import lbrytools.sort as sort
 
 def count_blobs(uri=None, cid=None, name=None,
                 blobfiles=None, print_msg=True, print_each=True,
+                insubfunc=False,
                 server="http://localhost:5279"):
     """Count blobs that have been downloaded from a claim.
 
@@ -71,6 +72,10 @@ def count_blobs(uri=None, cid=None, name=None,
         It defaults to `True`, in which case it will print all blobs
         that belong to the claim, and whether each of them is already
         in `blobfiles`.
+    insubfunc: bool, optional
+        It defaults to `False`, in which case it will assume the function
+        is called directly. If it is `True` it assumes this function
+        is called inside another function.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -123,18 +128,18 @@ def count_blobs(uri=None, cid=None, name=None,
 
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Count the blobs of the claim from the blobfiles directory")
-        print(f"blobfiles={blobfiles}")
-        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
-        home = os.path.expanduser("~")
-        blobfiles = os.path.join(home,
-                                 ".local", "share",
-                                 "lbry", "lbrynet", "blobfiles")
+        blobfiles = funcs.get_bdir(server=server)
 
         if not os.path.exists(blobfiles):
             print(f"Blobfiles directory does not exist: {blobfiles}")
+            print("This is typically "
+                  "'$HOME/.local/share/lbry/lbrynet/blobfiles'")
             return False
+
+    if print_msg and not insubfunc:
+        print("Count the blobs of the claim from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
 
     item = srch.search_item(uri=uri, cid=cid, name=name,
                             server=server)
@@ -177,9 +182,8 @@ def count_blobs(uri=None, cid=None, name=None,
                 "channel": c_channel,
                 "sd_hash": sd_hash}
 
-    fd = open(sd_hash_f)
-    lines = fd.readlines()
-    fd.close()
+    with open(sd_hash_f) as fd:
+        lines = fd.readlines()
 
     blobs = json.loads(lines[0])
     n_blobs = len(blobs["blobs"]) - 1
@@ -205,9 +209,7 @@ def count_blobs(uri=None, cid=None, name=None,
             blob_missing.append([num, blob_hash, present])
 
         if print_msg and print_each:
-            print("{:3d}/{:3d}, {}, {}".format(num, n_blobs,
-                                               blob_hash,
-                                               present))
+            print(f"{num:3d}/{n_blobs:3d}; {blob_hash}; {present}")
 
     all_present = all(present_list)
 
