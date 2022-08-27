@@ -24,6 +24,7 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help use with blobs from LBRY content."""
+import concurrent.futures as fts
 import json
 import os
 
@@ -300,9 +301,19 @@ def count_blobs(uri=None, cid=None, name=None,
     return blob_info
 
 
+def c_blobs_th(cid, blobfiles, print_msg, server):
+    """Wrapper to use with threads in 'count_blobs_all'."""
+    blob_info = c_blobs(cid=cid,
+                        blobfiles=blobfiles,
+                        print_msg=print_msg, insubfunc=True,
+                        server=server)
+    return blob_info
+
+
 def count_blobs_all(blobfiles=None, channel=None,
-                    start=1, end=0,
+                    threads=32,
                     print_msg=False, print_each=False,
+                    start=1, end=0,
                     server="http://localhost:5279"):
     """Count all blobs from all downloaded claims.
 
@@ -322,6 +333,11 @@ def count_blobs_all(blobfiles=None, channel=None,
         If a simplified name is used, and there are various channels
         with the same name, the one with the highest LBC bid will be selected.
         Enter the full name to choose the right one.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to count blobs,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     print_msg: bool, optional
         It defaults to `True`, in which case it will print information
         on the found claim.
@@ -407,23 +423,44 @@ def count_blobs_all(blobfiles=None, channel=None,
     claims_other_error = 0
     n_blobs = 0
 
-    for num, item in enumerate(items, start=1):
-        if num < start:
-            continue
-        if end != 0 and num > end:
-            break
+    # Iterables to be passed to the ThreadPoolExecutor
+    results = []
+    cids = (item["claim_id"] for item in items)
+    blobfs = (blobfiles for n in range(n_items))
+    prt_msgs = (print_msg for n in range(n_items))
+    servers = (server for n in range(n_items))
 
-        if print_msg:
-            print(f"Claim {num}/{n_items}, {item['claim_name']}")
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(c_blobs_th,
+                                   cids, blobfs, prt_msgs, servers)
+            print("Waiting for blob count to finish; "
+                  f"max threads: {threads}")
+            results = list(results)  # generator to list
+    else:
+        for num, item in enumerate(items, start=1):
+            print("Waiting for blob count to finish")
+            if num < start:
+                continue
+            if end != 0 and num > end:
+                break
 
-        blob_info = c_blobs(cid=item["claim_id"],
-                            blobfiles=blobfiles, print_msg=print_msg,
-                            insubfunc=True,
-                            server=server)
+            result = c_blobs(cid=item["claim_id"],
+                             blobfiles=blobfiles, print_msg=False,
+                             insubfunc=True,
+                             server=server)
+            results.append(result)
+
+    print()
+
+    for num, blob_info in enumerate(results, start=1):
+        c_name = blob_info["name"]
 
         if (print_msg
                 or "error_not_found" in blob_info
                 or "error_no_sd_hash" in blob_info):
+            print(f"Claim {num}/{n_items}, {c_name}")
             prnt_blobs(blob_info, print_each=print_each,
                        file=None, fdate=False)
             print()
