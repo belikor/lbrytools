@@ -32,6 +32,96 @@ import lbrytools.search as srch
 import lbrytools.sort as sort
 
 
+def c_blobs(uri=None, cid=None, name=None,
+            blobfiles=None, print_msg=True, insubfunc=False,
+            server="http://localhost:5279"):
+    """Count blobs from claims that have been downloaded."""
+    if not funcs.server_exists(server=server):
+        return False
+
+    if (not blobfiles or not isinstance(blobfiles, str)
+            or not os.path.exists(blobfiles)):
+
+        blobfiles = funcs.get_bdir(server=server)
+
+        if not os.path.exists(blobfiles):
+            print(f"Blobfiles directory does not exist: {blobfiles}")
+            print("This is typically "
+                  "'$HOME/.local/share/lbry/lbrynet/blobfiles'")
+            return False
+
+    if print_msg and not insubfunc:
+        print("Count the blobs of the claim from the blobfiles directory")
+        print(f"blobfiles={blobfiles}")
+
+    item = srch.search_item(uri=uri, cid=cid, name=name,
+                            server=server)
+    if not item:
+        return {"error_not_found": "item was not found in the network",
+                "canonical_url": uri,
+                "claim_id": cid,
+                "name": name}
+
+    c_uri = item["canonical_url"]
+    c_cid = item["claim_id"]
+    c_name = item["name"]
+
+    if "signing_channel" in item and "name" in item["signing_channel"]:
+        ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
+        c_channel = ch_full.replace("#", ":")
+    else:
+        c_channel = "@_Unknown_"
+
+    sd_hash = item["value"]["source"]["sd_hash"]
+
+    sd_hash_f = os.path.join(blobfiles, sd_hash)
+
+    # if not os.path.exists(sd_hash_f) or sd_hash not in list_all_blobs:
+    if not os.path.exists(sd_hash_f):
+        return {"error_no_sd_hash": "'sd_hash' blob not in directory "
+                                    f"{blobfiles}",
+                "canonical_url": c_uri,
+                "claim_id": c_cid,
+                "name": c_name,
+                "channel": c_channel,
+                "sd_hash": sd_hash}
+
+    with open(sd_hash_f) as fd:
+        lines = fd.readlines()
+
+    blobs = json.loads(lines[0])
+
+    present_list = []
+    blob_list = []
+    blob_missing = []
+
+    for blob in blobs["blobs"]:
+        if "blob_hash" not in blob:
+            continue
+
+        num = blob["blob_num"]
+        blob_hash = blob["blob_hash"]
+        present = os.path.exists(os.path.join(blobfiles, blob_hash))
+        present_list.append(present)
+        blob_list.append([num, blob_hash, present])
+
+        if not present:
+            blob_missing.append([num, blob_hash, present])
+
+    all_present = all(present_list)
+
+    blob_info = {"canonical_url": c_uri,
+                 "claim_id": c_cid,
+                 "name": c_name,
+                 "channel": c_channel,
+                 "sd_hash": sd_hash,
+                 "all_present": all_present,
+                 "blobs": blob_list,
+                 "missing": blob_missing}
+
+    return blob_info
+
+
 def prnt_blobs(blob_info, print_each=False,
                file=None, fdate=False):
     """Print the information of the blob count of a downloaded claim.
@@ -194,88 +284,10 @@ def count_blobs(uri=None, cid=None, name=None,
     if not funcs.server_exists(server=server):
         return False
 
-    if (not blobfiles or not isinstance(blobfiles, str)
-            or not os.path.exists(blobfiles)):
-
-        blobfiles = funcs.get_bdir(server=server)
-
-        if not os.path.exists(blobfiles):
-            print(f"Blobfiles directory does not exist: {blobfiles}")
-            print("This is typically "
-                  "'$HOME/.local/share/lbry/lbrynet/blobfiles'")
-            return False
-
-    if print_msg and not insubfunc:
-        print("Count the blobs of the claim from the blobfiles directory")
-        print(f"blobfiles={blobfiles}")
-
-    item = srch.search_item(uri=uri, cid=cid, name=name,
-                            server=server)
-    if not item:
-        return {"error_not_found": "item was not found in the network",
-                "canonical_url": uri,
-                "claim_id": cid,
-                "name": name}
-
-    c_uri = item["canonical_url"]
-    c_cid = item["claim_id"]
-    c_name = item["name"]
-
-    if "signing_channel" in item and "name" in item["signing_channel"]:
-        ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
-        c_channel = ch_full.replace("#", ":")
-    else:
-        c_channel = "@_Unknown_"
-
-    sd_hash = item["value"]["source"]["sd_hash"]
-
-    sd_hash_f = os.path.join(blobfiles, sd_hash)
-
-    # if not os.path.exists(sd_hash_f) or sd_hash not in list_all_blobs:
-    if not os.path.exists(sd_hash_f):
-        print(f">>> cid={c_cid}")
-        print(f">>> 'sd_hash' blob not in directory: {blobfiles}")
-        print(">>> Start downloading the claim, or redownload it.")
-        return {"error_no_sd_hash": "'sd_hash' blob not in directory "
-                                    f"{blobfiles}",
-                "canonical_url": c_uri,
-                "claim_id": c_cid,
-                "name": c_name,
-                "channel": c_channel,
-                "sd_hash": sd_hash}
-
-    with open(sd_hash_f) as fd:
-        lines = fd.readlines()
-
-    blobs = json.loads(lines[0])
-
-    present_list = []
-    blob_list = []
-    blob_missing = []
-
-    for blob in blobs["blobs"]:
-        if "blob_hash" not in blob:
-            continue
-
-        num = blob["blob_num"]
-        blob_hash = blob["blob_hash"]
-        present = os.path.exists(os.path.join(blobfiles, blob_hash))
-        present_list.append(present)
-        blob_list.append([num, blob_hash, present])
-
-        if not present:
-            blob_missing.append([num, blob_hash, present])
-
-    all_present = all(present_list)
-
-    blob_info = {"canonical_url": c_uri,
-                 "claim_id": c_cid,
-                 "name": c_name,
-                 "channel": c_channel,
-                 "sd_hash": sd_hash,
-                 "all_present": all_present,
-                 "blobs": blob_list,
-                 "missing": blob_missing}
+    blob_info = c_blobs(uri=uri, cid=cid, name=name,
+                        blobfiles=blobfiles,
+                        print_msg=print_msg, insubfunc=insubfunc,
+                        server=server)
 
     if print_msg:
         prnt_blobs(blob_info, print_each=print_each,
