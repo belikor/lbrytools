@@ -412,11 +412,16 @@ def count_blobs_all(blobfiles=None, channel=None,
         if print_msg:
             print(f"Claim {num}/{n_items}, {item['claim_name']}")
 
-        blob_info = count_blobs(cid=item["claim_id"],
-                                blobfiles=blobfiles, print_msg=print_msg,
-                                print_each=print_each, insubfunc=True,
-                                server=server)
-        if print_msg or "error_not_found" in blob_info:
+        blob_info = c_blobs(cid=item["claim_id"],
+                            blobfiles=blobfiles, print_msg=print_msg,
+                            insubfunc=True,
+                            server=server)
+
+        if (print_msg
+                or "error_not_found" in blob_info
+                or "error_no_sd_hash" in blob_info):
+            prnt_blobs(blob_info, print_each=print_each,
+                       file=None, fdate=False)
             print()
 
         info = {"num": num,
