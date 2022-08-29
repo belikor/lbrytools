@@ -32,6 +32,74 @@ import lbrytools.search as srch
 import lbrytools.sort as sort
 
 
+def prnt_blobs(blob_info, print_each=False,
+               file=None, fdate=False):
+    """Print the information of the blob count of a downloaded claim.
+
+    Parameters
+    ----------
+    blob_info: dict
+        A dictionary with several keys with information about a claim,
+        and its blobs.
+        Use the value returned by `count_blobs`.
+    print_each: bool, optional
+        It defaults to `False`, in which case it will only print
+        a summary of the blobs that belong to the claim.
+        If it is `True`, it will print each hash of each blob,
+        and whether each is already present in the `blobfiles` directory.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the information will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    """
+    c_uri = blob_info["canonical_url"]
+    c_cid = blob_info["claim_id"]
+    c_name = blob_info["name"]
+
+    if "error_not_found" in blob_info:
+        return False
+
+    output = [f"canonical_url: {c_uri}",
+              f"claim_id: {c_cid}",
+              f"name: {c_name}"]
+
+    c_channel = blob_info["channel"]
+    sd_hash = blob_info["sd_hash"]
+
+    output.append(f"channel: {c_channel}")
+    output.append(f"sd_hash: {sd_hash}")
+
+    if "error_no_sd_hash" in blob_info:
+        output.append(">>> 'sd_hash' missing, "
+                      "cannot determine the number of blobs")
+        output.append(">>> Start downloading the claim, or redownload it")
+        funcs.print_content(output, file=file, fdate=fdate)
+        return False
+
+    blobs = blob_info["blobs"]
+
+    n_blobs = len(blobs)
+
+    output.append(f"Total data blobs: {n_blobs}")
+
+    if print_each:
+        for blob in blobs:
+            num = blob[0]
+            blob_hash = blob[1]
+            present = blob[2]
+
+            output.append(f"{num:3d}/{n_blobs:3d}; {blob_hash}; {present}")
+
+    all_present = blob_info["all_present"]
+
+    output.append(f"All blob files are present: {all_present}")
+
+    funcs.print_content(output, file=file, fdate=fdate)
+
+
 def count_blobs(uri=None, cid=None, name=None,
                 blobfiles=None, print_msg=True, print_each=True,
                 insubfunc=False,
@@ -161,17 +229,11 @@ def count_blobs(uri=None, cid=None, name=None,
 
     sd_hash = item["value"]["source"]["sd_hash"]
 
-    if print_msg:
-        print(f"canonical_url: {c_uri}")
-        print(f"claim_id: {c_cid}")
-        print(f"name: {c_name}")
-        print(f"channel: {c_channel}")
-        print(f"sd_hash: {sd_hash}")
-
     sd_hash_f = os.path.join(blobfiles, sd_hash)
 
     # if not os.path.exists(sd_hash_f) or sd_hash not in list_all_blobs:
     if not os.path.exists(sd_hash_f):
+        print(f">>> cid={c_cid}")
         print(f">>> 'sd_hash' blob not in directory: {blobfiles}")
         print(">>> Start downloading the claim, or redownload it.")
         return {"error_no_sd_hash": "'sd_hash' blob not in directory "
@@ -186,10 +248,6 @@ def count_blobs(uri=None, cid=None, name=None,
         lines = fd.readlines()
 
     blobs = json.loads(lines[0])
-    n_blobs = len(blobs["blobs"]) - 1
-
-    if print_msg:
-        print(f"Total blobs: {n_blobs}")
 
     present_list = []
     blob_list = []
@@ -208,13 +266,7 @@ def count_blobs(uri=None, cid=None, name=None,
         if not present:
             blob_missing.append([num, blob_hash, present])
 
-        if print_msg and print_each:
-            print(f"{num:3d}/{n_blobs:3d}; {blob_hash}; {present}")
-
     all_present = all(present_list)
-
-    if print_msg:
-        print(f"All blob files present: {all_present}")
 
     blob_info = {"canonical_url": c_uri,
                  "claim_id": c_cid,
@@ -224,6 +276,11 @@ def count_blobs(uri=None, cid=None, name=None,
                  "all_present": all_present,
                  "blobs": blob_list,
                  "missing": blob_missing}
+
+    if print_msg:
+        prnt_blobs(blob_info, print_each=print_each,
+                   file=None, fdate=False)
+
     return blob_info
 
 
