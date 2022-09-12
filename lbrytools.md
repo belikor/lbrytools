@@ -767,6 +767,13 @@ c = lbryt.count_blobs_all(print_msg=True)
 c = lbryt.count_blobs_all(print_msg=True, print_each=True)
 ```
 
+By default, the method uses a maximum of 32 threads to resolve claims online
+and count their blobs.
+The number can be lowered or increased depending on the CPU power:
+```py
+c = lbryt.count_blobs_all(threads=64)
+```
+
 [Go back to _Content_](#content)
 
 ### Analyze blobs
