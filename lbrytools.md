@@ -784,19 +784,19 @@ c = lbryt.count_blobs_all(threads=64)
 
 If we manually do something with the blobs in the `blobfiles` directory,
 we may want to count all files in this directory to see if they match
-the blobs that each claim is supposed to have.
-This information is contained in the first blob of each claim,
-called the "manifest" blob, whose name corresponds to the claim's `'sd_hash'`.
+the blobs that each claim is supposed to have:
 ```py
 a = lbryt.analyze_blobs(blobfiles=bdir)
 ```
 
+The information on the blobs is contained in the first blob of each claim,
+called the "manifest" blob, whose name corresponds to the claim's `'sd_hash'`.
+
 This function wraps around the `count_blobs_all` function so it has the same
-input parameters.
+input parameters:
 ```py
-a = lbryt.analyze_blobs(blobfiles=bdir, channel="Odysee")
-a = lbryt.analyze_blobs(blobfiles=bdir, start=5, end=33)
-a = lbryt.analyze_blobs(blobfiles=bdir, print_msg=True, print_each=False)
+a = lbryt.analyze_blobs(channel="Odysee")
+a = lbryt.analyze_blobs(threads=64, print_msg=True, print_each=False)
 ```
 
 [Go back to _Content_](#content)
