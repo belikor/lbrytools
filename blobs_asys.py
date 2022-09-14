@@ -271,8 +271,9 @@ def analyze_blobs(blobfiles=None, channel=None,
 
 
 def analyze_channel(blobfiles=None, channel=None,
-                    start=1, end=0,
+                    threads=32,
                     print_msg=True,
+                    start=1, end=0,
                     server="http://localhost:5279"):
     """Obtain usage information from a channel by analyzing its blobs.
 
@@ -298,6 +299,14 @@ def analyze_channel(blobfiles=None, channel=None,
 
         If `channel=None` it will go through all valid claims
         so it will provide a general summary of all downloads.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to count blobs,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
+    print_msg: bool, optional
+        It defaults to `True`, in which case it will print the final
+        summary of the channels.
     start: int, optional
         It defaults to 1.
         Count the blobs from claims starting from this index
@@ -307,9 +316,6 @@ def analyze_channel(blobfiles=None, channel=None,
         Count the blobs from claims until and including this index
         in the list of items.
         If it is 0, it is the same as the last index in the list.
-    print_msg: bool, optional
-        It defaults to `True`, in which case it will print the final
-        summary of the channels.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -337,17 +343,13 @@ def analyze_channel(blobfiles=None, channel=None,
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Count the blobs of the claim from the blobfiles directory")
-        print(f"blobfiles={blobfiles}")
-        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
-        home = os.path.expanduser("~")
-        blobfiles = os.path.join(home,
-                                 ".local", "share",
-                                 "lbry", "lbrynet", "blobfiles")
+        blobfiles = funcs.get_bdir(server=server)
 
         if not os.path.exists(blobfiles):
             print(f"Blobfiles directory does not exist: {blobfiles}")
+            print("This is typically "
+                  "'$HOME/.local/share/lbry/lbrynet/blobfiles'")
             return False
 
     if channel and not isinstance(channel, str):
@@ -359,10 +361,12 @@ def analyze_channel(blobfiles=None, channel=None,
         if not channel.startswith("@"):
             channel = "@" + channel
 
-    output = analyze_blobs(blobfiles=blobfiles, channel=channel,
-                           start=start, end=end,
+    output = analyze_blobs(blobfiles=blobfiles,
+                           channel=channel,
+                           threads=threads,
                            print_msg=False,
                            print_each=False,
+                           start=start, end=end,
                            server=server)
     if not output:
         return False
@@ -412,39 +416,45 @@ def analyze_channel(blobfiles=None, channel=None,
     size_complete = size_complete / (1024*1024*1024)
     size_incomplete = size_incomplete / (1024*1024*1024)
 
-    if print_msg:
-        if channel:
-            print(f"Channel: {channel}")
-
-        print(f"complete:   {n_claims_complete:4d},  "
-              f"blobs: {n_blobs_complete:7d},  "
-              f"usage: {size_complete:9.4f} GB")
-        print(f"incomplete: {n_claims_incomplete:4d},  "
-              f"blobs: {n_blobs_incomplete:7d},  "
-              f"usage: {size_incomplete:9.4f} GB")
-        print(40 * "-")
-
     n_claims = n_claims_complete + n_claims_incomplete
     n_blobs_all = n_blobs_complete + n_blobs_incomplete
     n_size_all = size_complete + size_incomplete
 
-    if print_msg:
-        print(f"all claims: {n_claims:4d},  "
-              f"blobs: {n_blobs_all:7d},  "
-              f"usage: {n_size_all:9.4f} GB")
-        print()
-        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
-        print(f"start: {s_time}")
-        print(f"end:   {e_time}")
+    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
 
-    info = {"channel": channel,
+    out = []
+
+    if print_msg:
+        if channel:
+            out.append(f"Channel: {channel}")
+
+        out.append(f"complete:   {n_claims_complete:4d},  "
+                   f"blobs: {n_blobs_complete:7d},  "
+                   f"usage: {size_complete:9.4f} GiB")
+        out.append(f"incomplete: {n_claims_incomplete:4d},  "
+                   f"blobs: {n_blobs_incomplete:7d},  "
+                   f"usage: {size_incomplete:9.4f} GiB")
+
+        out.append(40 * "-")
+
+        out.append(f"all claims: {n_claims:4d},  "
+                   f"blobs: {n_blobs_all:7d},  "
+                   f"usage: {n_size_all:9.4f} GiB")
+
+        out.append("")
+
+        out.append(f"start: {s_time}")
+        out.append(f"end:   {e_time}")
+
+        funcs.print_content(out, file=None, fdate=None)
+
+    return {"channel": channel,
             "complete_claims": n_claims_complete,
             "complete_blobs": n_blobs_complete,
             "complete_usage": size_complete,
             "incomplete_claims": n_claims_incomplete,
             "incomplete_blobs": n_blobs_incomplete,
             "incomplete_usage": size_incomplete}
-    return info
 
 
 def print_channel_analysis(blobfiles=None, split=True, bar=False,

@@ -821,18 +821,20 @@ b = lbryt.download_missing_blobs(ddir=ddir, channel="@EatMoreVegans")
 
 We can display a summary of a particular channel by counting all blobs
 from all its downloaded claims, both complete and incomplete,
-and measure the space that they take in gigabytes (GB).
+and measure the space that they take in gibibytes (GiB):
 ```py
 c = lbryt.analyze_channel(blobfiles=bdir, channel="@EatMoreVegans")
 ```
 
 If the channel is not specified, it will analyze all blobs from all valid
 claims in the system, and thus provide an overall summary of all downloads.
-Beware that this takes considerable time (more than one hour)
+Beware that this may take considerable time (more than 10 minutes)
 if there is a large number of downloaded claims and blobs, for example,
 1000 claims with 100 thousand blobs.
+
+Threads are used to reduce processing time (32 by default):
 ```py
-c = lbryt.analyze_channel(blobfiles=bdir)
+c = lbryt.analyze_channel(threads=128)
 ```
 
 [Go back to _Content_](#content)
