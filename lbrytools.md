@@ -800,17 +800,15 @@ a = lbryt.analyze_blobs(threads=64, print_msg=True, print_each=False)
 ### Download missing blobs
 
 We can identify claims with missing blobs, either data blobs
-or the initial `'sd_hash'` blob, and automatically redownload the claims.
+or the initial `'sd_hash'` blob, and automatically redownload the claims:
 ```py
 b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir)
 ```
 
 If we already have many claims in our system this may take a while,
-so we may decide to restrict this to only a single channel,
-or a range of items.
+so we may decide to restrict this to only a single channel:
 ```py
-b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir, channel="@EatMoreVegans")
-b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir, start=20, end=50)
+b = lbryt.download_missing_blobs(ddir=ddir, channel="@EatMoreVegans")
 ```
 
 [Go back to _Content_](#content)
