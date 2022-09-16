@@ -649,8 +649,9 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
 
 
 def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
-                           start=1, end=0,
+                           threads=32,
                            print_msg=False, print_each=False,
+                           start=1, end=0,
                            server="http://localhost:5279"):
     """Download the missing blobfiles from the downloaded claims.
 
@@ -676,15 +677,11 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         If a simplified name is used, and there are various channels
         with the same name, the one with the highest LBC bid will be selected.
         Enter the full name to choose the right one.
-    start: int, optional
-        It defaults to 1.
-        Count the blobs from claims starting from this index
-        in the list of items.
-    end: int, optional
-        It defaults to 0.
-        Count the blobs from claims until and including this index
-        in the list of items.
-        If it is 0, it is the same as the last index in the list.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to count blobs,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     print_msg: bool, optional
         It defaults to `True`, in which case it will print information
         on the found claim.
@@ -694,6 +691,15 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         If it is `True` it will print all blobs
         that belong to the claim, and whether each of them is already
         in `blobfiles`.
+    start: int, optional
+        It defaults to 1.
+        Count the blobs from claims starting from this index
+        in the list of items.
+    end: int, optional
+        It defaults to 0.
+        Count the blobs from claims until and including this index
+        in the list of items.
+        If it is 0, it is the same as the last index in the list.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -715,17 +721,13 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
 
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
-        print("Count the blobs of the claim from the blobfiles directory")
-        print(f"blobfiles={blobfiles}")
-        print("This is typically '$HOME/.local/share/lbry/lbrynet/blobfiles'")
 
-        home = os.path.expanduser("~")
-        blobfiles = os.path.join(home,
-                                 ".local", "share",
-                                 "lbry", "lbrynet", "blobfiles")
+        blobfiles = funcs.get_bdir(server=server)
 
         if not os.path.exists(blobfiles):
             print(f"Blobfiles directory does not exist: {blobfiles}")
+            print("This is typically "
+                  "'$HOME/.local/share/lbry/lbrynet/blobfiles'")
             return False
 
     if channel and not isinstance(channel, str):
@@ -737,10 +739,12 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         if not channel.startswith("@"):
             channel = "@" + channel
 
-    output = analyze_blobs(blobfiles=blobfiles, channel=channel,
-                           start=start, end=end,
+    output = analyze_blobs(blobfiles=blobfiles,
+                           channel=channel,
+                           threads=threads,
                            print_msg=print_msg,
                            print_each=print_each,
+                           start=start, end=end,
                            server=server)
     if not output:
         return False
