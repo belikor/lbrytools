@@ -848,10 +848,12 @@ in gibibytes (GiB) that those blobs use.
 This method uses `analyze_channel` internally with each channel,
 so it takes a considerable amount of time to run (more than one hour)
 if there is a large number of downloaded claims and blobs.
-Threads are used to reduce processing time (32 by default):
+Threads are used to reduce processing time by processing claims
+in parallel (32 by default) and channels in parallel (32 by default):
 ```py
 d = lbryt.print_channel_analysis(blobfiles=bdir)
 d = lbryt.print_channel_analysis(threads=128)
+d = lbryt.print_channel_analysis(ch_threads=64, threads=96)
 ```
 
 Print the information split in complete claims, and incomplete claims
