@@ -947,3 +947,14 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         print()
 
     return info_get_incomplete, info_get_no_sd
+
+
+if __name__ == "__main__":
+    # import cProfile
+    # cProfile.run('analyze_blobs(threads=128)', 'restats.b.128')
+    # cProfile.run('analyze_channel(threads=128)', 'restats.c.128')
+    # cProfile.run('print_channel_analysis(threads=128)', 'restats.p.128')
+    # cProfile.run('print_channel_analysis(threads=64, ch_threads=64)', 'restats.p.64')
+    # analyze_blobs()
+    # analyze_channel()
+    print_channel_analysis()
