@@ -520,6 +520,7 @@ def analyze_channel(blobfiles=None, channel=None,
 def print_channel_analysis(blobfiles=None, split=True, bar=False,
                            start=1, end=0,
                            sort=False, reverse=False,
+                           threads=32,
                            file=None, fdate=False,
                            server="http://localhost:5279"):
     """Print a summary of all blobs of all channels.
@@ -549,6 +550,11 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         Count the channels until and including this index
         in the list of channels.
         If it is 0, it is the same as the last index in the list.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to count blobs,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     sort: bool, optional
         It defaults to `True`, in which case the channels will be ordered
         by the amount of space their claims take on the system.
@@ -600,10 +606,12 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
     sizes = []
     msg = []
 
+    space = ""
+
     if split and not bar:
-        out.append("{:43s}  completed (incomplete)".format(""))
+        out.append(f"{space:43s}  completed (incomplete)")
     elif bar:
-        out.append("{:83}  claims,   blobs,    use".format(""))
+        out.append(f"{space:83s}  claims,   blobs,    use")
 
     for it, channel in enumerate(channels, start=1):
         if it < start:
@@ -612,7 +620,9 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
             break
 
         print(f"Channel {it}/{n_channels}")
-        info = analyze_channel(blobfiles=blobfiles, channel=channel,
+        info = analyze_channel(blobfiles=blobfiles,
+                               channel=channel,
+                               threads=threads,
                                print_msg=False,
                                server=server)
         if not info:

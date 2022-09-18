@@ -843,35 +843,36 @@ in gigabytes (GB) that those blobs use.
 
 This method uses `analyze_channel` internally with each channel,
 so it takes a considerable amount of time to run (more than one hour)
-if there is a large number of downloaded claims and blobs, for example,
-1000 claims with 100 thousand blobs.
+if there is a large number of downloaded claims and blobs.
+Threads are used to reduce processing time (32 by default):
 ```py
 d = lbryt.print_channel_analysis(blobfiles=bdir)
+d = lbryt.print_channel_analysis(threads=128)
 ```
 
 Print the information split in complete claims, and incomplete claims
-in parentheses.
+in parentheses:
 ```py
-d = lbryt.print_channel_analysis(blobfiles=bdir, split=True)
+d = lbryt.print_channel_analysis(split=True)
 ```
 
 Print a bar for each channel representing their disk usage.
-In this case, it will show the numerical values combined as if `split=False`.
+In this case, it will show the numerical values combined as if `split=False`:
 ```py
-d = lbryt.print_channel_analysis(blobfiles=bdir, bar=True)
+d = lbryt.print_channel_analysis(bar=True)
 ```
 
 We can sort the channels by disk usage.
 If `reverse=False` it is ascending order (higher usage last),
-and with `reverse=True` it will be in descending order (higher usage first).
+and with `reverse=True` it will be in descending order (higher usage first):
 ```py
-d = lbryt.print_channel_analysis(blobfiles=bdir, bar=True, sort=True, reverse=True)
+d = lbryt.print_channel_analysis(bar=True, sort=True, reverse=True)
 ```
 
 Print the list of channels to a file.
-Optionally add the date to the name of the file.
+Optionally add the date to the name of the file:
 ```py
-d = lbryt.print_channel_analysis(blobfiles=bdir, file="ch_summary.txt", fdate=True)
+d = lbryt.print_channel_analysis(file="ch_summary.txt", fdate=True)
 ```
 
 [Go back to _Content_](#content)
