@@ -210,12 +210,13 @@ def analyze_blobs(blobfiles=None, channel=None,
         all_blobs.append(blob_info["sd_hash"])
         counted_sd_hash_blobs.append(blob_info["sd_hash"])
 
-        existing = blob_info["blobs"][:]
-        for blob in existing:
+        existing = []
+
+        for blob in blob_info["blobs"]:
             all_blobs.append(blob["blob_hash"])
 
-        for missing_blob in blob_info["missing"]:
-            existing.remove(missing_blob)
+            if blob not in blob_info["missing"]:
+                existing.append(blob)
 
         for blob in existing:
             counted_data_blobs.append(blob["blob_hash"])
@@ -223,18 +224,22 @@ def analyze_blobs(blobfiles=None, channel=None,
     n_all_blobs = len(all_blobs)
     n_data = len(counted_data_blobs)
 
-    minus_data_blobs = all_existing_blobs[:]
-    for data_blob in counted_data_blobs:
-        minus_data_blobs.remove(data_blob)
+    minus_data_blobs = []
+
+    for blob in all_existing_blobs:
+        if blob not in counted_data_blobs:
+            minus_data_blobs.append(blob)
 
     n_minus_data = len(minus_data_blobs)
 
     n_sd_hash = len(counted_sd_hash_blobs)
     n_sum = n_data + n_sd_hash
 
-    minus_data_sd_blobs = minus_data_blobs[:]
-    for sd_blob in counted_sd_hash_blobs:
-        minus_data_sd_blobs.remove(sd_blob)
+    minus_data_sd_blobs = []
+
+    for blob in minus_data_blobs:
+        if blob not in counted_sd_hash_blobs:
+            minus_data_sd_blobs.append(blob)
 
     n_minus_data_sd = len(minus_data_sd_blobs)
 
@@ -293,10 +298,11 @@ def get_size_incomplete(blobfiles, info):
     sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
     size_incomplete = os.path.getsize(sd_hash)
 
-    existing = blob_info["blobs"][:]
+    existing = []
 
-    for missing_blob in blob_info["missing"]:
-        existing.remove(missing_blob)
+    for blob in blob_info["blobs"]:
+        if blob not in blob_info["missing"]:
+            existing.append(blob)
 
     for blob in existing:
         blob_file = os.path.join(blobfiles, blob["blob_hash"])
