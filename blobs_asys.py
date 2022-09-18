@@ -24,6 +24,7 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help use with blobs from LBRY content."""
+import concurrent.futures as fts
 import os
 import time
 
@@ -270,6 +271,41 @@ def analyze_blobs(blobfiles=None, channel=None,
             "claims_other_error": claims_other_error}
 
 
+def get_size_complete(blobfiles, info):
+    """Size of blobs in completed claims."""
+    blob_info = info["blob_info"]
+    n_complete = 1 + len(blob_info["blobs"])
+    sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
+    size_complete = os.path.getsize(sd_hash)
+
+    for blob in blob_info["blobs"]:
+        blob_file = os.path.join(blobfiles, blob["blob_hash"])
+        size_complete += os.path.getsize(blob_file)
+
+    return {"n_blobs_complete": n_complete,
+            "size_complete": size_complete}
+
+
+def get_size_incomplete(blobfiles, info):
+    """Size of blobs in incomplete claims."""
+    blob_info = info["blob_info"]
+    n_incomplete = 1 + len(blob_info["blobs"]) - len(blob_info["missing"])
+    sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
+    size_incomplete = os.path.getsize(sd_hash)
+
+    existing = blob_info["blobs"][:]
+
+    for missing_blob in blob_info["missing"]:
+        existing.remove(missing_blob)
+
+    for blob in existing:
+        blob_file = os.path.join(blobfiles, blob["blob_hash"])
+        size_incomplete += os.path.getsize(blob_file)
+
+    return {"n_blobs_incomplete": n_incomplete,
+            "size_incomplete": size_incomplete}
+
+
 def analyze_channel(blobfiles=None, channel=None,
                     threads=32,
                     print_msg=True,
@@ -387,31 +423,50 @@ def analyze_channel(blobfiles=None, channel=None,
     size_incomplete = 0
     n_blobs_incomplete = 0
 
-    for info in claims_complete:
-        blob_info = info["blob_info"]
-        sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
-        size_complete += os.path.getsize(sd_hash)
-        n_blobs_complete += 1
-        n_blobs_complete += len(blob_info["blobs"])
+    bfiles_comp = (blobfiles for n in range(n_claims_complete))
+    infos_comp = (info for info in claims_complete)
+    bfiles_incomp = (blobfiles for n in range(n_claims_incomplete))
+    infos_incomp = (info for info in claims_incomplete)
 
-        for blob in blob_info["blobs"]:
-            blob_file = os.path.join(blobfiles, blob["blob_hash"])
-            size_complete += os.path.getsize(blob_file)
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(get_size_complete,
+                                   bfiles_comp, infos_comp)
+            print("Completed claims; "
+                  "waiting for blob size calculation to finish; "
+                  f"max threads: {threads}")
+            results_comp = list(results)  # generator to list
+    else:
+        results_comp = []
 
-    for info in claims_incomplete:
-        blob_info = info["blob_info"]
-        sd_hash = os.path.join(blobfiles, blob_info["sd_hash"])
-        size_incomplete += os.path.getsize(sd_hash)
-        n_blobs_incomplete += 1
-        n_blobs_incomplete += len(blob_info["blobs"])
-        n_blobs_incomplete -= len(blob_info["missing"])
+        for info in claims_complete:
+            result = get_size_complete(blobfiles, info)
+            results_comp.append(result)
 
-        existing = blob_info["blobs"][:]
-        for missing_blob in blob_info["missing"]:
-            existing.remove(missing_blob)
-        for blob in existing:
-            blob_file = os.path.join(blobfiles, blob["blob_hash"])
-            size_incomplete += os.path.getsize(blob_file)
+    for claim in results_comp:
+        n_blobs_complete += claim["n_blobs_complete"]
+        size_complete += claim["size_complete"]
+
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(get_size_incomplete,
+                                   bfiles_incomp, infos_incomp)
+            print("Incomplete claims; "
+                  "waiting for blob size calculation to finish; "
+                  f"max threads: {threads}")
+            results_incomp = list(results)  # generator to list
+    else:
+        results_incomp = []
+
+        for info in claims_incomplete:
+            result = get_size_incomplete(blobfiles, info)
+            results_incomp.append(result)
+
+    for claim in results_incomp:
+        n_blobs_incomplete += claim["n_blobs_incomplete"]
+        size_incomplete += claim["size_incomplete"]
 
     size_complete = size_complete / (1024*1024*1024)
     size_incomplete = size_incomplete / (1024*1024*1024)
