@@ -202,8 +202,8 @@ def analyze_blobs(blobfiles=None, channel=None,
         counted_sd_hash_blobs.append(blob_info["sd_hash"])
 
         for blob in blob_info["blobs"]:
-            all_blobs.append(blob[1])
-            counted_data_blobs.append(blob[1])
+            all_blobs.append(blob["blob_hash"])
+            counted_data_blobs.append(blob["blob_hash"])
 
     for info in claims_blobs_incomplete:
         blob_info = info["blob_info"]
@@ -212,13 +212,13 @@ def analyze_blobs(blobfiles=None, channel=None,
 
         existing = blob_info["blobs"][:]
         for blob in existing:
-            all_blobs.append(blob[1])
+            all_blobs.append(blob["blob_hash"])
 
         for missing_blob in blob_info["missing"]:
             existing.remove(missing_blob)
 
         for blob in existing:
-            counted_data_blobs.append(blob[1])
+            counted_data_blobs.append(blob["blob_hash"])
 
     n_all_blobs = len(all_blobs)
     n_data = len(counted_data_blobs)
@@ -272,7 +272,7 @@ def s_complete_th(blobfiles, info):
     n_complete = 1 + len(blob_info["blobs"])
 
     for blob in blob_info["blobs"]:
-        blob_file = os.path.join(blobfiles, blob[1])
+        blob_file = os.path.join(blobfiles, blob["blob_hash"])
         s_complete += os.path.getsize(blob_file)
 
     return {"n_blobs_complete": n_complete,
@@ -290,7 +290,7 @@ def s_incomplete_th(blobfiles, info):
     for missing_blob in blob_info["missing"]:
         existing.remove(missing_blob)
     for blob in existing:
-        blob_file = os.path.join(blobfiles, blob[1])
+        blob_file = os.path.join(blobfiles, blob["blob_hash"])
         s_incomplete += os.path.getsize(blob_file)
 
     return {"n_blobs_incomplete": n_incomplete,
@@ -441,7 +441,7 @@ def analyze_channel(blobfiles=None, channel=None,
             n_blobs_complete += len(blob_info["blobs"])
 
             for blob in blob_info["blobs"]:
-                blob_file = os.path.join(blobfiles, blob[1])
+                blob_file = os.path.join(blobfiles, blob["blob_hash"])
                 size_complete += os.path.getsize(blob_file)
 
     if threads:
@@ -470,7 +470,7 @@ def analyze_channel(blobfiles=None, channel=None,
             for missing_blob in blob_info["missing"]:
                 existing.remove(missing_blob)
             for blob in existing:
-                blob_file = os.path.join(blobfiles, blob[1])
+                blob_file = os.path.join(blobfiles, blob["blob_hash"])
                 size_incomplete += os.path.getsize(blob_file)
 
     size_complete = size_complete / (1024*1024*1024)

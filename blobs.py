@@ -104,10 +104,14 @@ def c_blobs(uri=None, cid=None, name=None,
         blob_hash = blob["blob_hash"]
         present = os.path.exists(os.path.join(blobfiles, blob_hash))
         present_list.append(present)
-        blob_list.append([num, blob_hash, present])
+        blob_list.append({"num": num,
+                          "blob_hash": blob_hash,
+                          "present": present})
 
         if not present:
-            blob_missing.append([num, blob_hash, present])
+            blob_missing.append({"num": num,
+                                 "blob_hash": blob_hash,
+                                 "present": present})
 
     all_present = all(present_list)
 
@@ -178,9 +182,9 @@ def prnt_blobs(blob_info, print_each=False,
 
     if print_each:
         for blob in blobs:
-            num = blob[0]
-            blob_hash = blob[1]
-            present = blob[2]
+            num = blob["num"]
+            blob_hash = blob["blob_hash"]
+            present = blob["present"]
 
             output.append(f"{num:3d}/{n_blobs:3d}; {blob_hash}; {present}")
 
