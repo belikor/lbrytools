@@ -697,32 +697,13 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         for first, second in sorted_list:
             msg.append(second)
 
-    out.extend(msg)
-
-    fd = 0
-
     if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
-
-        file = os.path.join(dirn, fdate + base)
-
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
-
-    if file and fd:
-        print("\n".join(msg), file=fd)
-        fd.close()
-        print(f"Summary written: {file}")
+        out = msg
     else:
-        print("\n".join(out))
+        out.extend(msg)
+
+    print()
+    funcs.print_content(out, file=file, fdate=fdate)
 
     print()
     e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
