@@ -520,10 +520,54 @@ def analyze_channel(blobfiles=None, channel=None,
             "incomplete_usage": size_incomplete}
 
 
+def analyze_ch_th(blobfiles, split, bar, channel, threads, sep, server):
+    """Wrapper to use 'analyze_channel' with multiple threads."""
+    info_ch = analyze_channel(blobfiles=blobfiles,
+                              channel=channel,
+                              threads=threads,
+                              print_msg=False,
+                              server=server)
+
+    n_c_complete = info_ch["complete_claims"]
+    n_c_blobs = info_ch["complete_blobs"]
+    n_c_size = info_ch["complete_usage"]
+
+    n_i_complete = info_ch["incomplete_claims"]
+    n_i_blobs = info_ch["incomplete_blobs"]
+    n_i_size = info_ch["incomplete_usage"]
+
+    n_claims = n_c_complete + n_i_complete
+    n_blobs_all = n_c_blobs + n_i_blobs
+    n_size_all = n_c_size + n_i_size
+
+    ch = channel + sep
+    chan = f"{ch:34s}  "
+
+    if split and not bar:
+        info = (f"claims: {n_c_complete:4d} ({n_i_complete:4d})"
+                f"{sep}  "
+                f"blobs: {n_c_blobs:7d} ({n_i_blobs:7d})"
+                f"{sep}  "
+                f"use: {n_c_size:7.2f} GB ({n_i_size:7.2f} GB)")
+    elif not split and not bar:
+        info = (f"claims: {n_claims:4d}" + f"{sep}  "
+                f"blobs: {n_blobs_all:7d}" + f"{sep}  "
+                f"use: {n_size_all:7.2f} GB")
+    else:
+        info = ""
+
+    line = chan + info
+
+    return {"n_claims": n_claims,
+            "n_blobs_all": n_blobs_all,
+            "n_size_all": n_size_all,
+            "line": line}
+
+
 def print_channel_analysis(blobfiles=None, split=True, bar=False,
                            start=1, end=0,
                            sort=False, reverse=False,
-                           threads=32,
+                           ch_threads=32, threads=32,
                            file=None, fdate=False, sep=";",
                            server="http://localhost:5279"):
     """Print a summary of all blobs of all channels.
@@ -553,6 +597,10 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         Count the channels until and including this index
         in the list of channels.
         If it is 0, it is the same as the last index in the list.
+    ch_threads: int, optional
+        It defaults to 8.
+        It is the number of threads that will be used to process channels,
+        meaning that many channels will be analyzed for blobs in parallel.
     threads: int, optional
         It defaults to 32.
         It is the number of threads that will be used to count blobs,
@@ -620,54 +668,78 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         out.append(f"{space:83s}  claims" + f"{sep}   "
                    + "blobs" + f"{sep}    " + "use")
 
-    for num, channel in enumerate(channels, start=1):
-        if num < start:
-            continue
-        if end != 0 and num > end:
-            break
+    blobfs = (blobfiles for n in range(n_channels))
+    splits = (split for n in range(n_channels))
+    bars = (bar for n in range(n_channels))
+    thds = (threads for n in range(n_channels))
+    seps = (sep for n in range(n_channels))
+    servers = (server for n in range(n_channels))
 
-        print(f"Channel {num}/{n_channels}")
-        info_ch = analyze_channel(blobfiles=blobfiles,
-                                  channel=channel,
-                                  threads=threads,
-                                  print_msg=False,
-                                  server=server)
-        if not info_ch:
-            continue
+    if ch_threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            results = executor.map(analyze_ch_th,
+                                   blobfs, splits, bars,
+                                   channels, thds, seps, servers)
+            print("Waiting for channel analysis to finish; "
+                  f"max threads: {ch_threads}")
+            results = list(results)  # generator to list
 
-        n_c_complete = info_ch["complete_claims"]
-        n_c_blobs = info_ch["complete_blobs"]
-        n_c_size = info_ch["complete_usage"]
+            for num, r in enumerate(results, start=1):
+                ch_claims.append(r["n_claims"])
+                ch_blobs.append(r["n_blobs_all"])
+                ch_sizes.append(r["n_size_all"])
 
-        n_i_complete = info_ch["incomplete_claims"]
-        n_i_blobs = info_ch["incomplete_blobs"]
-        n_i_size = info_ch["incomplete_usage"]
+                chan = f"{num:3d}/{n_channels:3d}" + f"{sep} "
+                line.append(chan + r["line"])
+    else:
+        for num, channel in enumerate(channels, start=1):
+            if num < start:
+                continue
+            if end != 0 and num > end:
+                break
 
-        n_claims = n_c_complete + n_i_complete
-        n_blobs_all = n_c_blobs + n_i_blobs
-        n_size_all = n_c_size + n_i_size
+            print(f"Channel {num}/{n_channels}")
+            info_ch = analyze_channel(blobfiles=blobfiles,
+                                      channel=channel,
+                                      threads=threads,
+                                      print_msg=False,
+                                      server=server)
+            if not info_ch:
+                continue
 
-        ch = channel + sep
-        chan = f"{num:3d}/{n_channels:3d}" + f"{sep} " + f"{ch:34s}  "
+            n_c_complete = info_ch["complete_claims"]
+            n_c_blobs = info_ch["complete_blobs"]
+            n_c_size = info_ch["complete_usage"]
 
-        if split and not bar:
-            info = (f"claims: {n_c_complete:4d} ({n_i_complete:4d})"
-                    f"{sep}  "
-                    f"blobs: {n_c_blobs:7d} ({n_i_blobs:7d})"
-                    f"{sep}  "
-                    f"use: {n_c_size:7.2f} GB ({n_i_size:7.2f} GB)")
-        elif not split and not bar:
-            info = (f"claims: {n_claims:4d}" + f"{sep}  "
-                    f"blobs: {n_blobs_all:7d}" + f"{sep}  "
-                    f"use: {n_size_all:7.2f} GB")
-        else:
-            info = ""
+            n_i_complete = info_ch["incomplete_claims"]
+            n_i_blobs = info_ch["incomplete_blobs"]
+            n_i_size = info_ch["incomplete_usage"]
 
-        line.append(chan + info)
+            n_claims = n_c_complete + n_i_complete
+            n_blobs_all = n_c_blobs + n_i_blobs
+            n_size_all = n_c_size + n_i_size
 
-        ch_claims.append(n_claims)
-        ch_blobs.append(n_blobs_all)
-        ch_sizes.append(n_size_all)
+            ch = channel + sep
+            chan = f"{num:3d}/{n_channels:3d}" + f"{sep} " + f"{ch:34s}  "
+
+            if split and not bar:
+                info = (f"claims: {n_c_complete:4d} ({n_i_complete:4d})"
+                        f"{sep}  "
+                        f"blobs: {n_c_blobs:7d} ({n_i_blobs:7d})"
+                        f"{sep}  "
+                        f"use: {n_c_size:7.2f} GB ({n_i_size:7.2f} GB)")
+            elif not split and not bar:
+                info = (f"claims: {n_claims:4d}" + f"{sep}  "
+                        f"blobs: {n_blobs_all:7d}" + f"{sep}  "
+                        f"use: {n_size_all:7.2f} GB")
+            else:
+                info = ""
+
+            line.append(chan + info)
+
+            ch_claims.append(n_claims)
+            ch_blobs.append(n_blobs_all)
+            ch_sizes.append(n_size_all)
 
     if bar:
         # Draw a bar indicating the amount of space used
