@@ -524,7 +524,7 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
                            start=1, end=0,
                            sort=False, reverse=False,
                            threads=32,
-                           file=None, fdate=False,
+                           file=None, fdate=False, sep=";",
                            server="http://localhost:5279"):
     """Print a summary of all blobs of all channels.
 
@@ -575,6 +575,9 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
     fdate: bool, optional
         It defaults to `False`.
         If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -604,106 +607,115 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
     n_channels = len(channels)
 
     out = []
-    claims = []
-    blobs = []
-    sizes = []
-    msg = []
+    ch_claims = []
+    ch_blobs = []
+    ch_sizes = []
+    line = []
 
     space = ""
 
     if split and not bar:
         out.append(f"{space:43s}  completed (incomplete)")
     elif bar:
-        out.append(f"{space:83s}  claims,   blobs,    use")
+        out.append(f"{space:83s}  claims" + f"{sep}   "
+                   + "blobs" + f"{sep}    " + "use")
 
-    for it, channel in enumerate(channels, start=1):
-        if it < start:
+    for num, channel in enumerate(channels, start=1):
+        if num < start:
             continue
-        if end != 0 and it > end:
+        if end != 0 and num > end:
             break
 
-        print(f"Channel {it}/{n_channels}")
-        info = analyze_channel(blobfiles=blobfiles,
-                               channel=channel,
-                               threads=threads,
-                               print_msg=False,
-                               server=server)
-        if not info:
+        print(f"Channel {num}/{n_channels}")
+        info_ch = analyze_channel(blobfiles=blobfiles,
+                                  channel=channel,
+                                  threads=threads,
+                                  print_msg=False,
+                                  server=server)
+        if not info_ch:
             continue
 
-        n_c_complete = info["complete_claims"]
-        n_c_blobs = info["complete_blobs"]
-        n_c_size = info["complete_usage"]
+        n_c_complete = info_ch["complete_claims"]
+        n_c_blobs = info_ch["complete_blobs"]
+        n_c_size = info_ch["complete_usage"]
 
-        n_i_complete = info["incomplete_claims"]
-        n_i_blobs = info["incomplete_blobs"]
-        n_i_size = info["incomplete_usage"]
+        n_i_complete = info_ch["incomplete_claims"]
+        n_i_blobs = info_ch["incomplete_blobs"]
+        n_i_size = info_ch["incomplete_usage"]
 
         n_claims = n_c_complete + n_i_complete
         n_blobs_all = n_c_blobs + n_i_blobs
         n_size_all = n_c_size + n_i_size
-        claims.append(n_claims)
-        blobs.append(n_blobs_all)
-        sizes.append(n_size_all)
 
-        ch = channel + ","
-        head = f"{it:3d}/{n_channels:3d}, {ch:34s}  "
+        ch = channel + sep
+        chan = f"{num:3d}/{n_channels:3d}" + f"{sep} " + f"{ch:34s}  "
 
         if split and not bar:
-            text = (f"claims: {n_c_complete:4d} ({n_i_complete:4d}),  "
-                    f"blobs: {n_c_blobs:7d} ({n_i_blobs:7d}),  "
+            info = (f"claims: {n_c_complete:4d} ({n_i_complete:4d})"
+                    f"{sep}  "
+                    f"blobs: {n_c_blobs:7d} ({n_i_blobs:7d})"
+                    f"{sep}  "
                     f"use: {n_c_size:7.2f} GB ({n_i_size:7.2f} GB)")
         elif not split and not bar:
-            text = (f"claims: {n_claims:4d},  "
-                    f"blobs: {n_blobs_all:7d},  "
+            info = (f"claims: {n_claims:4d}" + f"{sep}  "
+                    f"blobs: {n_blobs_all:7d}" + f"{sep}  "
                     f"use: {n_size_all:7.2f} GB")
         else:
-            text = ""
-        msg.append(head + text)
+            info = ""
+
+        line.append(chan + info)
+
+        ch_claims.append(n_claims)
+        ch_blobs.append(n_blobs_all)
+        ch_sizes.append(n_size_all)
 
     if bar:
-        # Draw a bar indicating the amount of space used.
+        # Draw a bar indicating the amount of space used
         spaces = 40
-        top = max(sizes)
-        sizes_p = [item/top for item in sizes]
+        top = max(ch_sizes)
+        sizes_p = [item/top for item in ch_sizes]
 
-        for it in range(len(sizes)):
-            cl = claims[it]
-            bl = blobs[it]
-            sz = sizes[it]
-            percent = sizes_p[it]
+        for num in range(len(ch_sizes)):
+            claims = ch_claims[num]
+            blobs = ch_blobs[num]
+            sizes = ch_sizes[num]
+            percent = sizes_p[num]
             m = int(percent * spaces)
 
-            msg[it] += "|"
-            if percent > 0.95:
-                msg[it] += (spaces-1)*"="
-            else:
-                msg[it] += m*"="
-                msg[it] += (spaces-1-m)*"."
+            line[num] += "|"
 
-            msg[it] += "|"
-            msg[it] += f" {cl:4d}, {bl:7d}, {sz:7.2f} GB"
+            if percent > 0.95:
+                line[num] += (spaces - 1) * "="
+            else:
+                line[num] += m * "="
+                line[num] += (spaces - 1 - m) * "."
+
+            line[num] += "| "
+
+            line[num] += (f"{claims:4d}" + f"{sep} "
+                          f"{blobs:7d}" + f"{sep} "
+                          f"{sizes:7.2f} GB")
 
     if sort:
-        # Pair the size and the message that we want to print in a dictionary
+        # Pair the size and the line that we want to print in a dictionary
         pair = {}
-        for it in range(len(sizes)):
-            pair[sizes[it]] = msg[it]
+        for num in range(len(ch_sizes)):
+            pair[ch_sizes[num]] = line[num]
 
         # Sort by the first element of the pair, the size
         sorted_list = sorted(pair.items(),
                              reverse=reverse,
                              key=lambda item: item[0])
 
-        # Just take the second element, the message, into a new list
-        msg = []
+        # Just take the second element, the line, into a new list
+        line = []
         for first, second in sorted_list:
-            msg.append(second)
+            line.append(second)
 
     if file:
-        out = msg
+        out = line
     else:
-        out.extend(msg)
+        out.extend(line)
 
     print()
     funcs.print_content(out, file=file, fdate=fdate)
