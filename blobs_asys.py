@@ -83,22 +83,22 @@ def analyze_blobs(blobfiles=None, channel=None,
 
     Returns
     -------
-    list of dict, list of dict, list of dict, list of dict, list of dict
-        A tuple of five lists.
-        - The first list contains blob information for claims
+    dict of list
+        A dictionary with five keys:
+        - 'claims_blobs_complete': list of blob information for claims
           that are complete.
-        - The second list contains blob information for claims
+        - 'claims_blobs_incomplete': list of blob information for claims
           that have missing blobs. These claims need to be redownloaded
           in order to have all blobs.
-        - The third list contains blob information for claims
+        - 'claims_no_sd_hash': list of blob information for claims
           whose `'sd_hash'` is missing so it is impossible to determine
           how many blobs they are supposed to have. These claims need to be
           redownloaded at least to get their `'sd_hash'`.
-        - The fourth list contains blob information for claims
+        - 'claims_not_found': list of blob information for claims
           that were not found in the online database (blockchain).
           These are 'invalid' claims, that is, claims that were donwloaded
           in the past, but then they were removed by their authors.
-        - The fifth list contains blob information for claims
+        - 'claims_other_error': list of blob information for claims
           that had other errors like a connectivity problem with the server.
 
         If all claims have been properly downloaded all lists must be empty
@@ -254,8 +254,11 @@ def analyze_blobs(blobfiles=None, channel=None,
         if len(rem_blob) != 96:
             print(rem_blob)
 
-    return (claims_blobs_complete, claims_blobs_incomplete,
-            claims_no_sd_hash, claims_not_found, claims_other_error)
+    return {"claims_blobs_complete": claims_blobs_complete,
+            "claims_blobs_incomplete": claims_blobs_incomplete,
+            "claims_no_sd_hash": claims_no_sd_hash,
+            "claims_not_found": claims_not_found,
+            "claims_other_error": claims_other_error}
 
 
 def analyze_channel(blobfiles=None, channel=None,
@@ -355,12 +358,13 @@ def analyze_channel(blobfiles=None, channel=None,
     if not output:
         return False
 
-    claims_complete = output[0]
-    claims_incomplete = output[1]
-    # claims_no_sd_hash = output[2]
-    # claims_not_found = output[3]
-    # claims_other_error = output[4]
     print()
+
+    claims_complete = output["claims_blobs_complete"]
+    claims_incomplete = output["claims_blobs_incomplete"]
+    # claims_no_sd_hash = output["claims_no_sd_hash"]
+    # claims_not_found = output["claims_not_found"]
+    # claims_other_error = output["claims_other_error"]
 
     n_claims_complete = len(claims_complete)
     n_claims_incomplete = len(claims_incomplete)
@@ -732,12 +736,13 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
     if not output:
         return False
 
-    # claims_complete = output[0]
-    claims_incomplete = output[1]
-    claims_no_sd_hash = output[2]
-    # claims_not_found = output[3]
-    # claims_other_error = output[4]
     print()
+
+    # claims_complete = output["claims_blobs_complete"]
+    claims_incomplete = output["claims_blobs_incomplete"]
+    claims_no_sd_hash = output["claims_no_sd_hash"]
+    # claims_not_found = output["claims_not_found"]
+    # claims_other_error = output["claims_other_error"]
 
     if not (claims_incomplete or claims_no_sd_hash):
         if channel:
