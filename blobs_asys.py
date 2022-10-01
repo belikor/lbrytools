@@ -975,3 +975,9 @@ def download_missing_blobs(blobfiles=None, ddir=None, channel=None,
         print()
 
     return info_get_incomplete, info_get_no_sd
+
+
+if __name__ == "__main__":
+#    analyze_blobs()
+#    analyze_channel()
+    print_channel_analysis()
