@@ -455,7 +455,7 @@ p = lbryt.print_summary(invalid=True, channel="mises")
 
 Print a list of all unique channels that published the downloaded claims
 that we have.
-Specify the separator, or it will use a semicolon by default.
+Specify the separator, or it will use a semicolon by default:
 ```py
 o = lbryt.print_channels()
 o = lbryt.print_channels(sep=";")
@@ -466,7 +466,7 @@ channels are printed in their "full" form (`@MyChannel#3`, `@MyChannel#c6`)
 in order to avoid ambiguity.
 Certain claims were published anonymously, so for these the channel
 is `@_Unknown_`.
-Two parameters control whether to use the full name or the canonical name.
+Two parameters control whether to use the full name or the canonical name:
 ```py
 o = lbryt.print_channels(full=False)
 o = lbryt.print_channels(canonical=True)
@@ -474,15 +474,21 @@ o = lbryt.print_channels(canonical=True)
 
 By default, channel names are printed in three columns for clarity.
 Use the `simple` parameter to print all channels in a single string,
-each channel separated from another by a `sep` symbol.
+each channel separated from another by a `sep` symbol:
 ```py
 o = lbryt.print_channels(simple=True, sep=",")
 ```
 
 By default, each claim is resolved online in order to get the channel
 information from the online database (blockchain).
-This takes significant time, so the function may take several minutes
-to return if there are thousands of downloaded claims.
+
+By default, the method uses a maximum of 32 threads to resolve claims online
+to get the channel information from the online database (blockchain).
+The number can be lowered or increased depending on the CPU power:
+```py
+o = lbryt.print_channels(threads=64)
+```
+
 With `offline=True` we can resolve the claims from the offline database;
 this is quicker but may not print all existing channels
 as some of them might have not been resolved when the claims were originally
@@ -490,20 +496,20 @@ downloaded.
 
 If `offline=True` is used, `full` and `canonical` have no effect,
 and only the base name is printed.
-The reason is that the offline database stores only the base name.
+The reason is that the offline database stores only the base name:
 ```py
 o = lbryt.print_channels(offline=True)
 ```
 
 If we wish to print only channels from invalid claims
 we can use `invalid=True`. This implies `offline=True` as well,
-as invalid claims cannot be resolved online.
+as invalid claims cannot be resolved online:
 ```py
 o = lbryt.print_channels(invalid=True)
 ```
 
 Print the list of channels to a file.
-Optionally add the date to the name of the file.
+Optionally add the date to the name of the file:
 ```py
 o = lbryt.print_channels(file="channels.txt", fdate=True)
 ```
@@ -519,7 +525,7 @@ The channel name resolution is affected by a bug in the SDK,
 which is documented in
 [lbry-sdk issue #3316](https://github.com/lbryio/lbry-sdk/issues/3316).
 
-If you wish to manually resolve a channel you can use the following function.
+If you wish to manually resolve a channel you can use the following function:
 ```py
 ch = lbryt.resolve_channel("@MyChannel")
 ```

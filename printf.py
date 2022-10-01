@@ -24,6 +24,7 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to print information about the claims in the LBRY network."""
+import concurrent.futures as fts
 import os
 import time
 
@@ -196,8 +197,18 @@ def print_summary(show="all",
     return status
 
 
+def find_ch_th(cid, full, canonical, offline, server):
+    """Wrapper to use with threads in 'print_channels'."""
+    channel = srch_ch.find_channel(cid=cid,
+                                   full=full, canonical=canonical,
+                                   offline=offline,
+                                   server=server)
+    return channel
+
+
 def print_channels(full=True, canonical=False,
                    simple=False, invalid=False, offline=False,
+                   threads=32,
                    start=1, end=0,
                    print_msg=True,
                    file=None, fdate=False, pre_num=True, sep=";",
@@ -247,6 +258,11 @@ def print_channels(full=True, canonical=False,
         from the offline database. This will be faster but may not
         print all known channels, only those that have been resolved
         when the claims were initially downloaded.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to find channels,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     start: int, optional
         It defaults to 1.
         Count the channels starting from this index in the list of channels.
@@ -309,20 +325,37 @@ def print_channels(full=True, canonical=False,
     if invalid:
         offline = True
 
+    # Iterables to be passed to the ThreadPoolExecutor
     all_channels = []
+    n_items = len(items)
+    cids = (item["claim_id"] for item in items)
+    fulls = (full for n in range(n_items))
+    canonicals = (canonical for n in range(n_items))
+    offs = (offline for n in range(n_items))
+    servers = (server for n in range(n_items))
 
-    for it, item in enumerate(items, start=1):
-        if it < start:
-            continue
-        if end != 0 and it > end:
-            break
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(find_ch_th,
+                                   cids, fulls, canonicals, offs,
+                                   servers)
 
-        channel = srch_ch.find_channel(cid=item["claim_id"],
-                                       full=full, canonical=canonical,
-                                       offline=offline,
-                                       server=server)
-        if channel:
-            all_channels.append(channel)
+            # generator to list, only non False items are added
+            all_channels = [ch for ch in results if ch]
+    else:
+        for num, item in enumerate(items, start=1):
+            if num < start:
+                continue
+            if end != 0 and num > end:
+                break
+
+            channel = srch_ch.find_channel(cid=item["claim_id"],
+                                           full=full, canonical=canonical,
+                                           offline=offline,
+                                           server=server)
+            if channel:
+                all_channels.append(channel)
 
     if not all_channels:
         print("No unique channels could be determined.")
