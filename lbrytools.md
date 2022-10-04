@@ -733,36 +733,38 @@ k = lbryt.remove_media(never_delete=never_delete)
 When a claim is downloaded a group of binary blobs is downloaded into
 the `blobfiles` directory. All blobs from all claims are dumped
 into this directory without much organization.
+By default, the `blobfiles` directory is located in the user's home directory:
 ```py
 bdir = /home/user/.local/share/lbry/lbrynet/blobfiles
 ```
 
 Count the blobs that exist for a particular claim.
 Use the canonical URL, the claim ID, or the claim name.
+The `blobfiles` directory can be provided if it's not in the standard location
+defined by the daemon configuration:
 ```py
-c = lbryt.count_blobs(uri="how-monero-works-and-why-its-a-better", blobfiles=bdir)
+c = lbryt.count_blobs(uri="how-monero-works-and-why-its-a-better")
 c = lbryt.count_blobs(cid="b4f73ad1e09e21457e18e4b3f8da0cc4319f8688", blobfiles=bdir)
 ```
 
 Print each of the blobs, indicating whether they are present
-or not in `blobfiles`.
+or not in `blobfiles`:
 ```py
-c = lbryt.count_blobs(uri="The-Essence-of-Money-(2009)", blobfiles=bdir, print_each=True)
+c = lbryt.count_blobs(uri="The-Essence-of-Money-(2009)", print_each=True)
 ```
 
 Count all blobs in the system, or consider only the claims by a specific
-channel, or by a range of items.
+channel:
 ```py
-c = lbryt.count_blobs_all(blobfiles=bdir)
-c = lbryt.count_blobs_all(blobfiles=bdir, channel="AfterSkool")
-c = lbryt.count_blobs_all(blobfiles=bdir, start=10, end=100)
+c = lbryt.count_blobs_all()
+c = lbryt.count_blobs_all(channel="AfterSkool")
 ```
 
-By default only a summary is printed. Two parameters control whether
-to display more information on each claim and its blobs.
+By default, only a summary is printed; two parameters control whether
+to display more information on each claim and its blobs:
 ```py
-c = lbryt.count_blobs_all(blobfiles=bdir, print_msg=True)
-c = lbryt.count_blobs_all(blobfiles=bdir, print_msg=True, print_each=False)
+c = lbryt.count_blobs_all(print_msg=True)
+c = lbryt.count_blobs_all(print_msg=True, print_each=True)
 ```
 
 [Go back to _Content_](#content)
