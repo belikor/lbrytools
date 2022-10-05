@@ -232,27 +232,31 @@ def analyze_blobs(blobfiles=None, channel=None,
 
     n_minus_data_sd = len(minus_data_sd_blobs)
 
-    print("Total blobs that should exist: "
-          f"[{n_all_blobs:7d}] (with complete claims)")
-    print(40 * "-")
-    print(f"Total files in directory: {n_all_existing:7d} | remaining")
-    print()
-    print(f" - Data blobs             {n_data:7d} | {n_minus_data:7d}")
-    print(f" - 'sd_hash' blobs        {n_sd_hash:7d} | {n_minus_data_sd:7d}")
     if n_all_blobs == n_sum:
-        print(f" - Sum                  >[{n_sum:7d}]")
+        symb = ">"
     else:
-        print(f" - Sum                  *[{n_sum:7d}]")
+        symb = "*"
+
+    out = [f"Total blobs that should exist: [{n_all_blobs:7d}] "
+           "(with complete claims)",
+           40 * "-",
+           f"Total files in directory: {n_all_existing:7d} | remaining",
+           "",
+           f" - Data blobs             {n_data:7d} | {n_minus_data:7d}",
+           f" - 'sd_hash' blobs        {n_sd_hash:7d} | {n_minus_data_sd:7d}",
+           f" - Sum                  {symb}[{n_sum:7d}]"]
 
     if channel:
-        print(f"Files that don't belong to {channel}: {n_minus_data_sd}")
+        out.append(f"Files that don't belong to {channel}: {n_minus_data_sd}")
     else:
-        print("Files that don't belong to any downloaded claim: "
-              f"{n_minus_data_sd} (orphaned blobs from invalid claims)")
+        out.append("Files that don't belong to any downloaded claim: "
+                   f"{n_minus_data_sd} (orphaned blobs from invalid claims)")
 
     for rem_blob in minus_data_sd_blobs:
         if len(rem_blob) != 96:
-            print(rem_blob)
+            out.append(rem_blob)
+
+    funcs.print_content(out, file=None, fdate=None)
 
     return {"claims_blobs_complete": claims_blobs_complete,
             "claims_blobs_incomplete": claims_blobs_incomplete,
