@@ -358,7 +358,9 @@ def create_support(uri=None, cid=None, name=None,
     if not funcs.server_exists(server=server):
         return False
 
-    supports = get_base_support(uri=uri, cid=cid, name=name)
+    supports = get_base_support(uri=uri, cid=cid, name=name,
+                                server=server)
+
     if not supports:
         return False
 
@@ -529,7 +531,9 @@ def abandon_support(uri=None, cid=None, name=None,
     if not funcs.server_exists(server=server):
         return False
 
-    supports = get_base_support(uri=uri, cid=cid, name=name)
+    supports = get_base_support(uri=uri, cid=cid, name=name,
+                                server=server)
+
     if not supports:
         return False
 
@@ -762,7 +766,9 @@ def target_support(uri=None, cid=None, name=None,
     if not funcs.server_exists(server=server):
         return False
 
-    supports = get_base_support(uri=uri, cid=cid, name=name)
+    supports = get_base_support(uri=uri, cid=cid, name=name,
+                                server=server)
+
     if not supports:
         return False
 
