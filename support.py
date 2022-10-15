@@ -170,7 +170,11 @@ def list_supports(claim_id=False, invalid=False,
         support = pair[0]
         resolved = pair[1]
 
-        name = support["name"]
+        if resolved:
+            name = resolved["short_url"].split("lbry://")[1]
+        else:
+            name = support["name"]
+
         cid = support["claim_id"]
         is_channel = True if name.startswith("@") else False
 
