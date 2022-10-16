@@ -62,11 +62,11 @@ def get_all_supports(server="http://localhost:5279"):
     if "error" in output:
         return False
 
-    items = output["result"]["items"]
-    n_items = len(items)
+    supports = output["result"]["items"]
+    n_supports = len(supports)
 
-    if n_items < 1:
-        print(f"Supports found: {n_items}")
+    if n_supports < 1:
+        print(f"Supports found: {n_supports}")
         return False
 
     valid = []
@@ -76,17 +76,17 @@ def get_all_supports(server="http://localhost:5279"):
     all_supports = []
     all_resolved = []
 
-    for item in items:
-        s = srch.search_item(cid=item["claim_id"])
+    for support in supports:
+        resolved = srch.search_item(cid=support["claim_id"])
 
-        if not s:
-            invalid.append(item)
+        if not resolved:
+            invalid.append(support)
         else:
-            valid.append(item)
-            valid_resolved.append(s)
+            valid.append(support)
+            valid_resolved.append(resolved)
 
-        all_supports.append(item)
-        all_resolved.append(s)
+        all_supports.append(support)
+        all_resolved.append(resolved)
 
     return {"all_supports": all_supports,
             "all_resolved": all_resolved,
@@ -155,25 +155,28 @@ def list_supports(claim_id=False, invalid=False,
     if not funcs.server_exists(server=server):
         return False
 
-    supports = get_all_supports(server=server)
-    if not supports:
+    support_info = get_all_supports(server=server)
+
+    if not support_info:
         return False
 
-    items = supports["all_supports"]
-    resolved = supports["all_resolved"]
-    n_items = len(items)
+    supports = support_info["all_supports"]
+    all_resolved = support_info["all_resolved"]
+    n_supports = len(supports)
 
-    out_list = []
-    for num, pair in enumerate(zip(items, resolved), start=1):
-        item = pair[0]
-        s = pair[1]
+    out = []
 
-        name = item["name"]
-        cid = item["claim_id"]
+    for num, pair in enumerate(zip(supports, all_resolved), start=1):
+        support = pair[0]
+        resolved = pair[1]
+
+        name = support["name"]
+        cid = support["claim_id"]
         is_channel = True if name.startswith("@") else False
 
         if is_channel and not channels:
             continue
+
         if not is_channel and not claims:
             continue
 
@@ -183,28 +186,32 @@ def list_supports(claim_id=False, invalid=False,
 
         _name = f'"{name}"'
 
-        if not s:
+        if not resolved:
             _name = "[" + _name + "]"
 
-        obj += f'{_name:58s}'
+        obj += f'{_name:60s}'
 
-        _amount = float(item["amount"])
+        _amount = float(support["amount"])
         amount = f"{_amount:14.8f}"
 
-        if not s:
-            m = {"support_amount": "0.0"}
-            s = {"amount": item["amount"]}
+        if not resolved:
+            meta = {"support_amount": "0.0"}
+            resolved = {"amount": support["amount"]}
         else:
             if invalid:
                 continue
-            m = s["meta"]
 
-        existing_support = float(s["amount"]) + float(m["support_amount"])
+            meta = resolved["meta"]
 
-        trend_gl = m.get("trending_global", 0)
-        trend_gr = m.get("trending_group", 0)
-        trend_loc = m.get("trending_local", 0)
-        trend_mix = m.get("trending_mixed", 0)
+        base = float(resolved["amount"])
+        supp = float(meta["support_amount"])
+
+        existing_support = base + supp
+
+        trend_gl = meta.get("trending_global", 0)
+        trend_gr = meta.get("trending_group", 0)
+        trend_loc = meta.get("trending_local", 0)
+        trend_mix = meta.get("trending_mixed", 0)
 
         combined = (trend_gl
                     + trend_gr
@@ -216,27 +223,28 @@ def list_supports(claim_id=False, invalid=False,
         tr_loc = f'{trend_loc:7.2f}'
         tr_mix = f'{trend_mix:7.2f}'
         tr_combined = f'{combined:7.2f}'
-        is_spent = item["is_spent"]
+        is_spent = support["is_spent"]
 
-        out = f"{num:3d}/{n_items:3d}" + f"{sep} "
-        out += f"{obj}" + f"{sep} " + f"{amount}" + f"{sep} "
-        out += f"{existing_support:15.8f}" + f"{sep} "
+        line = f"{num:3d}/{n_supports:3d}" + f"{sep} "
+        line += f"{obj}" + f"{sep} " + f"{amount}" + f"{sep} "
+        line += f"{existing_support:15.8f}" + f"{sep} "
 
         if not is_spent:
             if combine:
-                out += f"combined: {tr_combined}"
+                line += f"combined: {tr_combined}"
             else:
-                out += f"mix: {tr_mix}" + f"{sep} "
-                out += f"glob: {tr_gl}" + f"{sep} "
-                out += f"grp: {tr_gr}" + f"{sep} "
-                out += f"loc: {tr_loc}"
+                line += f"mix: {tr_mix}" + f"{sep} "
+                line += f"glob: {tr_gl}" + f"{sep} "
+                line += f"grp: {tr_gr}" + f"{sep} "
+                line += f"loc: {tr_loc}"
         else:
             continue
-        out_list.append(out)
 
-    funcs.print_content(out_list, file=file, fdate=fdate)
+        out.append(line)
 
-    return resolved
+    funcs.print_content(out, file=file, fdate=fdate)
+
+    return all_resolved
 
 
 def get_base_support(uri=None, cid=None, name=None,
@@ -644,12 +652,12 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
     found = False
 
     if not invalids:
-        all_supports = get_all_supports(server=server)
+        support_info = get_all_supports(server=server)
 
-        if not all_supports:
+        if not support_info:
             return False
 
-        invalids = all_supports["invalid_supports"]
+        invalids = support_info["invalid_supports"]
 
     for supp in invalids:
         if ((cid and cid in supp["claim_id"])
