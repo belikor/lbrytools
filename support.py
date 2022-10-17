@@ -213,17 +213,19 @@ def list_supports(claim_id=False, invalid=False,
         _amount = float(support["amount"])
         amount = f"{_amount:14.8f}"
 
-        if not resolved:
-            meta = {"support_amount": "0.0"}
-            resolved = {"amount": support["amount"]}
-        else:
+        if resolved:
             if invalid:
                 continue
 
             meta = resolved["meta"]
-
-        base = float(resolved["amount"])
-        supp = float(meta["support_amount"])
+            base = float(resolved["amount"])
+            supp = float(meta["support_amount"])
+        else:
+            # The claim is invalid and no longer resolves online
+            # so it doesn't have base support; the only support may be from us
+            meta = {}
+            base = 0
+            supp = float(support["amount"])
 
         existing_support = base + supp
 
