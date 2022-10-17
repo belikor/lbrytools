@@ -1351,6 +1351,13 @@ We can choose to display these claims only:
 w = lbryt.list_supports(invalid=True)
 ```
 
+Each claim is resolved online in order to get the full support information.
+By default, it uses a maximum of 32 threads to resolve claims,
+the number can be lowered or increased depending on the CPU power:
+```py
+w = lbryt.list_supports(threads=64)
+```
+
 There are four trending scores; they are normally combined into one
 so that the information displayed is more compact.
 This can be controlled with the `combine` argument:

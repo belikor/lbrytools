@@ -24,13 +24,26 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Auxiliary functions for handling supports."""
+import concurrent.futures as fts
+
 import requests
 
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
 
 
-def get_all_supports(server="http://localhost:5279"):
+def search_cid_th(cid, server):
+    """Wrapper to use with threads in `get_all_supports`."""
+    s = srch.search_item(cid=cid, server=server)
+
+    if not s:
+        print()
+
+    return s
+
+
+def get_all_supports(threads=32,
+                     server="http://localhost:5279"):
     """Get all supports in a dictionary; all, valid, and invalid.
 
     Returns
@@ -73,8 +86,26 @@ def get_all_supports(server="http://localhost:5279"):
     valid = []
     invalid = []
 
-    for support in supports:
-        resolved = srch.search_item(cid=support["claim_id"])
+    # Iterables to be passed to the ThreadPoolExecutor
+    results = []
+    cids = (support["claim_id"] for support in supports)
+    servers = (server for n in range(n_supports))
+
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(search_cid_th,
+                                   cids, servers)
+            results = list(results)  # generator to list
+    else:
+        for support in supports:
+            s = srch.search_item(cid=support["claim_id"],
+                                 server=server)
+            results.append(s)
+
+    for pair in zip(supports, results):
+        support = pair[0]
+        resolved = pair[1]
 
         support["resolved"] = resolved
 
@@ -84,7 +115,6 @@ def get_all_supports(server="http://localhost:5279"):
             valid.append(support)
         else:
             invalid.append(support)
-            print()
 
     return {"all_supports": all_supports,
             "valid_supports": valid,
@@ -94,6 +124,7 @@ def get_all_supports(server="http://localhost:5279"):
 def list_supports(claim_id=False, invalid=False,
                   combine=True, claims=True, channels=True,
                   sanitize=False,
+                  threads=32,
                   file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
     """Print supported claims, the amount, and the trending score.
@@ -127,6 +158,11 @@ def list_supports(claim_id=False, invalid=False,
         from the names and titles.
         If it is `True` it will remove these unicode characters.
         This option requires the `emoji` package to be installed.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve claims,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     file: str, optional
         It defaults to `None`.
         It must be a user writable path to which the summary will be written.
@@ -167,7 +203,7 @@ def list_supports(claim_id=False, invalid=False,
     if not funcs.server_exists(server=server):
         return False
 
-    support_info = get_all_supports(server=server)
+    support_info = get_all_supports(threads=threads, server=server)
 
     if not support_info:
         return False
@@ -609,6 +645,7 @@ def abandon_support(uri=None, cid=None, name=None,
 
 def abandon_support_inv(invalids=None, cid=None, name=None,
                         keep=0.0,
+                        threads=32,
                         server="http://localhost:5279"):
     """Abandon or change a support for invalid claims.
 
@@ -636,6 +673,11 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
         after we remove our previous support. That is, we can use
         this parameter to assign a new support value.
         If it is `0.0` all support is removed.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve claims,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -680,7 +722,7 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
     found = False
 
     if not invalids:
-        support_info = get_all_supports(server=server)
+        support_info = get_all_supports(threads=threads, server=server)
 
         if not support_info:
             return False
