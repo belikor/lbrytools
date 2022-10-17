@@ -1328,20 +1328,25 @@ v = lbryt.list_playlists(file="playlists.txt", fdate=True)
 List the supports, along with the amount of LBC staked, the total support,
 and the trending score.
 By default it will show both claim and channel supports,
-but we can specify this manually if we want.
-We can also choose whether to show the `'claim_id'` instead of the name,
-and choose a specific separator:
+but we can specify only one of them if we want.
+If `sanitize=True`, it will remove emojis from the displayed names and titles,
+which may be necessary if we want to use the output in other programs:
 ```py
 w = lbryt.list_supports()
 w = lbryt.list_supports(channels=False)
 w = lbryt.list_supports(claims=False)
+w = lbryt.list_supports(sanitize=True)
+```
+
+We can also choose to show the `'claim_id'`, and choose a specific separator:
+```py
 w = lbryt.list_supports(claim_id=True, sep=";.;")
 ```
 
 There may be claims that are 'invalid', meaning that they were removed
 but are still supported by us. These will be displayed with their name
 between `[brackets]`.
-We can display only these claims:
+We can choose to display these claims only:
 ```py
 w = lbryt.list_supports(invalid=True)
 ```

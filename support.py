@@ -97,6 +97,7 @@ def get_all_supports(server="http://localhost:5279"):
 
 def list_supports(claim_id=False, invalid=False,
                   combine=True, claims=True, channels=True,
+                  sanitize=False,
                   file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
     """Print supported claims, the amount, and the trending score.
@@ -125,6 +126,11 @@ def list_supports(claim_id=False, invalid=False,
         It defaults to `True`, in which case supported channels,
         which start with the `@` symbol, will be shown.
         If it is `False` channel claims won't be shown.
+    sanitize: bool, optional
+        It defaults to `False`, in which case it will not remove the emojis
+        from the names and titles.
+        If it is `True` it will remove these unicode characters.
+        This option requires the `emoji` package to be installed.
     file: str, optional
         It defaults to `None`.
         It must be a user writable path to which the summary will be written.
@@ -179,6 +185,10 @@ def list_supports(claim_id=False, invalid=False,
         else:
             name = support["name"]
             title = "[" + support["name"] + "]"
+
+        if sanitize:
+            name = funcs.sanitize_text(name)
+            title = funcs.sanitize_text(title)
 
         cid = support["claim_id"]
         is_channel = True if name.startswith("@") else False
