@@ -172,8 +172,13 @@ def list_supports(claim_id=False, invalid=False,
 
         if resolved:
             name = resolved["short_url"].split("lbry://")[1]
+            title = resolved["short_url"].split("lbry://")[1]
+
+            if "value" in resolved:
+                title = resolved["value"].get("title", "(no title)")
         else:
             name = support["name"]
+            title = "[" + support["name"] + "]"
 
         cid = support["claim_id"]
         is_channel = True if name.startswith("@") else False
@@ -235,14 +240,16 @@ def list_supports(claim_id=False, invalid=False,
 
         if not is_spent:
             if combine:
-                line += f"combined: {tr_combined}"
+                line += f"combined: {tr_combined}" + f"{sep} "
             else:
                 line += f"mix: {tr_mix}" + f"{sep} "
                 line += f"glob: {tr_gl}" + f"{sep} "
                 line += f"grp: {tr_gr}" + f"{sep} "
-                line += f"loc: {tr_loc}"
+                line += f"loc: {tr_loc}" + f"{sep} "
         else:
             continue
+
+        line += f"{title}"
 
         out.append(line)
 
