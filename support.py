@@ -151,10 +151,20 @@ def list_supports(claim_id=False, invalid=False,
 
     Returns
     -------
-    list
-        The list of resolved claims, as returned by `lbrynet resolve`.
-        Each item is a dictionary with information from the supported claim
-        which may be a stream (video, music, document) or a channel.
+    dict
+        A dictionary with information on the supports.
+        The keys are the following:
+        - 'all_supports': list with dictionaries of all supports.
+        - 'all_resolved': list with dictionaries of all resolved claims
+          corresponding to all supports.
+          Invalid claims will simply be `False`.
+        - 'valid_supports': list with dictionaries of supports
+          for valid claims only.
+        - 'valid_resolved': list with dictionaries of resolved claims
+          corresponding to `'valid_supports'` only.
+        - 'invalid_supports': list with dictionaries of supports
+          for invalid claims. The claim IDs in these dictionaries
+          cannot be resolved anymore.
     False
         If there is a problem or no list of supports, it will return `False`.
     """
@@ -267,7 +277,7 @@ def list_supports(claim_id=False, invalid=False,
 
     funcs.print_content(out, file=file, fdate=fdate)
 
-    return all_resolved
+    return support_info
 
 
 def get_base_support(uri=None, cid=None, name=None,
