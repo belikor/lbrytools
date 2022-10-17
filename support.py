@@ -118,12 +118,13 @@ def list_supports(claim_id=False, invalid=False,
         and `mixed` trending scores are added into one combined score.
         If it is `False` it will show the four values separately.
     claims: bool, optional
-        It defaults to `True`, in which case supported claims will be shown.
-        If it is `False` simple claims won't be shown.
+        It defaults to `True`, in which case supported non-channel claims
+        will be shown.
+        If it is `False` non-channel claims won't be shown.
     channels: bool, optional
-        It defaults to `True`, in which case supported channels will be shown.
-        If it is `False` channel claims (which start with the `@` symbol)
-        won't be shown.
+        It defaults to `True`, in which case supported channels,
+        which start with the `@` symbol, will be shown.
+        If it is `False` channel claims won't be shown.
     file: str, optional
         It defaults to `None`.
         It must be a user writable path to which the summary will be written.
