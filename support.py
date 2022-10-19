@@ -39,16 +39,16 @@ def get_all_supports(server="http://localhost:5279"):
         A dictionary with information on the supports.
         The keys are the following:
         - 'all_supports': list with dictionaries of all supports.
-        - 'all_resolved': list with dictionaries of all resolved claims
-          corresponding to all supports.
-          Invalid claims will simply be `False`.
+          - One of the keys in every dictionary is `'resolve'`,
+            which has another dictionary with the entire resolved information
+            of the claim.
+            For claims that are invalid, this value is simply `False`.
         - 'valid_supports': list with dictionaries of supports
-          for valid claims only.
-        - 'valid_resolved': list with dictionaries of resolved claims
-          corresponding to `'valid_supports'` only.
+          for valid claims only. It also has the `'resolve'` key.
         - 'invalid_supports': list with dictionaries of supports
           for invalid claims. The claim IDs in these dictionaries
-          cannot be resolved anymore.
+          cannot be resolved anymore, so the `'resolve'` key
+          is always `False`.
     False
         If there is a problem or no list of supports, it will return `False`.
     """
@@ -69,29 +69,25 @@ def get_all_supports(server="http://localhost:5279"):
         print(f"Supports found: {n_supports}")
         return False
 
-    valid = []
-    valid_resolved = []
-    invalid = []
-
     all_supports = []
-    all_resolved = []
+    valid = []
+    invalid = []
 
     for support in supports:
         resolved = srch.search_item(cid=support["claim_id"])
 
-        if not resolved:
-            invalid.append(support)
-        else:
-            valid.append(support)
-            valid_resolved.append(resolved)
+        support["resolved"] = resolved
 
         all_supports.append(support)
-        all_resolved.append(resolved)
+
+        if resolved:
+            valid.append(support)
+        else:
+            invalid.append(support)
+            print()
 
     return {"all_supports": all_supports,
-            "all_resolved": all_resolved,
             "valid_supports": valid,
-            "valid_resolved": valid_resolved,
             "invalid_supports": invalid}
 
 
@@ -155,16 +151,16 @@ def list_supports(claim_id=False, invalid=False,
         A dictionary with information on the supports.
         The keys are the following:
         - 'all_supports': list with dictionaries of all supports.
-        - 'all_resolved': list with dictionaries of all resolved claims
-          corresponding to all supports.
-          Invalid claims will simply be `False`.
+          - One of the keys in every dictionary is `'resolve'`,
+            which has another dictionary with the entire resolved information
+            of the claim.
+            For claims that are invalid, this value is simply `False`.
         - 'valid_supports': list with dictionaries of supports
-          for valid claims only.
-        - 'valid_resolved': list with dictionaries of resolved claims
-          corresponding to `'valid_supports'` only.
+          for valid claims only. It also has the `'resolve'` key.
         - 'invalid_supports': list with dictionaries of supports
           for invalid claims. The claim IDs in these dictionaries
-          cannot be resolved anymore.
+          cannot be resolved anymore, so the `'resolve'` key
+          is always `False`.
     False
         If there is a problem or no list of supports, it will return `False`.
     """
@@ -176,15 +172,13 @@ def list_supports(claim_id=False, invalid=False,
     if not support_info:
         return False
 
-    supports = support_info["all_supports"]
-    all_resolved = support_info["all_resolved"]
-    n_supports = len(supports)
+    all_supports = support_info["all_supports"]
+    n_supports = len(all_supports)
 
     out = []
 
-    for num, pair in enumerate(zip(supports, all_resolved), start=1):
-        support = pair[0]
-        resolved = pair[1]
+    for num, support in enumerate(all_supports, start=1):
+        resolved = support["resolved"]
 
         if resolved:
             name = resolved["short_url"].split("lbry://")[1]
