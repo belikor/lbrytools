@@ -519,7 +519,7 @@ def calculate_abandon(claim_id=None, keep=0.0,
         else:
             print(f">>> Error: {error}")
         print(f">>> Requested amount: {keep:.8f}")
-        return False, False
+        return False
 
     new_support = keep
     t_input = float(output["result"]["total_input"])
@@ -527,19 +527,18 @@ def calculate_abandon(claim_id=None, keep=0.0,
     t_fee = float(output["result"]["total_fee"])
     txid = output["result"]["txid"]
 
-    calc = {"new_support": new_support,
-            "t_input": t_input,
-            "t_output": t_output,
-            "t_fee": t_fee,
-            "txid": txid}
-
     text = [f"Applied:          {new_support:14.8f}",
             f"total_input:      {t_input:14.8f}",
             f"total_output:     {t_output:14.8f}",
             f"total_fee:        {t_fee:14.8f}",
             f"txid: {txid}"]
 
-    return calc, text
+    return {"new_support": new_support,
+            "t_input": t_input,
+            "t_output": t_output,
+            "t_fee": t_fee,
+            "txid": txid,
+            "text": text}
 
 
 def abandon_support(uri=None, cid=None, name=None,
@@ -615,13 +614,13 @@ def abandon_support(uri=None, cid=None, name=None,
     base_support = supports["base_support"]
     old_support = supports["old_support"]
 
-    calc, text = calculate_abandon(claim_id=claim_id, keep=keep,
-                                   server=server)
-    if not calc:
+    calculation = calculate_abandon(claim_id=claim_id, keep=keep,
+                                    server=server)
+    if not calculation:
         return False
 
-    new_support = calc["new_support"]
-    txid = calc["txid"]
+    new_support = calculation["new_support"]
+    txid = calculation["txid"]
 
     out = [f"canonical_url: {uri}",
            f"claim_id: {claim_id}",
@@ -630,7 +629,7 @@ def abandon_support(uri=None, cid=None, name=None,
            f"Old support:      {old_support:14.8f}",
            f"New support:      {keep:14.8f}",
            ""]
-    out += text
+    out += calculation["text"]
 
     print("\n".join(out))
 
@@ -745,13 +744,13 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
               f'name="{name}"')
         return False
 
-    calc, text = calculate_abandon(claim_id=claim_id, keep=keep,
-                                   server=server)
-    if not calc:
+    calculation = calculate_abandon(claim_id=claim_id, keep=keep,
+                                    server=server)
+    if not calculation:
         return False
 
-    new_support = calc["new_support"]
-    txid = calc["txid"]
+    new_support = calculation["new_support"]
+    txid = calculation["txid"]
 
     out = [f"claim_name: {c_name}",
            f"claim_id: {claim_id}",
@@ -760,7 +759,7 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
            f"Old support:      {old_support:14.8f}",
            f"New support:      {keep:14.8f}",
            ""]
-    out += text
+    out += calculation["text"]
 
     print("\n".join(out))
 
