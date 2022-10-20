@@ -660,13 +660,13 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
 
         invalids = support_info["invalid_supports"]
 
-    for supp in invalids:
-        if ((cid and cid in supp["claim_id"])
-                or (name and name in supp["name"])):
-            existing = float(supp["amount"])
-            old_support = float(supp["amount"])
-            claim_id = supp["claim_id"]
-            c_name = supp["name"]
+    for support in invalids:
+        if ((cid and cid in support["claim_id"])
+                or (name and name in support["name"])):
+            existing = float(support["amount"])
+            old_support = float(support["amount"])
+            claim_id = support["claim_id"]
+            c_name = support["name"]
             found = True
 
     if not found:
