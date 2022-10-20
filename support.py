@@ -340,6 +340,7 @@ def get_base_support(uri=None, cid=None, name=None,
 
     uri = item["canonical_url"]
     cid = item["claim_id"]
+    name = item["name"]
 
     existing = float(item["amount"]) + float(item["meta"]["support_amount"])
 
@@ -366,6 +367,7 @@ def get_base_support(uri=None, cid=None, name=None,
 
     return {"canonical_url": uri,
             "claim_id": cid,
+            "name": name,
             "existing_support": existing,
             "base_support": base_support,
             "old_support": old_support}
@@ -414,6 +416,7 @@ def create_support(uri=None, cid=None, name=None,
         The keys are the following:
         - 'canonical_url': canonical URI of the claim.
         - 'claim_id': unique 40 character alphanumeric string.
+        - 'name': name of the claim.
         - 'existing_support': existing support before we add or remove ours;
           this is the sum of `base_support` and `old_support`.
         - 'base_support': existing minimum support that we do not control;
@@ -438,6 +441,7 @@ def create_support(uri=None, cid=None, name=None,
 
     uri = supports["canonical_url"]
     claim_id = supports["claim_id"]
+    c_name = supports["name"]
     existing = supports["existing_support"]
     base_support = supports["base_support"]
     old_support = supports["old_support"]
@@ -483,10 +487,12 @@ def create_support(uri=None, cid=None, name=None,
            f"total_output:     {t_output:14.8f}",
            f"total_fee:        {t_fee:14.8f}",
            f"txid: {txid}"]
+
     print("\n".join(out))
 
     return {"canonical_url": uri,
             "claim_id": claim_id,
+            "name": c_name,
             "existing_support": existing,
             "base_support": base_support,
             "old_support": old_support,
@@ -586,6 +592,7 @@ def abandon_support(uri=None, cid=None, name=None,
         The keys are the following:
         - 'canonical_url': canonical URI of the claim.
         - 'claim_id': unique 40 character alphanumeric string.
+        - 'name': name of the claim.
         - 'existing_support': existing support before we add or remove ours;
           this is the sum of `base_support` and `old_support`.
         - 'base_support': existing minimum support that we do not control;
@@ -610,6 +617,7 @@ def abandon_support(uri=None, cid=None, name=None,
 
     uri = supports["canonical_url"]
     claim_id = supports["claim_id"]
+    c_name = supports["name"]
     existing = supports["existing_support"]
     base_support = supports["base_support"]
     old_support = supports["old_support"]
@@ -635,6 +643,7 @@ def abandon_support(uri=None, cid=None, name=None,
 
     return {"canonical_url": uri,
             "claim_id": claim_id,
+            "name": c_name,
             "existing_support": existing,
             "base_support": base_support,
             "old_support": old_support,
@@ -689,9 +698,10 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
     dict
         A dictionary with information on the result of the support.
         The keys are the following:
-        - 'claim_name': name of the claim; the canonical URI is not available
+        - 'canonical_url': canonical URI of the claim, which will be `None`
           because the claim can't be resolved online any more.
         - 'claim_id': unique 40 character alphanumeric string.
+        - 'name': name of the claim.
         - 'existing_support': existing support before we add or remove ours;
           this should be the same as `old_support`.
         - 'base_support': since this claim does not resolve any more,
@@ -763,8 +773,9 @@ def abandon_support_inv(invalids=None, cid=None, name=None,
 
     print("\n".join(out))
 
-    return {"claim_name": c_name,
+    return {"canonical_url": None,
             "claim_id": claim_id,
+            "name": c_name,
             "existing_support": existing,
             "base_support": base_support,
             "old_support": old_support,
@@ -818,6 +829,7 @@ def target_support(uri=None, cid=None, name=None,
         The keys are the following:
         - 'canonical_url': canonical URI of the claim.
         - 'claim_id': unique 40 character alphanumeric string.
+        - 'name': name of the claim.
         - 'existing_support': existing support before we add or remove ours;
           this is the sum of `base_support` and `old_support`.
         - 'base_support': existing minimum support that we do not control;
@@ -851,6 +863,7 @@ def target_support(uri=None, cid=None, name=None,
 
     uri = supports["canonical_url"]
     claim_id = supports["claim_id"]
+    c_name = supports["name"]
     existing = supports["existing_support"]
     base_support = supports["base_support"]
     old_support = supports["old_support"]
@@ -939,6 +952,7 @@ def target_support(uri=None, cid=None, name=None,
 
     return {"canonical_url": uri,
             "claim_id": cid,
+            "name": c_name,
             "existing_support": existing,
             "base_support": base_support,
             "old_support": old_support,
