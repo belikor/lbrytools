@@ -295,8 +295,9 @@ def get_base_support(uri=None, cid=None, name=None,
         # Old support remains 0
         pass
     else:
-        for su_item in supported_items:
-            old_support += float(su_item["amount"])
+        # There may be many independent supports
+        for support in supported_items:
+            old_support += float(support["amount"])
 
     base_support = existing - old_support
 
