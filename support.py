@@ -99,8 +99,8 @@ def get_all_supports(threads=32,
             results = list(results)  # generator to list
     else:
         for support in supports:
-            s = srch.search_item(cid=support["claim_id"],
-                                 server=server)
+            s = search_cid_th(support["claim_id"],
+                              server=server)
             results.append(s)
 
     for pair in zip(supports, results):
