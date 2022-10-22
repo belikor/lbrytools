@@ -268,6 +268,7 @@ def sort_invalid(channel=None, reverse=False,
 
 
 def sort_items_size(channel=None, reverse=False, invalid=False,
+                    threads=32,
                     server="http://localhost:5279"):
     """Return a list of claims that were downloaded, their size and length.
 
@@ -293,6 +294,11 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
         These can no longer be resolved online, nor can they be re-downloaded.
         The blobs belonging to these claims can be considered orphaned
         and can be removed to save hard disk space.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve claims,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -332,6 +338,7 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
 
     if invalid:
         claims = sort_invalid(channel=channel, reverse=reverse,
+                              threads=threads,
                               server=server)
     else:
         claims = sort_items(channel=channel, reverse=reverse,
