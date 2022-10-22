@@ -108,15 +108,20 @@ def downloadable_size(claims, local=False, print_msg=True):
     Returns
     -------
     dict
-        A dictionary with two keys:
+        A dictionary with eight keys:
         - 'size': total size of the claims in bytes.
           It can be divided by 1024 to obtain kibibytes, by another 1024
           to obtain mebibytes, and by another 1024 to obtain gibibytes.
         - 'duration': total duration of the claims in seconds.
           It will count only stream types which have a duration
           such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'text': text describing the number of claims, the total size in GiB,
+           and the total duration expressed as HH:MM:SS, and days
     """
     if print_msg:
         if local:
@@ -125,8 +130,8 @@ def downloadable_size(claims, local=False, print_msg=True):
             print("Calculate size of downloadable claims")
 
     n_claims = len(claims)
-    total_size = 0
-    total_duration = 0
+    total_bytes = 0
+    total_seconds = 0
 
     for num, claim in enumerate(claims, start=1):
         if local:
@@ -154,11 +159,32 @@ def downloadable_size(claims, local=False, print_msg=True):
         elif "audio" in source_info:
             seconds = source_info["audio"].get("duration", 0)
 
-        total_size += size
-        total_duration += seconds
+        total_bytes += size
+        total_seconds += seconds
 
-    return {"size": total_size,
-            "duration": total_duration}
+    size_gb = total_bytes / (1024**3)
+    hrs = total_seconds / 3600
+    days = hrs / 24
+
+    hr = total_seconds // 3600
+    mi = (total_seconds % 3600) // 60
+    sec = (total_seconds % 3600) % 60
+
+    m = [f"Claims: {n_claims}",
+         f"Total size: {size_gb:.4f} GB",
+         f"Total duration: {hr} h {mi} min {sec} s, "
+         f"or {days:.4f} days"]
+
+    text = "\n".join(m)
+
+    return {"size": total_bytes,
+            "duration": total_seconds,
+            "size_GB": size_gb,
+            "d_h": hr,
+            "d_min": mi,
+            "d_s": sec,
+            "days": days,
+            "text": text}
 
 
 def sort_filter_size(claims, number=0, reverse=False):
