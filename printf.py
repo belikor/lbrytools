@@ -162,39 +162,60 @@ def print_summary(show="all",
 
     Returns
     -------
-    bool
-        It returns `True` if it printed the summary successfully.
-        If there is any error it will return `False`.
+    dict
+        A dictionary with nine keys:
+        - 'claims': a list of dictionaries where every dictionary represents
+          a claim returned by `file_list`.
+          The list is ordered in ascending order by default (old claims first),
+          and in descending order (newer claims first) if `reverse=True`.
+          Certain claims don't have `'release_time'` so for them we add
+          this key, and use the value of `'timestamp'` for it.
+          If there are no claims the list may be empty.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'text': text describing the number of claims, the total size in GiB,
+           and the total duration expressed as HH:MM:SS, and days
+    False
+        If there is a problem it will return `False`.
     """
     if not funcs.server_exists(server=server):
         return False
 
-    output = sort.sort_items_size(reverse=False, invalid=invalid,
+    claims = sort.sort_items_size(reverse=False, invalid=invalid,
                                   server=server)
 
-    items = output["claims"]
+    items = claims["claims"]
 
     if not items or len(items) < 1:
         if file:
             print("No file written.")
-        return False
+        return claims
 
     if invalid:
         ch_online = False
 
     print()
-    status = prnt.print_items(items=items, show=show,
-                              blocks=blocks, cid=cid, blobs=blobs,
-                              size=size,
-                              typ=typ, ch=ch, ch_online=ch_online,
-                              name=name, title=title, path=path,
-                              sanitize=sanitize,
-                              start=start, end=end, channel=channel,
-                              reverse=reverse,
-                              file=file, fdate=fdate, sep=sep,
-                              server=server)
+    prnt.print_items(items=items, show=show,
+                     blocks=blocks, cid=cid, blobs=blobs,
+                     size=size,
+                     typ=typ, ch=ch, ch_online=ch_online,
+                     name=name, title=title, path=path,
+                     sanitize=sanitize,
+                     start=start, end=end, channel=channel,
+                     reverse=reverse,
+                     file=file, fdate=fdate, sep=sep,
+                     server=server)
 
-    return status
+    return claims
 
 
 def find_ch_th(cid, full, canonical, offline, server):
