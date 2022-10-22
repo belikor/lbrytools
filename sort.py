@@ -24,6 +24,8 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help with sorting downloaded claims from the LBRY network."""
+import concurrent.futures as fts
+
 import requests
 
 import lbrytools.funcs as funcs
@@ -148,7 +150,17 @@ def sort_items(channel=None, reverse=False,
     return sorted_items
 
 
+def search_item_th(cid, server):
+    """Wrapper to use with threads in `sort_invalid`."""
+    s = srch.search_item(cid=cid,
+                         offline=False, print_error=False,
+                         server=server)
+
+    return s
+
+
 def sort_invalid(channel=None, reverse=False,
+                 threads=32,
                  server="http://localhost:5279"):
     """Return a list of invalid claims that were previously downloaded.
 
@@ -172,6 +184,11 @@ def sort_invalid(channel=None, reverse=False,
         It defaults to `False`, in which case older items come first
         in the output list.
         If it is `True` newer claims are at the beginning of the list.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve claims,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     server: str, optional
         It defaults to `'http://localhost:5279'`.
         This is the address of the `lbrynet` daemon, which should be running
@@ -209,17 +226,34 @@ def sort_invalid(channel=None, reverse=False,
 
     invalid_items = []
 
-    for it, item in enumerate(items, start=1):
-        online_item = srch.search_item(cid=item["claim_id"], offline=False,
-                                       print_error=False,
-                                       server=server)
-        if not online_item:
+    # Iterables to be passed to the ThreadPoolExecutor
+    results = []
+    cids = (item["claim_id"] for item in items)
+    servers = (server for n in range(n_items))
+
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(search_item_th,
+                                   cids, servers)
+            results = list(results)  # generator to list
+    else:
+        for item in items:
+            s = search_item_th(item["claim_id"], server)
+            results.append(s)
+
+    for num, pair in enumerate(zip(items, results), start=1):
+        item = pair[0]
+        resolved = pair[1]
+
+        if not resolved:
             if len(invalid_items) == 0:
                 print()
+
             claim_id = item["claim_id"]
             claim_name = item["claim_name"]
             channel = item["channel_name"]
-            print(f"Claim {it:4d}/{n_items:4d}, "
+            print(f"Claim {num:4d}/{n_items:4d}, "
                   f"{claim_id}, {channel}, {claim_name}")
             invalid_items.append(item)
 
