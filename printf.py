@@ -43,6 +43,7 @@ def print_summary(show="all",
                   sanitize=False,
                   start=1, end=0, channel=None, invalid=False,
                   reverse=False,
+                  threads=32,
                   file=None, fdate=False, sep=";",
                   server="http://localhost:5279"):
     """Print a summary of the items downloaded from the LBRY network.
@@ -142,6 +143,11 @@ def print_summary(show="all",
         It defaults to `False`, in which case older items come first
         in the output list.
         If it is `True` newer claims are at the beginning of the list.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to resolve claims,
+        meaning claims that will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
     file: str, optional
         It defaults to `None`.
         It must be a writable path to which the summary will be written.
@@ -191,6 +197,7 @@ def print_summary(show="all",
         return False
 
     claims = sort.sort_items_size(reverse=False, invalid=invalid,
+                                  threads=threads,
                                   server=server)
 
     items = claims["claims"]

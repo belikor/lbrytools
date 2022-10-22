@@ -360,7 +360,7 @@ the `'timestamp'` is used.
 
 Specify a filename to print to that file, otherwise it will print to
 the terminal. Optionally add the date to the filename to better keep track
-of the written files.
+of the written files:
 ```py
 p = lbryt.print_summary()
 p = lbryt.print_summary(file="summary.txt")
@@ -372,7 +372,7 @@ Print all files (default),
 or only those which have incomplete blobs,
 or only those which have all their blobs,
 or only those for which the full media file (mp4, mp3, mkv, etc.) exists,
-or only those for which the media file is missing.
+or only those for which the media file is missing:
 ```py
 p = lbryt.print_summary(show="all")
 p = lbryt.print_summary(show="incomplete")
@@ -392,7 +392,7 @@ The `sanitize` parameter removes the emojis that may be found in the name
 of the claim or channel, or in the title. This may be useful if you are
 copying this information to a document that doesn't display emojis properly.
 We may specify the separator between the data fields; since a claim name
-can have a comma as part of the name, a semicolon `;` is used by default.
+can have a comma as part of the name, a semicolon `;` is used by default:
 ```py
 p = lbryt.print_summary(blocks=False, cid=True, blobs=True, size=True,
                         typ=False, ch=False,
@@ -404,7 +404,7 @@ p = lbryt.print_summary(blocks=False, cid=True, blobs=True, size=True,
 We can also restrict printing only a range of items, or only the claims
 by a specific channel (it implies `ch=True`).
 By default older claims (by release time) are printed first,
-but we can reverse the order so that newer items appear first.
+but we can reverse the order so that newer items appear first:
 ```py
 p = lbryt.print_summary(start=20)  # From this index until the end
 p = lbryt.print_summary(end=40)  # From the beginning until this index
@@ -414,7 +414,7 @@ p = lbryt.print_summary(reverse=True)
 ```
 
 When printing the channel's name we can choose whether to find
-the name by resolving the claim online or not.
+the name by resolving the claim online or not:
 ```py
 p = lbryt.print_summary(ch=True, ch_online=True)
 p = lbryt.print_summary(channel="NaomiBrockwell", ch_online=False)
@@ -435,15 +435,21 @@ print `_Unknown_`.
 
 Print only the invalid claims by using the `invalid=True` parameter
 of `print_summary`. This will be slower than with `invalid=False`
-as it needs to resolve each claim online, to see if it's still valid or not.
+as it needs to resolve each claim online, to see if it's still valid or not:
 ```py
 p = lbryt.print_summary(invalid=True)
 p = lbryt.print_summary(file="summary_invalid.txt", invalid=True)
 ```
 
+By default, it uses a maximum of 32 threads to resolve the claims in parallel;
+the number can be lowered or increased depending on the CPU power:
+```py
+p = lbryt.print_summary(invalid=True, threads=128)
+```
+
 If `invalid=True` and `ch=True` or `channel` is used, this will automatically
 set `ch_online=False` because for invalid claims the channel name
-can only be resolved from the offline database.
+can only be resolved from the offline database:
 ```py
 p = lbryt.print_summary(invalid=True, ch=True)
 p = lbryt.print_summary(invalid=True, channel="mises")
