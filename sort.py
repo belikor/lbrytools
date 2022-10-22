@@ -269,7 +269,7 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
     Returns
     -------
     dict
-        A dictionary with three keys:
+        A dictionary with nine keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `file_list`.
           The list is ordered in ascending order by default (old claims first),
@@ -283,8 +283,13 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
         - 'duration': total duration of the claims in seconds.
           It will count only stream types which have a duration
           such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'text': text describing the number of claims, the total size in GiB,
+           and the total duration expressed as HH:MM:SS, and days
     False
         If there is a problem it will return `False`.
     """
@@ -302,25 +307,10 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
         claims = []
 
     print()
-    output = sutils.downloadable_size(claims, local=True)
-    total_size = output["size"]
-    total_duration = output["duration"]
-
-    n_claims = len(claims)
-    GB = total_size / (1024**3)  # to GiB
-
-    hrs = total_duration / 3600
-    days = hrs / 24
-
-    hr = total_duration // 3600
-    mi = (total_duration % 3600) // 60
-    sec = (total_duration % 3600) % 60
+    claims_info = sutils.downloadable_size(claims, local=True)
+    claims_info["claims"] = claims
 
     print(40 * "-")
-    print(f"Total unique claims: {n_claims}")
-    print(f"Total download size: {GB:.4f} GiB")
-    print(f"Total duration: {hr} h {mi} min {sec} s, or {days:.4f} days")
+    print(claims_info["text"])
 
-    return {"claims": claims,
-            "size": total_size,
-            "duration": total_duration}
+    return claims_info
