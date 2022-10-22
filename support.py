@@ -100,7 +100,7 @@ def get_all_supports(threads=32,
     else:
         for support in supports:
             s = search_cid_th(support["claim_id"],
-                              server=server)
+                              server)
             results.append(s)
 
     for pair in zip(supports, results):
