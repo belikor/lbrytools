@@ -276,6 +276,7 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
           and in descending order (newer claims first) if `reverse=True`.
           Certain claims don't have `'release_time'` so for them we add
           this key, and use the value of `'timestamp'` for it.
+          If there are no claims the list may be empty.
         - 'size': total size of the claims in bytes.
           It can be divided by 1024 to obtain kibibytes, by another 1024
           to obtain mebibytes, and by another 1024 to obtain gibibytes.
@@ -298,7 +299,7 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
                             server=server)
 
     if not claims:
-        return False
+        claims = []
 
     print()
     output = sutils.downloadable_size(claims, local=True)
