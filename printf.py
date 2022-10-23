@@ -196,16 +196,18 @@ def print_summary(show="all",
     if not funcs.server_exists(server=server):
         return False
 
-    claims = sort.sort_items_size(reverse=False, invalid=invalid,
-                                  threads=threads,
-                                  server=server)
+    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
 
-    items = claims["claims"]
+    claims_info = sort.sort_items_size(reverse=False, invalid=invalid,
+                                       threads=threads,
+                                       server=server)
+
+    items = claims_info["claims"]
 
     if not items or len(items) < 1:
         if file:
             print("No file written.")
-        return claims
+        return claims_info
 
     if invalid:
         ch_online = False
@@ -222,7 +224,17 @@ def print_summary(show="all",
                      file=file, fdate=fdate, sep=sep,
                      server=server)
 
-    return claims
+    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+
+    out = [40 * "-",
+           claims_info["text"],
+           "",
+           f"start: {s_time}",
+           f"end:   {e_time}"]
+
+    funcs.print_content(out, file=None, fdate=False)
+
+    return claims_info
 
 
 def find_ch_th(cid, full, canonical, offline, server):

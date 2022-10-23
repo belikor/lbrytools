@@ -347,11 +347,8 @@ def sort_items_size(channel=None, reverse=False, invalid=False,
     if not claims:
         claims = []
 
-    print()
-    claims_info = sutils.downloadable_size(claims, local=True)
+    claims_info = sutils.downloadable_size(claims, local=True,
+                                           print_msg=False)
     claims_info["claims"] = claims
-
-    print(40 * "-")
-    print(claims_info["text"])
 
     return claims_info
