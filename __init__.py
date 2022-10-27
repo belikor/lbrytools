@@ -62,6 +62,7 @@ from lbrytools.funcs import sanitize_text
 
 from lbrytools.status import list_lbrynet_status
 from lbrytools.config import list_lbrynet_settings
+from lbrytools.s_wallet import sync_wallet
 
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
@@ -163,6 +164,7 @@ True if sanitize_text else False
 
 True if list_lbrynet_status else False
 True if list_lbrynet_settings else False
+True if sync_wallet else False
 
 True if check_repost else False
 True if search_item else False

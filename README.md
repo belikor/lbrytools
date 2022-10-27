@@ -182,6 +182,7 @@ lbryt.abandon_comment(...)
 lbryt.list_peers(...)
 lbryt.list_ch_peers(...)
 lbryt.list_ch_subs_peers(...)
+lbryt.sync_wallet(...)
 lbryt.list_lbrynet_status(...)
 lbryt.list_lbrynet_settings(...)
 ```

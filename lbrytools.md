@@ -49,6 +49,7 @@
     - [Peers in a single channel](#peers-in-a-single-channel)
     - [Peers in multiple channels](#peers-in-multiple-channels)
     - [Peers in subscribed channels](#peers-in-subscribed-channels)
+- [Wallet](#wallet)
 - [Status](#status)
 - [Server](#server)
 
@@ -114,6 +115,7 @@ from lbrytools import abandon_comment
 from lbrytools import list_peers
 from lbrytools import list_ch_peers
 from lbrytools import list_ch_subs_peers
+from lbrytools import sync_wallet
 from lbrytools import list_lbrynet_status
 from lbrytools import list_lbrynet_settings
 ```
@@ -1754,6 +1756,47 @@ mm = lbryt.list_ch_subs_peers(number=50,
 
 [Go back to _Content_](#content)
 
+## Wallet
+
+The LBC wallet can be created locally by running `lbrynet`, or by using
+Odysee.
+If the wallet is created on Odysee, we can authenticate our account,
+download that online wallet, and synchronize it locally,
+so that the local wallet has the same information as the online wallet
+such as followed channels.
+
+We only need the email and password associated with the Odysee account
+to perform the synchronization.
+By default, it will only download the online data;
+we need to specify `sync=True` to complete the operation:
+```py
+ww = lbryt.sync_wallet(email, password)
+ww = lbryt.sync_wallet(email, password, sync=True)
+```
+
+By default, it will use the default wallet in our local system,
+simply named `'default_wallet'`, but we can choose another wallet if we want:
+```py
+ww = lbryt.sync_wallet(email, password, wallet_id="default_wallet")
+```
+
+The server addresses to authenticate the account and obtain
+the online wallet can be provided optionally:
+```py
+ww = lbryt.sync_wallet(email, password,
+                       api_server="https://api.odysee.com",
+                       lbry_api="https://api.lbry.com")
+```
+
+The address of the local `lbrynet` daemon which applies
+the synchronization data can also be specified:
+```py
+ww = lbryt.sync_wallet(email, password,
+                       server="http://localhost:5279")
+```
+
+[Go back to _Content_](#content)
+
 ## Status
 
 To show the status of the `lbrynet` daemon we can run
@@ -1833,6 +1876,7 @@ lbryt.abandon_comment(..., server=server)
 lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)
+lbryt.sync_wallet(..., server=server)
 lbryt.list_lbrynet_status(..., server=server)
 lbryt.list_lbrynet_settings(..., server=server)
 ```
