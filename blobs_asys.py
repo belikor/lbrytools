@@ -474,8 +474,8 @@ def analyze_channel(blobfiles=None, channel=None,
         n_blobs_incomplete += claim["n_blobs_incomplete"]
         size_incomplete += claim["size_incomplete"]
 
-    size_complete = size_complete / (1024*1024*1024)
-    size_incomplete = size_incomplete / (1024*1024*1024)
+    size_complete = size_complete / (1024**3)  # bytes to GiB
+    size_incomplete = size_incomplete / (1024**3)
 
     n_claims = n_claims_complete + n_claims_incomplete
     n_blobs_all = n_blobs_complete + n_blobs_incomplete
