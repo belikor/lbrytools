@@ -221,6 +221,18 @@ def print_channels(full=True, canonical=False,
 
     print(80 * "-")
 
+    if simple:
+        out = [f"{sep} ".join(all_channels)]
+
+        funcs.print_content(out, file=file, fdate=fdate)
+
+        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+        if print_msg:
+            print()
+            print(f"start: {s_time}")
+            print(f"end:   {e_time}")
+        return all_channels
+
     fd = 0
 
     if file:
@@ -238,23 +250,6 @@ def print_channels(full=True, canonical=False,
             fd = open(file, "w")
         except (FileNotFoundError, PermissionError) as err:
             print(f"Cannot open file for writing; {err}")
-
-    if simple:
-        out = f"{sep} ".join(all_channels)
-
-        if file and fd:
-            print(out, file=fd)
-            fd.close()
-            print(f"Summary written: {file}")
-        else:
-            print(out)
-
-        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
-        if print_msg:
-            print()
-            print(f"start: {s_time}")
-            print(f"end:   {e_time}")
-        return all_channels
 
     # Maximum channel length can be used to evenly space all channels
     # in columns. How do we integrate this into the format specifier?
