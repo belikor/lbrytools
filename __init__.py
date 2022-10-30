@@ -84,8 +84,8 @@ from lbrytools.print import print_items
 from lbrytools.print_claims import print_sch_claims
 
 from lbrytools.printf import print_summary
-from lbrytools.printf import print_channels
-from lbrytools.printf import print_ch_claims
+from lbrytools.print_ch import print_channels
+from lbrytools.print_ch import print_ch_claims
 
 from lbrytools.download import download_single
 

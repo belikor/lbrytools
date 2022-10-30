@@ -29,7 +29,7 @@ import os
 import time
 
 import lbrytools.funcs as funcs
-import lbrytools.printf as prntf
+import lbrytools.print_ch as prnt_ch
 import lbrytools.clean as clean
 import lbrytools.download as dld
 import lbrytools.blobs as blobs
@@ -644,12 +644,12 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
         return False
 
     s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
-    channels = prntf.print_channels(full=False, canonical=False,
-                                    invalid=False, offline=False,
-                                    threads=threads,
-                                    print_msg=True,
-                                    file=None, fdate=False,
-                                    server=server)
+    channels = prnt_ch.print_channels(full=False, canonical=False,
+                                      invalid=False, offline=False,
+                                      threads=threads,
+                                      print_msg=True,
+                                      file=None, fdate=False,
+                                      server=server)
     if not channels:
         return False
 
