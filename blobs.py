@@ -57,7 +57,11 @@ def c_blobs(uri=None, cid=None, name=None,
 
     item = srch.search_item(uri=uri, cid=cid, name=name,
                             server=server)
+
     if not item:
+        if insubfunc:
+            print()
+
         return {"error_not_found": "item was not found in the network",
                 "canonical_url": uri,
                 "claim_id": cid,
@@ -339,14 +343,15 @@ def count_blobs_all(blobfiles=None, channel=None,
         meaning claims that will be searched in parallel.
         This number shouldn't be large if the CPU doesn't have many cores.
     print_msg: bool, optional
-        It defaults to `True`, in which case it will print information
-        on the found claim.
-        If `print_msg=False`, it also implies `print_each=False`.
+        It defaults to `False`, in which case it will not print information
+        on each claim. If `print_msg=False`, it also implies
+        `print_each=False`.
+        If `print_msg=True` it will print some information on the claims
+        being counted.
     print_each: bool, optional
         It defaults to `False`.
-        If it is `True` it will print all blobs
-        that belong to the claim, and whether each of them is already
-        in `blobfiles`.
+        If it is `True` it will print all blobs that belong to a given claim,
+        and whether each of them is already in `blobfiles`.
     start: int, optional
         It defaults to 1.
         Count the blobs from claims starting from this index
@@ -446,10 +451,8 @@ def count_blobs_all(blobfiles=None, channel=None,
             if end != 0 and num > end:
                 break
 
-            result = c_blobs(cid=item["claim_id"],
-                             blobfiles=blobfiles, print_msg=False,
-                             insubfunc=True,
-                             server=server)
+            result = c_blobs_th(item["claim_id"],
+                                blobfiles, print_msg, server)
             results.append(result)
 
     print()
