@@ -213,11 +213,12 @@ def print_channels(full=True, canonical=False,
     n_channels = len(all_channels)
 
     if invalid or offline:
-        print(f"Original channels found: {n_channels} "
+        print(f"Channels found: {n_channels} "
               "(does not include unresolved channels)")
     else:
-        print(f"Original channels found: {n_channels} "
+        print(f"Channels found: {n_channels} "
               "(does not include invalid claims, or unresolved channels)")
+
     print(80 * "-")
 
     fd = 0
