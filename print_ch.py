@@ -26,7 +26,6 @@
 """Functions to print channels in the LBRY network."""
 import time
 import concurrent.futures as fts
-import os
 
 import lbrytools.funcs as funcs
 import lbrytools.sort as sort
@@ -233,24 +232,6 @@ def print_channels(full=True, canonical=False,
             print(f"end:   {e_time}")
         return all_channels
 
-    fd = 0
-
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
-
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
-
-        file = os.path.join(dirn, fdate + base)
-
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
-
     # Maximum channel length can be used to evenly space all channels
     # in columns. How do we integrate this into the format specifier?
     # print(f"{c1:<length>s}")
@@ -270,55 +251,64 @@ def print_channels(full=True, canonical=False,
     else:
         rows = n_channels/3 + 1
 
+    out = []
     index = 0
     row = 1
 
-    # Print rows that are full, only if the number of rows is more than 1
+    # Collect the rows that are full, only if the number of rows is more than 1
     if rows > 1:
-        for u in range(int(rows)-1):
+        for u in range(int(rows) - 1):
             c1 = all_channels[index + 0] + f"{sep}"
             c2 = all_channels[index + 1] + f"{sep}"
             c3 = all_channels[index + 2] + f"{sep}"
+
+            line = f"{c1:33s} {c2:33s} {c3:33s}"
+
             if pre_num:
-                out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
-            else:
-                out = f"{c1:33s} {c2:33s} {c3:33s}"
-            if file and fd:
-                print(out, file=fd)
-            else:
-                print(out)
+                line = f"{row:3d}: " + line
+
+            out.append(line)
+
             index += 3
             row += 3
 
-    # Print the last row, which may be the only row if row=1
-    if res == 1:
-        c1 = all_channels[index + 0]
-        if pre_num:
-            out = f"{row:3d}: {c1:33s}"
-        else:
-            out = f"{c1:33s}"
-    if res == 2:
-        c1 = all_channels[index + 0] + f"{sep}"
-        c2 = all_channels[index + 1]
-        if pre_num:
-            out = f"{row:3d}: {c1:33s} {c2:33s}"
-        else:
-            out = f"{c1:33s} {c2:33s}"
+    # Collect the last row, which may be the only row if row=1
+    # The last row may have 3 items, 2 items or only 1
+    # depending on the residue calculated earlier
     if res == 0:
         c1 = all_channels[index + 0] + f"{sep}"
         c2 = all_channels[index + 1] + f"{sep}"
         c3 = all_channels[index + 2]
-        if pre_num:
-            out = f"{row:3d}: {c1:33s} {c2:33s} {c3:33s}"
-        else:
-            out = f"{c1:33s} {c2:33s} {c3:33s}"
 
-    if file and fd:
-        print(out, file=fd)
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print(out)
+        line = f"{c1:33s} {c2:33s} {c3:33s}"
+
+        if pre_num:
+            line = f"{row:3d}: " + line
+
+        out.append(line)
+
+    if res == 1:
+        c1 = all_channels[index + 0]
+
+        line = f"{c1:33s}"
+
+        if pre_num:
+            line = f"{row:3d}: " + line
+
+        out.append(line)
+
+    if res == 2:
+        c1 = all_channels[index + 0] + f"{sep}"
+        c2 = all_channels[index + 1]
+
+        line = f"{c1:33s} {c2:33s}"
+
+        if pre_num:
+            line = f"{row:3d}: " + line
+
+        out.append(line)
+
+    funcs.print_content(out, file=file, fdate=fdate)
 
     e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if print_msg:
