@@ -315,16 +315,9 @@ def print_channels(full=True, canonical=False,
         out = [f"{sep} ".join(all_channels)]
 
         funcs.print_content(out, file=file, fdate=fdate)
-
-        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
-        if print_msg:
-            print()
-            print(f"start: {s_time}")
-            print(f"end:   {e_time}")
-        return all_channels
-
-    print_three_cols(all_channels,
-                     file=file, fdate=fdate, pre_num=pre_num, sep=sep)
+    else:
+        print_three_cols(all_channels,
+                         file=file, fdate=fdate, pre_num=pre_num, sep=sep)
 
     e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if print_msg:
