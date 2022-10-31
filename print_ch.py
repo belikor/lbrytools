@@ -43,6 +43,97 @@ def find_ch_th(cid, full, canonical, offline, server):
     return channel
 
 
+def print_three_cols(all_channels,
+                     file=None, fdate=False, pre_num=True, sep=";"):
+    """Print all channels in three columns.
+
+    Determine how many rows are required to display all channels
+    in three columns, and then add three channels to each row,
+    except for the last row, which may have 1, 2 or 3 elements:
+        c1      c2      c3
+        c4      c5      c6
+        c7
+
+    The maximum channel length can be used to evenly space all channels
+    in the columns. How do we integrate this into the format specifier?
+    ::
+        print(f"{c1:<length>s}")
+
+        length = 0
+        for ch in all_channels:
+            if len(ch) > length:
+                length = len(ch)
+    """
+    n_channels = len(all_channels)
+
+    res = n_channels % 3
+
+    if res == 0:
+        rows = n_channels/3
+    else:
+        rows = n_channels/3 + 1
+
+    out = []
+    index = 0
+    row = 1
+
+    # Collect the rows that are full, only if the number of rows
+    # is more than 1
+    if rows > 1:
+        for u in range(int(rows) - 1):
+            c1 = all_channels[index + 0] + f"{sep}"
+            c2 = all_channels[index + 1] + f"{sep}"
+            c3 = all_channels[index + 2] + f"{sep}"
+
+            line = f"{c1:33s} {c2:33s} {c3:33s}"
+
+            if pre_num:
+                line = f"{row:3d}: " + line
+
+            out.append(line)
+
+            index += 3
+            row += 3
+
+    # Collect the last row, which may be the only row if row=1.
+    # The last row may have 1 item, 2 items or 3 items
+    # depending on the residue calculated earlier
+    if res == 0:
+        c1 = all_channels[index + 0] + f"{sep}"
+        c2 = all_channels[index + 1] + f"{sep}"
+        c3 = all_channels[index + 2]
+
+        line = f"{c1:33s} {c2:33s} {c3:33s}"
+
+        if pre_num:
+            line = f"{row:3d}: " + line
+
+        out.append(line)
+
+    if res == 1:
+        c1 = all_channels[index + 0]
+
+        line = f"{c1:33s}"
+
+        if pre_num:
+            line = f"{row:3d}: " + line
+
+        out.append(line)
+
+    if res == 2:
+        c1 = all_channels[index + 0] + f"{sep}"
+        c2 = all_channels[index + 1]
+
+        line = f"{c1:33s} {c2:33s}"
+
+        if pre_num:
+            line = f"{row:3d}: " + line
+
+        out.append(line)
+
+    funcs.print_content(out, file=file, fdate=fdate)
+
+
 def print_channels(full=True, canonical=False,
                    simple=False, invalid=False, offline=False,
                    threads=32,
@@ -232,83 +323,8 @@ def print_channels(full=True, canonical=False,
             print(f"end:   {e_time}")
         return all_channels
 
-    # Maximum channel length can be used to evenly space all channels
-    # in columns. How do we integrate this into the format specifier?
-    # print(f"{c1:<length>s}")
-    #
-    # length = 0
-    # for ch in all_channels:
-    #     if len(ch) > length:
-    #         length = len(ch)
-
-    # Determine how many rows are required to display
-    # all channels in three columns
-    # c1    c2     c3
-    # c4    c5
-    res = n_channels % 3
-    if res == 0:
-        rows = n_channels/3
-    else:
-        rows = n_channels/3 + 1
-
-    out = []
-    index = 0
-    row = 1
-
-    # Collect the rows that are full, only if the number of rows is more than 1
-    if rows > 1:
-        for u in range(int(rows) - 1):
-            c1 = all_channels[index + 0] + f"{sep}"
-            c2 = all_channels[index + 1] + f"{sep}"
-            c3 = all_channels[index + 2] + f"{sep}"
-
-            line = f"{c1:33s} {c2:33s} {c3:33s}"
-
-            if pre_num:
-                line = f"{row:3d}: " + line
-
-            out.append(line)
-
-            index += 3
-            row += 3
-
-    # Collect the last row, which may be the only row if row=1
-    # The last row may have 3 items, 2 items or only 1
-    # depending on the residue calculated earlier
-    if res == 0:
-        c1 = all_channels[index + 0] + f"{sep}"
-        c2 = all_channels[index + 1] + f"{sep}"
-        c3 = all_channels[index + 2]
-
-        line = f"{c1:33s} {c2:33s} {c3:33s}"
-
-        if pre_num:
-            line = f"{row:3d}: " + line
-
-        out.append(line)
-
-    if res == 1:
-        c1 = all_channels[index + 0]
-
-        line = f"{c1:33s}"
-
-        if pre_num:
-            line = f"{row:3d}: " + line
-
-        out.append(line)
-
-    if res == 2:
-        c1 = all_channels[index + 0] + f"{sep}"
-        c2 = all_channels[index + 1]
-
-        line = f"{c1:33s} {c2:33s}"
-
-        if pre_num:
-            line = f"{row:3d}: " + line
-
-        out.append(line)
-
-    funcs.print_content(out, file=file, fdate=fdate)
+    print_three_cols(all_channels,
+                     file=file, fdate=fdate, pre_num=pre_num, sep=sep)
 
     e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     if print_msg:
