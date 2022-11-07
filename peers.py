@@ -346,12 +346,16 @@ def search_ch_peers(channel=None, number=2, threads=32,
             results.append(result)
 
     n_streams = 0
+
     for result in results:
         if "source" not in result["stream"]["value"]:
             continue
         n_streams += 1
 
-    base_peers_info = {"channel": channel,
+    ch = results[0]["stream"]["signing_channel"]["canonical_url"]
+    ch = ch.split("lbry://")[1]
+
+    base_peers_info = {"channel": ch,
                        "n_claims": n_claims,
                        "n_streams": n_streams,
                        "streams_info": results}
