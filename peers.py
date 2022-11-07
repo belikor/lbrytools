@@ -80,6 +80,8 @@ def calculate_peers(claim=None, print_msg=True,
     if not claim or "source" not in claim["value"]:
         return {"stream": claim,
                 "peers": [],
+                "peers_tracker": [],
+                "peers_user": [],
                 "size": 0,
                 "duration": 0,
                 "local_node": False}
@@ -104,7 +106,17 @@ def calculate_peers(claim=None, print_msg=True,
             if fpeer not in peers:
                 peers.append(fpeer)
 
-    n_peers = len(peers)
+    peers_tracker = []
+    peers_user = []
+
+    for peer in peers:
+        if peer.get("node_id", None):
+            peers_user.append(peer)
+        else:
+            peers_tracker.append(peer)
+
+    n_peers_tracker = len(peers_tracker)
+    n_peers_user = len(peers_user)
 
     source_info = claim["value"]
     size = int(source_info["source"].get("size", 0))
@@ -119,10 +131,14 @@ def calculate_peers(claim=None, print_msg=True,
         print(f"claim_name: {name}")
         print(f"claim_id: {claim_id}")
         print(f"sd_hash: {sd_hash}")
-        print(f"peers: {n_peers}")
+        print(f"tracker peers: {n_peers_tracker}")
+        print(f"user peers: {n_peers_user}")
+        print(f"locally hosted: {local}")
 
     return {"stream": claim,
             "peers": peers,
+            "peers_tracker": peers_tracker,
+            "peers_user": peers_user,
             "size": size,
             "duration": seconds,
             "local_node": local}
