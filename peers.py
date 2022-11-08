@@ -154,11 +154,17 @@ def process_ch_peers(base_peers_info, print_msg=False):
     total_size = 0
     total_duration = 0
     streams_with_hosts = 0
+    streams_with_hosts_all = 0
     total_peers = 0
+    total_peers_all = 0
+    u_nodes_id = []
     unique_nodes = []
+    u_trackers_addr = []
+    unique_trackers = []
     peer_ratio = 0.0
-    hosting_coverage = 0
-    local_node = False
+    peer_ratio_all = 0.0
+    hosting_coverage = 0.0
+    hosting_coverage_all = 0.0
     g_local_node = False
 
     if n_streams < 1:
@@ -169,15 +175,21 @@ def process_ch_peers(base_peers_info, print_msg=False):
                 "total_size": total_size,
                 "total_duration": total_duration,
                 "streams_with_hosts": streams_with_hosts,
+                "streams_with_hosts_all": streams_with_hosts_all,
                 "total_peers": total_peers,
+                "total_peers_all": total_peers_all,
                 "unique_nodes": unique_nodes,
+                "unique_trackers": unique_trackers,
                 "peer_ratio": peer_ratio,
+                "peer_ratio_all": peer_ratio_all,
                 "hosting_coverage": hosting_coverage,
+                "hosting_coverage_all": hosting_coverage_all,
                 "local_node": g_local_node}
 
     for num, info in enumerate(streams_info, start=1):
         stream = info["stream"]
-        peers = info["peers"]
+        peers_all = info["peers"]
+        peers_user = info["peers_user"]
         total_size += info["size"]
         total_duration += info["duration"]
         local_node = info["local_node"]
@@ -185,43 +197,70 @@ def process_ch_peers(base_peers_info, print_msg=False):
 
         name = stream["name"]
         claim_id = stream["claim_id"]
+        vtype = stream["value_type"]
 
         if "source" not in stream["value"]:
             sd_hash = "0"
         else:
             sd_hash = stream["value"]["source"]["sd_hash"]
 
-        n_peers = len(peers)
+        n_peers_user = len(peers_user)
+        n_peers_all = len(peers_all)
 
         if print_msg:
             print(f"Stream {num}/{n_claims}")
             print(f"claim_name: {name}")
             print(f"claim_id: {claim_id}")
             print(f"sd_hash: {sd_hash}")
-            print(f"peers: {n_peers}")
+            print(f"Claim type: {vtype}")
+            print(f"User peers: {n_peers_user}")
+            print(f"Total peers: {n_peers_all}")
 
-        if not peers:
+        if not peers_all:
             peer_ratio = total_peers/num
+            peer_ratio_all = total_peers_all/num
+
             if print_msg:
-                print(f"Average peers per stream: {peer_ratio:.4f}")
+                print(f"Average user peers per stream: {peer_ratio:.4f}")
+                print(f"Average peers per stream: {peer_ratio_all:.4f}")
                 print(f"Locally hosted: {local_node}")
                 print()
             continue
 
-        total_peers += len(peers)
+        total_peers += n_peers_user
+        total_peers_all += n_peers_all
+
         peer_ratio = total_peers/num
+        peer_ratio_all = total_peers_all/num
+
         if print_msg:
-            print(f"Average peers per stream: {peer_ratio:.4f}")
+            print(f"Average user peers per stream: {peer_ratio:.4f}")
+            print(f"Average peers per stream: {peer_ratio_all:.4f}")
             print(f"Locally downloaded: {local_node}")
             print()
-        streams_with_hosts += 1
 
-        for p in peers:
-            if p["node_id"] not in unique_nodes:
-                unique_nodes.append(p["node_id"])
+        if n_peers_user > 0:
+            streams_with_hosts += 1
+
+        streams_with_hosts_all += 1
+
+        for peer in peers_all:
+            node = peer["node_id"]
+            address = peer["address"]
+
+            if node and node not in u_nodes_id:
+                u_nodes_id.append(node)
+                unique_nodes.append(peer)
+
+            if node is None and address not in u_trackers_addr:
+                u_trackers_addr.append(address)
+                unique_trackers.append(peer)
 
     peer_ratio = total_peers/n_streams
+    peer_ratio_all = total_peers_all/n_streams
+
     hosting_coverage = streams_with_hosts/n_streams
+    hosting_coverage_all = streams_with_hosts_all/n_streams
 
     return {"channel": channel,
             "n_claims": n_claims,
@@ -230,10 +269,15 @@ def process_ch_peers(base_peers_info, print_msg=False):
             "total_size": total_size,
             "total_duration": total_duration,
             "streams_with_hosts": streams_with_hosts,
+            "streams_with_hosts_all": streams_with_hosts_all,
             "total_peers": total_peers,
+            "total_peers_all": total_peers_all,
             "unique_nodes": unique_nodes,
+            "unique_trackers": unique_trackers,
             "peer_ratio": peer_ratio,
+            "peer_ratio_all": peer_ratio_all,
             "hosting_coverage": hosting_coverage,
+            "hosting_coverage_all": hosting_coverage_all,
             "local_node": g_local_node}
 
 
