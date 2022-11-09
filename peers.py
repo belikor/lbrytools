@@ -165,7 +165,7 @@ def process_ch_peers(base_peers_info, print_msg=False):
     peer_ratio_all = 0.0
     hosting_coverage = 0.0
     hosting_coverage_all = 0.0
-    g_local_node = False
+    local_node = False
 
     if n_streams < 1:
         return {"channel": channel,
@@ -184,7 +184,7 @@ def process_ch_peers(base_peers_info, print_msg=False):
                 "peer_ratio_all": peer_ratio_all,
                 "hosting_coverage": hosting_coverage,
                 "hosting_coverage_all": hosting_coverage_all,
-                "local_node": g_local_node}
+                "local_node": local_node}
 
     for num, info in enumerate(streams_info, start=1):
         stream = info["stream"]
@@ -192,8 +192,8 @@ def process_ch_peers(base_peers_info, print_msg=False):
         peers_user = info["peers_user"]
         total_size += info["size"]
         total_duration += info["duration"]
-        local_node = info["local_node"]
-        g_local_node = g_local_node or local_node
+        loc_node = info["local_node"]
+        local_node = local_node or loc_node
 
         name = stream["name"]
         claim_id = stream["claim_id"]
@@ -223,7 +223,7 @@ def process_ch_peers(base_peers_info, print_msg=False):
             if print_msg:
                 print(f"Average user peers per stream: {peer_ratio:.4f}")
                 print(f"Average peers per stream: {peer_ratio_all:.4f}")
-                print(f"Locally hosted: {local_node}")
+                print(f"Locally hosted: {loc_node}")
                 print()
             continue
 
@@ -236,7 +236,7 @@ def process_ch_peers(base_peers_info, print_msg=False):
         if print_msg:
             print(f"Average user peers per stream: {peer_ratio:.4f}")
             print(f"Average peers per stream: {peer_ratio_all:.4f}")
-            print(f"Locally downloaded: {local_node}")
+            print(f"Locally downloaded: {loc_node}")
             print()
 
         if n_peers_user > 0:
@@ -278,7 +278,7 @@ def process_ch_peers(base_peers_info, print_msg=False):
             "peer_ratio_all": peer_ratio_all,
             "hosting_coverage": hosting_coverage,
             "hosting_coverage_all": hosting_coverage_all,
-            "local_node": g_local_node}
+            "local_node": local_node}
 
 
 def search_ch_peers(channel=None, number=2, threads=32,
@@ -516,19 +516,26 @@ def print_p_summary(peers_info,
                     file=None, fdate=False):
     """Print a summary paragraph of the results from the peer search."""
     channel = peers_info["channel"]
+
     n_claims = peers_info["n_claims"]
     n_streams = peers_info["n_streams"]
     total_size = peers_info["total_size"]
     total_seconds = peers_info["total_duration"]
     streams_with_hosts = peers_info["streams_with_hosts"]
+    streams_with_hosts_all = peers_info["streams_with_hosts_all"]
     total_peers = peers_info["total_peers"]
+    total_peers_all = peers_info["total_peers_all"]
+
     n_nodes = len(peers_info["unique_nodes"])
+    n_trackers = len(peers_info["unique_trackers"])
 
     if peers_info["local_node"]:
         n_nodes = f"{n_nodes} + 1"
 
     peer_ratio = peers_info["peer_ratio"]
+    peer_ratio_all = peers_info["peer_ratio_all"]
     hosting_coverage = peers_info["hosting_coverage"] * 100
+    hosting_coverage_all = peers_info["hosting_coverage_all"] * 100
 
     total_size_gb = total_size / (1024**3)
     days = (total_seconds / 3600) / 24
@@ -537,19 +544,24 @@ def print_p_summary(peers_info,
     sec = (total_seconds % 3600) % 60
     duration = f"{hr} h {mi} min {sec} s, or {days:.4f} days"
 
-    out_list = [f"Channel: {channel}",
-                f"Claims searched: {n_claims}",
-                f"Downloadable streams: {n_streams}",
-                f"- Streams that have at least one host: {streams_with_hosts}",
-                f"- Size of streams: {total_size_gb:.4f} GiB",
-                f"- Duration of streams: {duration}",
-                "",
-                f"Total peers in all searched claims: {total_peers}",
-                f"Total unique peers (nodes) hosting streams: {n_nodes}",
-                f"Average number of peers per stream: {peer_ratio:.4f}",
-                f"Hosting coverage: {hosting_coverage:.2f}%"]
+    out = [f"Channel: {channel}",
+           f"Claims searched: {n_claims}",
+           f"Downloadable streams: {n_streams}",
+           f"- Streams with at least one user host: {streams_with_hosts}",
+           f"- Streams with all types of host: {streams_with_hosts_all}",
+           f"- Size of streams: {total_size_gb:.4f} GiB",
+           f"- Duration of streams: {duration}",
+           "",
+           f"Total user peers in all searched claims: {total_peers}",
+           f"Total peers in all searched claims: {total_peers_all}",
+           f"Total unique user peers (nodes) hosting streams: {n_nodes}",
+           f"Total unique tracker peers hosting streams: {n_trackers}",
+           f"Average number of user peers per stream: {peer_ratio:.4f}",
+           f"Average number of total peers per stream: {peer_ratio_all:.4f}",
+           f"User hosting coverage: {hosting_coverage:.2f}%",
+           f"Total hosting coverage: {hosting_coverage_all:.2f}%"]
 
-    funcs.print_content(out_list, file=file, fdate=fdate)
+    funcs.print_content(out, file=file, fdate=fdate)
 
 
 def print_peers_info(peers_info,
