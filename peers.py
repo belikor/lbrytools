@@ -512,9 +512,8 @@ def print_p_lines(peers_info,
     funcs.print_content(out, file=file, fdate=fdate)
 
 
-def print_p_summary(peers_info,
-                    file=None, fdate=False):
-    """Print a summary paragraph of the results from the peer search."""
+def get_summary(peers_info):
+    """Calculate a summary paragraph of the results from the peer search."""
     channel = peers_info["channel"]
 
     n_claims = peers_info["n_claims"]
@@ -561,20 +560,9 @@ def print_p_summary(peers_info,
            f"User hosting coverage: {hosting_coverage:.2f}%",
            f"Total hosting coverage: {hosting_coverage_all:.2f}%"]
 
-    funcs.print_content(out, file=file, fdate=fdate)
+    summary = "\n".join(out)
 
-
-def print_peers_info(peers_info,
-                     claim_id=False, typ=False, title=False,
-                     sanitize=False,
-                     file=None, fdate=False, sep=";"):
-    """Print the summary lines and paragraph of the peer search."""
-    print_p_lines(peers_info,
-                  cid=claim_id, typ=typ, title=title,
-                  sanitize=sanitize,
-                  file=file, fdate=fdate, sep=sep)
-
-    print_p_summary(peers_info, file=None, fdate=fdate)
+    return summary
 
 
 def list_peers(channel=None, number=2, threads=32,
@@ -693,6 +681,9 @@ def list_peers(channel=None, number=2, threads=32,
           are found in our system.
           Our local node is not counted when calculating 'streams_with_hosts',
           'total_peers', 'unique_nodes', 'peer_ratio', nor 'hosting_coverage'.
+        - 'summary': a paragraph of text with the summary of the peer search
+          for this channel. It can be printed to the terminal or displayed
+          in other types of graphical interface.
     False
         If there is a problem it will return `False`.
     """
@@ -704,13 +695,20 @@ def list_peers(channel=None, number=2, threads=32,
                                  print_msg=print_msg,
                                  server=server)
 
+    summary = get_summary(peers_info)
+
     if peers_info["n_streams"] > 0:
         print()
+        print_p_lines(peers_info,
+                      cid=claim_id, typ=typ, title=title,
+                      sanitize=sanitize,
+                      file=file, fdate=fdate, sep=sep)
 
-        print_peers_info(peers_info,
-                         claim_id=claim_id, typ=typ, title=title,
-                         sanitize=sanitize,
-                         file=file, fdate=fdate, sep=sep)
+    print(80 * "-")
+
+    funcs.print_content([summary], file=None, fdate=False)
+
+    peers_info["summary"] = summary
 
     return peers_info
 
