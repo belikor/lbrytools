@@ -593,13 +593,13 @@ def list_peers(channel=None, number=2, threads=32,
                                  print_msg=print_msg,
                                  server=server)
 
-    if peers_info["n_streams"] < 1:
-        return peers_info
+    if peers_info["n_streams"] > 0:
+        print()
 
-    print_peers_info(peers_info,
-                     claim_id=claim_id, typ=typ, title=title,
-                     sanitize=sanitize,
-                     file=file, fdate=fdate, sep=sep)
+        print_peers_info(peers_info,
+                         claim_id=claim_id, typ=typ, title=title,
+                         sanitize=sanitize,
+                         file=file, fdate=fdate, sep=sep)
 
     return peers_info
 
