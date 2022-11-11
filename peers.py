@@ -342,19 +342,31 @@ def search_ch_peers(channel=None, number=2, threads=32,
         - 'total_duration': total duration in seconds of all `n_streams`
           together
         - 'streams_with_hosts': number of streams that have at least
-          one peer hosting the stream; the value goes from 0 to `n_streams`.
+          one user peer hosting the stream; the value goes from 0
+          to `n_streams`.
           A stream is counted as having a host if it has either
           the manifest blob `sd_hash` or the first data blob.
-        - 'total_peers': total number of peers found for all `n_streams`
-        - 'unique_peers': list with node IDs from the peers
-          found in all `n_streams`; the nodes are unique, so a node ID
-          only appears once in the list
-        - 'peer_ratio': it is the ratio total_peers/n_streams,
-          approximately how many peers are in each downloadable claim;
-          it should be larger than 1.0 to indicate a well seeded channel
-        - 'hosting_coverage': it is the ratio streams_with_hosts/n_streams,
-          how much of the channel is seeded; if it's 0.0 no stream is seeded,
-          if it's 1.0 all streams are seeded at least by one peer.
+        - 'streams_with_hosts_all': number of streams that have any type
+          of peer (user or tracker).
+        - 'total_peers': total number of user peers found for all `n_streams`
+        - 'total_peers_all': total number of peers (user and tracker).
+        - 'unique_nodes': list with dictionaries of unique peers
+          as calculated from their node IDs, meaning that a single node ID
+          only appears once.
+        - 'unique_trackers': list with dictionaries of unique tracker peers
+          as calculated from their IP addresses, meaning that a single
+          IP address only appears once. Tracker peers have an empty node ID.
+        - 'peer_ratio': it is the ratio `total_peers/n_streams`,
+          approximately how many user peers are in each downloadable claim;
+          it should be larger than 1.0 to indicate a well seeded channel.
+        - 'peer_ratio_all': it is the ratio `total_peers_all/n_streams`,
+          approximately how many peers in total are in each downloadable claim.
+        - 'hosting_coverage': it is the ratio `streams_with_hosts/n_streams`,
+          how much of the channel is seeded by users; if it's 0.0 no stream
+          is seeded by users, if it's 1.0 all streams are seeded at least
+          by one user peer.
+        - 'hosting_coverage_all': ratio `streams_with_hosts_all/n_streams`
+          how much of the channel is seeded by any type of peer.
         - 'local_node': it is `True` if our `lbrynet` client is hosting
           at least one of the claims, meaning that the initial blobs
           are found in our system.
@@ -639,19 +651,31 @@ def list_peers(channel=None, number=2, threads=32,
         - 'total_duration': total duration in seconds of all `n_streams`
           together
         - 'streams_with_hosts': number of streams that have at least
-          one peer hosting the stream; the value goes from 0 to `n_streams`.
+          one user peer hosting the stream; the value goes from 0
+          to `n_streams`.
           A stream is counted as having a host if it has either
           the manifest blob `sd_hash` or the first data blob.
-        - 'total_peers': total number of peers found for all `n_streams`
-        - 'unique_peers': list with node IDs from the peers
-          found in all `n_streams`; the nodes are unique, so a node ID
-          only appears once in the list
-        - 'peer_ratio': it is the ratio total_peers/n_streams,
-          approximately how many peers are in each downloadable claim;
-          it should be larger than 1.0 to indicate a well seeded channel
-        - 'hosting_coverage': it is the ratio streams_with_hosts/n_streams,
-          how much of the channel is seeded; if it's 0.0 no stream is seeded,
-          if it's 1.0 all streams are seeded at least by one peer.
+        - 'streams_with_hosts_all': number of streams that have any type
+          of peer (user or tracker).
+        - 'total_peers': total number of user peers found for all `n_streams`
+        - 'total_peers_all': total number of peers (user and tracker).
+        - 'unique_nodes': list with dictionaries of unique peers
+          as calculated from their node IDs, meaning that a single node ID
+          only appears once.
+        - 'unique_trackers': list with dictionaries of unique tracker peers
+          as calculated from their IP addresses, meaning that a single
+          IP address only appears once. Tracker peers have an empty node ID.
+        - 'peer_ratio': it is the ratio `total_peers/n_streams`,
+          approximately how many user peers are in each downloadable claim;
+          it should be larger than 1.0 to indicate a well seeded channel.
+        - 'peer_ratio_all': it is the ratio `total_peers_all/n_streams`,
+          approximately how many peers in total are in each downloadable claim.
+        - 'hosting_coverage': it is the ratio `streams_with_hosts/n_streams`,
+          how much of the channel is seeded by users; if it's 0.0 no stream
+          is seeded by users, if it's 1.0 all streams are seeded at least
+          by one user peer.
+        - 'hosting_coverage_all': ratio `streams_with_hosts_all/n_streams`
+          how much of the channel is seeded by any type of peer.
         - 'local_node': it is `True` if our `lbrynet` client is hosting
           at least one of the claims, meaning that the initial blobs
           are found in our system.
