@@ -285,6 +285,11 @@ def search_ch_peers(channel=None, number=2, threads=32,
           - 'stream': the resolved information of the claim, or `None`
           - 'peers': list of peers for the claim; each peer is a dict
             with keys 'address'  (IP), 'node_id', 'tcp_port', and 'udp_port'
+          - 'peers_tracker': list of peers corresponding to fixed trackers,
+            for which the 'node_id' is `None`.
+          - 'peers_user': list of peers corresponding to user nodes
+            running their own `lbrynet` daemons. For these the 'node_id'
+            is a 96-character string.
           - 'size': size in bytes of the claim; could be zero
           - 'duration': duration in seconds of the claim; could be zero
           - 'local_node': boolean indicating if the claim is hosted
@@ -580,6 +585,11 @@ def list_peers(channel=None, number=2, threads=32,
           - 'stream': the resolved information of the claim, or `None`
           - 'peers': list of peers for the claim; each peer is a dict
             with keys 'address'  (IP), 'node_id', 'tcp_port', and 'udp_port'
+          - 'peers_tracker': list of peers corresponding to fixed trackers,
+            for which the 'node_id' is `None`.
+          - 'peers_user': list of peers corresponding to user nodes
+            running their own `lbrynet` daemons. For these the 'node_id'
+            is a 96-character string.
           - 'size': size in bytes of the claim; could be zero
           - 'duration': duration in seconds of the claim; could be zero
           - 'local_node': boolean indicating if the claim is hosted
