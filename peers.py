@@ -128,8 +128,8 @@ def calculate_peers(claim=None, print_msg=True,
             "local_node": local}
 
 
-def process_results(base_peers_info, print_msg=False):
-    """Process results from the peer search."""
+def process_ch_peers(base_peers_info, print_msg=False):
+    """Process results from the channel peer search."""
     channel = base_peers_info["channel"]
     n_claims = base_peers_info["n_claims"]
     n_streams = base_peers_info["n_streams"]
@@ -315,7 +315,7 @@ def search_ch_peers(channel=None, number=2, threads=32,
                            "n_streams": 0,
                            "streams_info": results}
 
-        peers_info = process_results(base_peers_info, print_msg=print_msg)
+        peers_info = process_ch_peers(base_peers_info, print_msg=print_msg)
         return peers_info
 
     results = []
@@ -351,12 +351,12 @@ def search_ch_peers(channel=None, number=2, threads=32,
             continue
         n_streams += 1
 
-    b_peers_info = {"channel": channel,
-                    "n_claims": n_claims,
-                    "n_streams": n_streams,
-                    "streams_info": results}
+    base_peers_info = {"channel": channel,
+                       "n_claims": n_claims,
+                       "n_streams": n_streams,
+                       "streams_info": results}
     print()
-    peers_info = process_results(b_peers_info, print_msg=print_msg)
+    peers_info = process_ch_peers(base_peers_info, print_msg=print_msg)
 
     if print_time:
         e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
