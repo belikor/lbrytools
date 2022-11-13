@@ -257,7 +257,9 @@ def search_ch_peers(channel=None, number=2, threads=32,
     -------
     dict
         It has many keys:
-        - 'channel': same as input `channel`
+        - 'channel': if no claims were found, it will be the same
+          as the input `channel`. If at least one claim was found,
+          it will be the canonical name of the channel such as `@channel#2c`
         - 'n_claims': same as input `number`
         - 'n_streams': number of actual streams, that is,
           claims that can be downloaded. It may be the same as `n_claims`
@@ -550,7 +552,9 @@ def list_peers(channel=None, number=2, threads=32,
     -------
     dict
         It has many keys:
-        - 'channel': same as input `channel`
+        - 'channel': if no claims were found, it will be the same
+          as the input `channel`. If at least one claim was found,
+          it will be the canonical name of the channel such as `@channel#2c`
         - 'n_claims': same as input `number`
         - 'n_streams': number of actual streams, that is,
           claims that can be downloaded. It may be the same as `n_claims`
