@@ -565,12 +565,12 @@ def get_summary(peers_info):
     return summary
 
 
-def list_peers(channel=None, number=2, threads=32,
-               print_msg=False,
-               claim_id=False, typ=True, title=False,
-               sanitize=False,
-               file=None, fdate=False, sep=";",
-               server="http://localhost:5279"):
+def list_ch_peers(channel=None, number=2, threads=32,
+                  print_msg=False,
+                  claim_id=False, typ=True, title=False,
+                  sanitize=False,
+                  file=None, fdate=False, sep=";",
+                  server="http://localhost:5279"):
     """Print the peers for the claims of a given channel.
 
     Parameters
@@ -714,6 +714,6 @@ def list_peers(channel=None, number=2, threads=32,
 
 
 if __name__ == "__main__":
-    list_peers(channel="@Luke", number=53, threads=64)
-#    list_peers(channel="@rossmanngroup", number=50, threads=64)
-#    list_peers(channel="@AlphaNerd", number=50, threads=64)
+    list_ch_peers(channel="@Luke", number=53, threads=64)
+#    list_ch_peers(channel="@rossmanngroup", number=50, threads=64)
+#    list_ch_peers(channel="@AlphaNerd", number=50, threads=64)

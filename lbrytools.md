@@ -112,8 +112,8 @@ from lbrytools import list_comments
 from lbrytools import create_comment
 from lbrytools import update_comment
 from lbrytools import abandon_comment
-from lbrytools import list_peers
 from lbrytools import list_ch_peers
+from lbrytools import list_chs_peers
 from lbrytools import list_ch_subs_peers
 from lbrytools import sync_wallet
 from lbrytools import list_lbrynet_status
@@ -1628,7 +1628,7 @@ other types such as reposts or collections will not have peers.
 We can get the peers that are hosting the latest claims of a particular channel,
 starting from the newest claim and going back in time:
 ```py
-ff = lbryt.list_peers("@GTV-Japan", number=50)
+ff = lbryt.list_ch_peers("@GTV-Japan", number=50)
 ```
 
 By default it uses maximum 32 threads to search for the peers of 32 claims
@@ -1639,15 +1639,15 @@ If we sanitize the name or title, it will remove the emojis from the output,
 which may be useful if we use the output in applications
 that don't support emojis:
 ```py
-ff = lbryt.list_peers("@fireship", number=50, threads=64,
-                      claim_id=True, typ=True, title=True,
-                      sanitize=True)
+ff = lbryt.list_ch_peers("@fireship", number=50, threads=64,
+                         claim_id=True, typ=True, title=True,
+                         sanitize=True)
 ```
 
 The summary of the peer search per claim can be printed to a file:
 ```py
-ff = lbryt.list_peers("@fireship", number=50,
-                      file="peers.txt", fdate=True, sep=";")
+ff = lbryt.list_ch_peers("@fireship", number=50,
+                         file="peers.txt", fdate=True, sep=";")
 ```
 
 [Go back to _Content_](#content)
@@ -1669,7 +1669,7 @@ channels = [
 ```
 
 ```py
-gg = lbryt.list_ch_peers(channels=channels)
+gg = lbryt.list_chs_peers(channels=channels)
 ```
 
 By using the `number` parameter, the individual numbers in `channels`
@@ -1677,7 +1677,7 @@ are overriden, so the number of claims searched for peers
 will be the same for all channels. If the list of channels is long,
 they can be shuffled so the channels and claims are searched in a random order:
 ```py
-gg = lbryt.list_ch_peers(channels=channels, number=25, shuffle=True)
+gg = lbryt.list_chs_peers(channels=channels, number=25, shuffle=True)
 ```
 
 We can specify threads for searching channels in parallel (8 by default),
@@ -1689,14 +1689,14 @@ should be decreased.
 The total number of threads shouldn't be increased too much because
 it may cause the peer search to fail completely:
 ```py
-gg = lbryt.list_ch_peers(channels=channels, number=50,
-                         ch_threads=8, claim_threads=32)
+gg = lbryt.list_chs_peers(channels=channels, number=50,
+                          ch_threads=8, claim_threads=32)
 ```
 
 The summary of the peer search per channel can be printed to a file:
 ```py
-gg = lbryt.list_ch_peers(channels=channels, number=25,
-                         file="ch_peers.txt", fdate=True, sep=";")
+gg = lbryt.list_chs_peers(channels=channels, number=25,
+                          file="ch_peers.txt", fdate=True, sep=";")
 ```
 
 [Go back to _Content_](#content)
@@ -1707,7 +1707,7 @@ We can search the peers of all channels to which we are subscribed.
 
 As the subscribed channels are not part of the blockchain data,
 this method searches the local wallet file which is read by `lbrynet`
-for the subscribed channels, then it calls `list_ch_peers` on that list.
+for the subscribed channels, then it calls `list_chs_peers` on that list.
 
 Search peers for a maximum of 50 claims for all channels
 in our subscribed list:
@@ -1873,8 +1873,8 @@ lbryt.list_comments(..., server=server)
 lbryt.create_comment(..., server=server)
 lbryt.update_comment(..., server=server)
 lbryt.abandon_comment(..., server=server)
-lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
+lbryt.list_chs_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)
 lbryt.sync_wallet(..., server=server)
 lbryt.list_lbrynet_status(..., server=server)

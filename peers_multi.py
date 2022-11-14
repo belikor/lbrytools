@@ -274,11 +274,11 @@ def print_ch_peers_info(ch_peers_info,
     print_ch_p_summary(ch_peers_info, file=None, fdate=fdate)
 
 
-def list_ch_peers(channels=None,
-                  number=None, shuffle=True,
-                  ch_threads=8, claim_threads=32,
-                  file=None, fdate=False, sep=";",
-                  server="http://localhost:5279"):
+def list_chs_peers(channels=None,
+                   number=None, shuffle=True,
+                   ch_threads=8, claim_threads=32,
+                   file=None, fdate=False, sep=";",
+                   server="http://localhost:5279"):
     """Print the summary from the peer search for multiple channels.
 
     Parameters
@@ -459,20 +459,20 @@ def list_ch_subs_peers(number=2, shuffle=False,
 
         channels.append([c_name, number])
 
-    ch_peers_info = list_ch_peers(channels=channels,
-                                  number=None, shuffle=shuffle,
-                                  ch_threads=ch_threads,
-                                  claim_threads=claim_threads,
-                                  file=file, fdate=fdate, sep=sep,
-                                  server=server)
+    ch_peers_info = list_chs_peers(channels=channels,
+                                   number=None, shuffle=shuffle,
+                                   ch_threads=ch_threads,
+                                   claim_threads=claim_threads,
+                                   file=file, fdate=fdate, sep=sep,
+                                   server=server)
 
     return ch_peers_info
 
 
 if __name__ == "__main__":
-    list_ch_peers(["@Luke"])
-    list_ch_peers(["@Luke", "@rossmanngroup"])
-    list_ch_peers([["@Luke", 3], "@rossmanngroup"])
-    list_ch_peers([["@Luke", 3], ["@rossmanngroup", 5]])
-    list_ch_peers(["@Luke", "@rossmanngroup"], number=3)
-    list_ch_peers([["@Luke", 3], ["@rossmanngroup", 5]], number=4)
+    list_chs_peers(["@Luke"])
+    list_chs_peers(["@Luke", "@rossmanngroup"])
+    list_chs_peers([["@Luke", 3], "@rossmanngroup"])
+    list_chs_peers([["@Luke", 3], ["@rossmanngroup", 5]])
+    list_chs_peers(["@Luke", "@rossmanngroup"], number=3)
+    list_chs_peers([["@Luke", 3], ["@rossmanngroup", 5]], number=4)
