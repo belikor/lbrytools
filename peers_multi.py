@@ -279,17 +279,25 @@ def print_ch_p_lines(chs_peers_info,
 
         channel = peers_info["channel"]
         channel = f'"{channel}"'
+
         n_streams = peers_info["n_streams"]
         total_size = peers_info["total_size"]
         total_seconds = peers_info["total_duration"]
         streams_with_hosts = peers_info["streams_with_hosts"]
-        unique_nodes = peers_info["unique_nodes"]
-        n_nodes = len(unique_nodes)
+        streams_with_hosts_all = peers_info["streams_with_hosts_all"]
+
+        n_nodes = len(peers_info["unique_nodes"])
+        n_trackers = len(peers_info["unique_trackers"])
 
         if peers_info["local_node"]:
             n_nodes = f"{n_nodes:3d} + 1"
         else:
             n_nodes = f"{n_nodes:3d}"
+
+        peer_ratio = peers_info["peer_ratio"]
+        peer_ratio_all = peers_info["peer_ratio_all"]
+        hosting_coverage = peers_info["hosting_coverage"] * 100
+        hosting_coverage_all = peers_info["hosting_coverage_all"] * 100
 
         total_size_gb = total_size / (1024**3)
         hr = total_seconds // 3600
@@ -297,17 +305,18 @@ def print_ch_p_lines(chs_peers_info,
         sec = (total_seconds % 3600) % 60
         duration = f"{hr:3d} h {mi:2d} min {sec:2d} s"
 
-        peer_ratio = peers_info["peer_ratio"]
-        hosting_coverage = peers_info["hosting_coverage"] * 100
-
         line = f"{num:4d}/{n_channels:4d}" + f"{sep} "
         line += f"{channel:42s}" + f"{sep} "
-        line += f"streams: {streams_with_hosts:3d}/{n_streams:3d}" + f"{sep} "
+        line += f"streams: {streams_with_hosts:3d}/{n_streams:3d} "
+        line += f"({streams_with_hosts_all:3d}/{n_streams:3d})" + f"{sep} "
         line += f"{total_size_gb:9.4f} GB" + f"{sep} "
         line += f"{duration}" + f"{sep} "
-        line += f"peers/stream: {peer_ratio:7.4f}" + f"{sep} "
-        line += f"coverage: {hosting_coverage:6.2f}%" + f"{sep} "
-        line += f"unique peers: {n_nodes}"
+        line += f"peers/stream: {peer_ratio:7.4f} "
+        line += f"({peer_ratio_all:7.4f})" + f"{sep} "
+        line += f"coverage: {hosting_coverage:6.2f}% "
+        line += f"({hosting_coverage_all:6.2f}%)" + f"{sep} "
+        line += f"unique peers: {n_nodes:7s}" + f"{sep} "
+        line += f"unique trackers: {n_trackers}"
         out.append(line)
 
     funcs.print_content(out, file=file, fdate=fdate)
@@ -396,6 +405,8 @@ def print_ch_peers_info(chs_peers_info,
     """Print the summary for the peer search of various channels."""
     print_ch_p_lines(chs_peers_info,
                      file=file, fdate=fdate, sep=sep)
+
+    print(80 * "-")
 
     print_ch_p_summary(chs_peers_info, file=None, fdate=fdate)
 
@@ -500,6 +511,8 @@ def list_chs_peers(channels=None,
                                         ch_threads=ch_threads,
                                         claim_threads=claim_threads,
                                         server=server)
+
+    print()
 
     print_ch_peers_info(chs_peers_info,
                         file=file, fdate=fdate, sep=sep)
