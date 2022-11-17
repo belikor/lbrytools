@@ -328,74 +328,55 @@ def print_ch_p_summary(chs_peers_info,
     if not chs_peers_info or len(chs_peers_info) < 0:
         return False
 
-    base_ch_peers_info = chs_peers_info["base_chs_peers_info"]
     n_channels = chs_peers_info["n_channels"]
 
-    n_streams_t = 0
-    total_size_t = 0
-    total_seconds_t = 0
-    streams_with_hosts_t = 0
-    total_peers_t = 0
-    unique_peers_t = []
-    peer_ratio_sum = 0
-    hosting_coverage_sum = 0
-    local_node_t = False
+    chs_n_streams = chs_peers_info["chs_n_streams"]
+    chs_total_size = chs_peers_info["chs_total_size"]
+    chs_total_seconds = chs_peers_info["chs_total_duration"]
+    chs_streams_with_hosts = chs_peers_info["chs_streams_with_hosts"]
+    chs_streams_with_hosts_all = chs_peers_info["chs_streams_with_hosts_all"]
+    chs_total_peers = chs_peers_info["chs_total_peers"]
+    chs_total_peers_all = chs_peers_info["chs_total_peers_all"]
 
-    for peers_info in base_ch_peers_info:
-        if not peers_info:
-            continue
+    chs_n_nodes = len(chs_peers_info["chs_unique_nodes"])
+    chs_n_trackers = len(chs_peers_info["chs_unique_trackers"])
 
-        channel = peers_info["channel"]
-        channel = f'"{channel}"'
-        n_streams = peers_info["n_streams"]
-        total_size = peers_info["total_size"]
-        total_seconds = peers_info["total_duration"]
-        streams_with_hosts = peers_info["streams_with_hosts"]
-        total_peers = peers_info["total_peers"]
-        unique_nodes = peers_info["unique_nodes"]
-        peer_ratio = peers_info["peer_ratio"]
-        hosting = peers_info["hosting_coverage"]
+    if chs_peers_info["chs_local_node"]:
+        chs_n_nodes = f"{chs_n_nodes} + 1"
 
-        n_streams_t += n_streams
-        total_size_t += total_size
-        total_seconds_t += total_seconds
-        streams_with_hosts_t += streams_with_hosts
-        total_peers_t += total_peers
+    chs_peer_ratio = chs_peers_info["chs_peer_ratio"]
+    chs_peer_ratio_all = chs_peers_info["chs_peer_ratio_all"]
+    chs_hosting_coverage = chs_peers_info["chs_hosting_coverage"] * 100
+    chs_hosting_coverage_all = chs_peers_info["chs_hosting_coverage_all"] * 100
 
-        for p in unique_nodes:
-            if p not in unique_peers_t:
-                unique_peers_t.append(p)
-
-        peer_ratio_sum += peer_ratio
-        hosting_coverage_sum += hosting
-        local_node_t = local_node_t or peers_info["local_node"]
-
-    total_size_gb_t = total_size_t / (1024**3)
-    hr_t = total_seconds_t // 3600
-    mi_t = (total_seconds_t % 3600) // 60
-    sec_t = (total_seconds_t % 3600) % 60
-    duration_t = f"{hr_t} h {mi_t} min {sec_t} s"
-
-    n_nodes_t = len(unique_peers_t)
-
-    if local_node_t:
-        n_nodes_t = f"{n_nodes_t} + 1"
-
-    peer_ratio_t = peer_ratio_sum/n_channels
-    hosting_coverage_t = hosting_coverage_sum/n_channels * 100
+    chs_total_size_gb = chs_total_size / (1024**3)
+    days = (chs_total_seconds / 3600) / 24
+    hr = chs_total_seconds // 3600
+    mi = (chs_total_seconds % 3600) // 60
+    sec = (chs_total_seconds % 3600) % 60
+    chs_duration = f"{hr} h {mi} min {sec} s, or {days:.4f} days"
 
     out = [f"Channels: {n_channels}",
-           f"Total streams: {n_streams_t}",
-           "- Total streams that have at least one host: "
-           f"{streams_with_hosts_t}",
-           f"- Total size of streams: {total_size_gb_t:.4f} GiB",
-           f"- Total duration of streams: {duration_t}",
+           f"Total streams: {chs_n_streams}",
+           "- Total streams with at least one user host: "
+           f"{chs_streams_with_hosts}",
+           "- Total streams with all types of hosts: "
+           f"{chs_streams_with_hosts_all}",
+           f"- Total size of streams: {chs_total_size_gb:.4f} GiB",
+           f"- Total duration of streams: {chs_duration}",
            "",
-           f"Total peers in all searched claims: {total_peers_t}",
-           f"Total unique peers (nodes) hosting streams: {n_nodes_t}",
-           "Total average number of peers per stream: "
-           f"{peer_ratio_t:.4f}",
-           f"Total hosting coverage: {hosting_coverage_t:.2f}%"]
+           f"Total user peers in all searched claims: {chs_total_peers}",
+           f"Total peers in all searched claims: {chs_total_peers_all}",
+           f"Total unique peers (nodes) hosting streams: {chs_n_nodes}",
+           f"Total unique tracker peers hosting streams: {chs_n_trackers}",
+           "Average number of user peers per stream per channel: "
+           f"{chs_peer_ratio:.4f}",
+           "Average number of total peers per stream per channel: "
+           f"{chs_peer_ratio_all:.4f}",
+           "Average user hosting coverage per channel: "
+           f"{chs_hosting_coverage:.2f}%",
+           "Average total hosting coverage per channel: "
+           f"{chs_hosting_coverage_all:.2f}%"]
 
     funcs.print_content(out, file=file, fdate=fdate)
 
