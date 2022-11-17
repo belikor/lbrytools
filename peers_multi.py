@@ -322,9 +322,8 @@ def print_ch_p_lines(chs_peers_info,
     funcs.print_content(out, file=file, fdate=fdate)
 
 
-def print_ch_p_summary(chs_peers_info,
-                       file=None, fdate=False):
-    """Print a summary of the results for all peers searched in channels."""
+def get_chs_summary(chs_peers_info):
+    """Calculate a summary paragraph of the peers searched in the channels."""
     if not chs_peers_info or len(chs_peers_info) < 0:
         return False
 
@@ -378,18 +377,9 @@ def print_ch_p_summary(chs_peers_info,
            "Average total hosting coverage per channel: "
            f"{chs_hosting_coverage_all:.2f}%"]
 
-    funcs.print_content(out, file=file, fdate=fdate)
+    summary = "\n".join(out)
 
-
-def print_ch_peers_info(chs_peers_info,
-                        file=None, fdate=False, sep=";"):
-    """Print the summary for the peer search of various channels."""
-    print_ch_p_lines(chs_peers_info,
-                     file=file, fdate=fdate, sep=sep)
-
-    print(80 * "-")
-
-    print_ch_p_summary(chs_peers_info, file=None, fdate=fdate)
+    return summary
 
 
 def list_chs_peers(channels=None,
@@ -481,6 +471,9 @@ def list_chs_peers(channels=None,
         - 'chs_hosting_coverage_all': average hosting coverage per channel
         - 'chs_local_node': boolean value that indicates if we are hosting
           at least one stream
+        - 'summary': a paragraph of text with the summary of the peer search
+          for the searched channels. It can be printed to the terminal
+          or displayed in other types of graphical interface.
     False
         If there is a problem it will return `False`.
     """
@@ -493,10 +486,18 @@ def list_chs_peers(channels=None,
                                         claim_threads=claim_threads,
                                         server=server)
 
-    print()
+    summary = get_chs_summary(chs_peers_info)
 
-    print_ch_peers_info(chs_peers_info,
-                        file=file, fdate=fdate, sep=sep)
+    if chs_peers_info["chs_n_streams"] > 0:
+        print()
+        print_ch_p_lines(chs_peers_info,
+                         file=file, fdate=fdate, sep=sep)
+
+    print(80 * "-")
+
+    funcs.print_content([summary], file=None, fdate=False)
+
+    chs_peers_info["summary"] = summary
 
     return chs_peers_info
 
@@ -603,6 +604,9 @@ def list_ch_subs_peers(number=2, shuffle=False,
         - 'chs_hosting_coverage_all': average hosting coverage per channel
         - 'chs_local_node': boolean value that indicates if we are hosting
           at least one stream
+        - 'summary': a paragraph of text with the summary of the peer search
+          for the searched channels. It can be printed to the terminal
+          or displayed in other types of graphical interface.
     False
         If there is a problem it will return `False`.
     """

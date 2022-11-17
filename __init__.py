@@ -152,7 +152,6 @@ from lbrytools.comments import abandon_comment
 
 from lbrytools.peers import list_ch_peers
 from lbrytools.peers_multi import list_chs_peers
-from lbrytools.peers_multi import print_ch_p_summary
 from lbrytools.peers_multi import list_ch_subs_peers
 
 # Use of the modules so that code checkers don't complain (flake8)
@@ -254,5 +253,4 @@ True if abandon_comment else False
 
 True if list_ch_peers else False
 True if list_chs_peers else False
-True if print_ch_p_summary else False
 True if list_ch_subs_peers else False
