@@ -28,8 +28,103 @@ import concurrent.futures as fts
 import time
 
 import lbrytools.funcs as funcs
-import lbrytools.peers as peers
+import lbrytools.peers as prs
 import lbrytools.channels as chs
+
+
+def process_chs_peers(base_chs_peers_info, print_msg=False):
+    """Process the base results from the channels peer search."""
+    if not base_chs_peers_info or len(base_chs_peers_info) < 0:
+        return False
+
+    n_channels = len(base_chs_peers_info)
+
+    chs_n_streams = 0
+    chs_total_size = 0
+    chs_total_seconds = 0
+    chs_streams_with_hosts = 0
+    chs_streams_with_hosts_all = 0
+    chs_total_peers = 0
+    chs_total_peers_all = 0
+    u_nodes_id = []
+    chs_unique_nodes = []
+    u_trackers_addr = []
+    chs_unique_trackers = []
+
+    peer_ratio_sum = 0.0
+    peer_ratio_all_sum = 0.0
+    hosting_coverage_sum = 0.0
+    hosting_coverage_all_sum = 0.0
+
+    chs_local_node = False
+
+    for peers_info in base_chs_peers_info:
+        if not peers_info:
+            continue
+
+        n_streams = peers_info["n_streams"]
+        total_size = peers_info["total_size"]
+        total_seconds = peers_info["total_duration"]
+        streams_with_hosts = peers_info["streams_with_hosts"]
+        streams_with_hosts_all = peers_info["streams_with_hosts_all"]
+        total_peers = peers_info["total_peers"]
+        total_peers_all = peers_info["total_peers_all"]
+        unique_nodes = peers_info["unique_nodes"]
+        unique_trackers = peers_info["unique_trackers"]
+        peer_ratio = peers_info["peer_ratio"]
+        peer_ratio_all = peers_info["peer_ratio_all"]
+        hosting = peers_info["hosting_coverage"]
+        hosting_all = peers_info["hosting_coverage_all"]
+
+        chs_n_streams += n_streams
+        chs_total_size += total_size
+        chs_total_seconds += total_seconds
+        chs_streams_with_hosts += streams_with_hosts
+        chs_streams_with_hosts_all += streams_with_hosts_all
+        chs_total_peers += total_peers
+        chs_total_peers_all += total_peers_all
+
+        for peer in unique_nodes:
+            node = peer["node_id"]
+
+            if node not in u_nodes_id:
+                u_nodes_id.append(node)
+                chs_unique_nodes.append(peer)
+
+        for peer in unique_trackers:
+            address = peer["address"]
+
+            if address not in u_trackers_addr:
+                u_trackers_addr.append(address)
+                chs_unique_trackers.append(peer)
+
+        peer_ratio_sum += peer_ratio
+        peer_ratio_all_sum += peer_ratio_all
+        hosting_coverage_sum += hosting
+        hosting_coverage_all_sum += hosting_all
+        chs_local_node = chs_local_node or peers_info["local_node"]
+
+    chs_peer_ratio = peer_ratio_sum/n_channels
+    chs_peer_ratio_all = peer_ratio_all_sum/n_channels
+    chs_hosting_coverage = hosting_coverage_sum/n_channels
+    chs_hosting_coverage_all = hosting_coverage_all_sum/n_channels
+
+    return {"base_chs_peers_info": base_chs_peers_info,
+            "n_channels": n_channels,
+            "chs_n_streams": chs_n_streams,
+            "chs_total_size": chs_total_size,
+            "chs_total_duration": chs_total_seconds,
+            "chs_streams_with_hosts": chs_streams_with_hosts,
+            "chs_streams_with_hosts_all": chs_streams_with_hosts_all,
+            "chs_total_peers": chs_total_peers,
+            "chs_total_peers_all": chs_total_peers_all,
+            "chs_unique_nodes": chs_unique_nodes,
+            "chs_unique_trackers": chs_unique_trackers,
+            "chs_peer_ratio": chs_peer_ratio,
+            "chs_peer_ratio_all": chs_peer_ratio_all,
+            "chs_hosting_coverage": chs_hosting_coverage,
+            "chs_hosting_coverage_all": chs_hosting_coverage_all,
+            "chs_local_node": chs_local_node}
 
 
 def ch_search_ch_peers(channels=None,
@@ -94,7 +189,7 @@ def ch_search_ch_peers(channels=None,
     if not processed_chs or len(processed_chs) < 1:
         return False
 
-    ch_peers_info = []
+    base_chs_peers_info = []
 
     # Iterables to be passed to the ThreadPoolExecutor
     n_channels = len(processed_chs)
@@ -108,44 +203,47 @@ def ch_search_ch_peers(channels=None,
     if ch_threads:
         with fts.ThreadPoolExecutor(max_workers=ch_threads) as executor:
             # The input must be iterables
-            results = executor.map(peers.search_ch_peers,
+            results = executor.map(prs.search_ch_peers,
                                    chns, numbers, c_threads,
                                    falses, falses2, servers)
             print(f"Channel-peer search; max threads: {ch_threads}")
-            ch_peers_info = list(results)  # generator to list
+            base_chs_peers_info = list(results)  # generator to list
     else:
         for num, processed in enumerate(processed_chs, start=1):
             channel = processed["channel"]
             number = processed["number"]
 
             print(f"Channel {num}/{n_channels}, {channel}")
-            peers_info = peers.search_ch_peers(channel=channel,
-                                               number=number,
-                                               threads=claim_threads,
-                                               print_time=False,
-                                               print_msg=False,
-                                               server=server)
+            peers_info = prs.search_ch_peers(channel=channel,
+                                             number=number,
+                                             threads=claim_threads,
+                                             print_time=False,
+                                             print_msg=False,
+                                             server=server)
             print()
-            ch_peers_info.append(peers_info)
+            base_chs_peers_info.append(peers_info)
+
+    chs_peers_info = process_chs_peers(base_chs_peers_info)
 
     e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
     print(f"start: {s_time}")
     print(f"end:   {e_time}")
 
-    return ch_peers_info
+    return chs_peers_info
 
 
-def print_ch_p_lines(ch_peers_info,
+def print_ch_p_lines(chs_peers_info,
                      file=None, fdate=False, sep=";"):
     """Print a summary for each channel in a peer search."""
-    if not ch_peers_info or len(ch_peers_info) < 0:
+    if not chs_peers_info or len(chs_peers_info) < 0:
         return False
 
-    n_channels = len(ch_peers_info)
+    base_ch_peers_info = chs_peers_info["base_chs_peers_info"]
+    n_channels = chs_peers_info["n_channels"]
 
     out = []
 
-    for num, peers_info in enumerate(ch_peers_info, start=1):
+    for num, peers_info in enumerate(base_ch_peers_info, start=1):
         if not peers_info:
             line = f"{num:4d}/{n_channels:4d}" + f"{sep} "
             line += '"None"'
@@ -188,13 +286,14 @@ def print_ch_p_lines(ch_peers_info,
     funcs.print_content(out, file=file, fdate=fdate)
 
 
-def print_ch_p_summary(ch_peers_info,
+def print_ch_p_summary(chs_peers_info,
                        file=None, fdate=False):
     """Print a summary of the results for all peers searched in channels."""
-    if not ch_peers_info or len(ch_peers_info) < 0:
+    if not chs_peers_info or len(chs_peers_info) < 0:
         return False
 
-    n_channels = len(ch_peers_info)
+    base_ch_peers_info = chs_peers_info["base_chs_peers_info"]
+    n_channels = chs_peers_info["n_channels"]
 
     n_streams_t = 0
     total_size_t = 0
@@ -206,7 +305,7 @@ def print_ch_p_summary(ch_peers_info,
     hosting_coverage_sum = 0
     local_node_t = False
 
-    for peers_info in ch_peers_info:
+    for peers_info in base_ch_peers_info:
         if not peers_info:
             continue
 
@@ -265,13 +364,13 @@ def print_ch_p_summary(ch_peers_info,
     funcs.print_content(out, file=file, fdate=fdate)
 
 
-def print_ch_peers_info(ch_peers_info,
+def print_ch_peers_info(chs_peers_info,
                         file=None, fdate=False, sep=";"):
     """Print the summary for the peer search of various channels."""
-    print_ch_p_lines(ch_peers_info,
+    print_ch_p_lines(chs_peers_info,
                      file=file, fdate=fdate, sep=sep)
 
-    print_ch_p_summary(ch_peers_info, file=None, fdate=fdate)
+    print_ch_p_summary(chs_peers_info, file=None, fdate=fdate)
 
 
 def list_chs_peers(channels=None,
@@ -342,16 +441,16 @@ def list_chs_peers(channels=None,
     if not funcs.server_exists(server=server):
         return False
 
-    ch_peers_info = ch_search_ch_peers(channels=channels,
-                                       number=number, shuffle=shuffle,
-                                       ch_threads=ch_threads,
-                                       claim_threads=claim_threads,
-                                       server=server)
+    chs_peers_info = ch_search_ch_peers(channels=channels,
+                                        number=number, shuffle=shuffle,
+                                        ch_threads=ch_threads,
+                                        claim_threads=claim_threads,
+                                        server=server)
 
-    print_ch_peers_info(ch_peers_info,
+    print_ch_peers_info(chs_peers_info,
                         file=file, fdate=fdate, sep=sep)
 
-    return ch_peers_info
+    return chs_peers_info
 
 
 def list_ch_subs_peers(number=2, shuffle=False,
@@ -459,14 +558,14 @@ def list_ch_subs_peers(number=2, shuffle=False,
 
         channels.append([c_name, number])
 
-    ch_peers_info = list_chs_peers(channels=channels,
-                                   number=None, shuffle=shuffle,
-                                   ch_threads=ch_threads,
-                                   claim_threads=claim_threads,
-                                   file=file, fdate=fdate, sep=sep,
-                                   server=server)
+    chs_peers_info = list_chs_peers(channels=channels,
+                                    number=None, shuffle=shuffle,
+                                    ch_threads=ch_threads,
+                                    claim_threads=claim_threads,
+                                    file=file, fdate=fdate, sep=sep,
+                                    server=server)
 
-    return ch_peers_info
+    return chs_peers_info
 
 
 if __name__ == "__main__":
