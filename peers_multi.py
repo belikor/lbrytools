@@ -174,9 +174,36 @@ def ch_search_ch_peers(channels=None,
 
     Returns
     -------
-    list of dict
-        Each element of the list is the output of `peers.search_ch_peers`,
-        with the peer information of every channel.
+    dict
+        It has many keys:
+        - 'base_chs_peers_info': list of dict; each element of the list
+          is the output of `peers.search_ch_peers` corresponding
+          to each channel
+        - 'n_channels': total number of channels
+        - 'chs_n_streams': number of all streams in all channels searched
+        - 'chs_total_size': total size of all streams searched in all channels
+        - 'chs_total_duration': total duration of all streams searched
+          in all channels
+        - 'chs_streams_with_hosts': total number of streams
+          with at least one user host in all channels
+        - 'chs_streams_with_hosts_all': total number of streams
+          with at least one host in all channels
+        - 'chs_total_peers': total number of user peers
+          in all searched streams in all channels
+        - 'chs_total_peers_all': total number of peers
+          in all searched streams in all channels
+        - 'chs_unique_nodes': list of unique user peers
+          in all searched streams in all channels
+        - 'chs_unique_trackers': list of unique tracker peers
+          in all searched streams in all channels
+        - 'chs_peer_ratio': average number of user peers per stream
+          per channel
+        - 'chs_peer_ratio_all': average number of total peers per stream
+          per channel
+        - 'chs_hosting_coverage': average user hosting coverage per channel
+        - 'chs_hosting_coverage_all': average hosting coverage per channel
+        - 'chs_local_node': boolean value that indicates if we are hosting
+          at least one stream
     """
     if not funcs.server_exists(server=server):
         return False
@@ -432,9 +459,36 @@ def list_chs_peers(channels=None,
 
     Returns
     -------
-    list of dict
-        Each element of the list is the output of `peers.search_ch_peers`,
-        with the peer information of every channel.
+    dict
+        It has many keys:
+        - 'base_chs_peers_info': list of dict; each element of the list
+          is the output of `peers.search_ch_peers` corresponding
+          to each channel
+        - 'n_channels': total number of channels
+        - 'chs_n_streams': number of all streams in all channels searched
+        - 'chs_total_size': total size of all streams searched in all channels
+        - 'chs_total_duration': total duration of all streams searched
+          in all channels
+        - 'chs_streams_with_hosts': total number of streams
+          with at least one user host in all channels
+        - 'chs_streams_with_hosts_all': total number of streams
+          with at least one host in all channels
+        - 'chs_total_peers': total number of user peers
+          in all searched streams in all channels
+        - 'chs_total_peers_all': total number of peers
+          in all searched streams in all channels
+        - 'chs_unique_nodes': list of unique user peers
+          in all searched streams in all channels
+        - 'chs_unique_trackers': list of unique tracker peers
+          in all searched streams in all channels
+        - 'chs_peer_ratio': average number of user peers per stream
+          per channel
+        - 'chs_peer_ratio_all': average number of total peers per stream
+          per channel
+        - 'chs_hosting_coverage': average user hosting coverage per channel
+        - 'chs_hosting_coverage_all': average hosting coverage per channel
+        - 'chs_local_node': boolean value that indicates if we are hosting
+          at least one stream
     False
         If there is a problem it will return `False`.
     """
@@ -525,9 +579,36 @@ def list_ch_subs_peers(number=2, shuffle=False,
 
     Returns
     -------
-    list of dict
-        Each element of the list is the output of `peers.search_ch_peers`,
-        with the peer information of every channel.
+    dict
+        It has many keys:
+        - 'base_chs_peers_info': list of dict; each element of the list
+          is the output of `peers.search_ch_peers` corresponding
+          to each channel
+        - 'n_channels': total number of channels
+        - 'chs_n_streams': number of all streams in all channels searched
+        - 'chs_total_size': total size of all streams searched in all channels
+        - 'chs_total_duration': total duration of all streams searched
+          in all channels
+        - 'chs_streams_with_hosts': total number of streams
+          with at least one user host in all channels
+        - 'chs_streams_with_hosts_all': total number of streams
+          with at least one host in all channels
+        - 'chs_total_peers': total number of user peers
+          in all searched streams in all channels
+        - 'chs_total_peers_all': total number of peers
+          in all searched streams in all channels
+        - 'chs_unique_nodes': list of unique user peers
+          in all searched streams in all channels
+        - 'chs_unique_trackers': list of unique tracker peers
+          in all searched streams in all channels
+        - 'chs_peer_ratio': average number of user peers per stream
+          per channel
+        - 'chs_peer_ratio_all': average number of total peers per stream
+          per channel
+        - 'chs_hosting_coverage': average user hosting coverage per channel
+        - 'chs_hosting_coverage_all': average hosting coverage per channel
+        - 'chs_local_node': boolean value that indicates if we are hosting
+          at least one stream
     False
         If there is a problem it will return `False`.
     """
