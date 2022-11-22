@@ -28,7 +28,7 @@ import concurrent.futures as fts
 import time
 
 import lbrytools.funcs as funcs
-import lbrytools.peers as prs
+import lbrytools.peers_ch as peers_ch
 import lbrytools.channels as chs
 
 
@@ -230,7 +230,7 @@ def ch_search_ch_peers(channels=None,
     if ch_threads:
         with fts.ThreadPoolExecutor(max_workers=ch_threads) as executor:
             # The input must be iterables
-            results = executor.map(prs.search_ch_peers,
+            results = executor.map(peers_ch.search_ch_peers,
                                    chns, numbers, c_threads,
                                    falses, falses2, servers)
             print(f"Channel-peer search; max threads: {ch_threads}")
@@ -241,12 +241,12 @@ def ch_search_ch_peers(channels=None,
             number = processed["number"]
 
             print(f"Channel {num}/{n_channels}, {channel}")
-            peers_info = prs.search_ch_peers(channel=channel,
-                                             number=number,
-                                             threads=claim_threads,
-                                             print_time=False,
-                                             print_msg=False,
-                                             server=server)
+            peers_info = peers_ch.search_ch_peers(channel=channel,
+                                                  number=number,
+                                                  threads=claim_threads,
+                                                  print_time=False,
+                                                  print_msg=False,
+                                                  server=server)
             print()
             base_chs_peers_info.append(peers_info)
 

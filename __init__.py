@@ -150,7 +150,7 @@ from lbrytools.comments import create_comment
 from lbrytools.comments import update_comment
 from lbrytools.comments import abandon_comment
 
-from lbrytools.peers import list_ch_peers
+from lbrytools.peers_ch import list_ch_peers
 from lbrytools.peers_multi import list_chs_peers
 from lbrytools.peers_multi import list_ch_subs_peers
 
