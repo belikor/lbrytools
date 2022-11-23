@@ -143,9 +143,11 @@ def search_item_uri(uri=None, repost=True,
         if print_error:
             error = item["error"]
             if "name" in error:
-                print(">>> Error: {}, {}".format(error["name"], error["text"]))
+                name_err = error["name"]
+                text_err = error["text"]
+                print(f">>> Error: {name_err}, {text_err}")
             else:
-                print(">>> Error: {}".format(error))
+                print(f">>> Error: {error}")
             print(">>> Check that the URI is correct, "
                   "or that the claim hasn't been removed from the network.")
         return False
@@ -260,7 +262,21 @@ def search_item_cid(cid=None, name=None, offline=False, repost=True,
 
     data = output["result"]
 
-    if data["total_items"] <= 0:
+    if "blocked" in data and data["blocked"]["total"] > 0:
+        chs = data["blocked"]["channels"]
+        blks = []
+
+        for blocking in chs:
+            blk = blocking["channel"]["canonical_url"].split("lbry://")[1]
+            blks.append(blk)
+
+        ch = " ; ".join(blks)
+
+        print(">>> Claim blocked by hub.")
+        print(f">>> Blocking channel: {ch}")
+        return False
+
+    if data["total_items"] < 1:
         if print_error:
             if cid:
                 print(">>> No item found.")
@@ -475,3 +491,15 @@ def parse_claim_file(file=None, sep=";", start=1, end=0):
     n_claims = len(claims)
     print(f"Effective claims found: {n_claims}")
     return claims
+
+
+if __name__ == "__main__":
+    s = search_item(uri="dsnt-exist")
+    print()
+    s = search_item(uri="LUKAS-LION---1984#b")
+    print()
+    s = search_item(cid="b7c7082fd52a5b932b6f08c83645ac808b6ba801")
+    print()
+    s = search_item(name="LUKAS-LION---1984")
+    print()
+    s = search_item(cid="wwwzyx")
