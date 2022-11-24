@@ -150,6 +150,7 @@ from lbrytools.comments import create_comment
 from lbrytools.comments import update_comment
 from lbrytools.comments import abandon_comment
 
+from lbrytools.peers_claims import list_peers
 from lbrytools.peers_ch import list_ch_peers
 from lbrytools.peers_multi import list_chs_peers
 from lbrytools.peers_multi import list_ch_subs_peers
@@ -251,6 +252,7 @@ True if create_comment else False
 True if update_comment else False
 True if abandon_comment else False
 
+True if list_peers else False
 True if list_ch_peers else False
 True if list_chs_peers else False
 True if list_ch_subs_peers else False

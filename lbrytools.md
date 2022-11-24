@@ -46,6 +46,7 @@
     - [Update comments](#update-comments)
     - [Abandon comments](#abandon-comments)
 - [Peers](#peers)
+    - [Peers in a single claim](#peers-in-a-single-claim)
     - [Peers in a single channel](#peers-in-a-single-channel)
     - [Peers in multiple channels](#peers-in-multiple-channels)
     - [Peers in subscribed channels](#peers-in-subscribed-channels)
@@ -112,6 +113,7 @@ from lbrytools import list_comments
 from lbrytools import create_comment
 from lbrytools import update_comment
 from lbrytools import abandon_comment
+from lbrytools import list_peers
 from lbrytools import list_ch_peers
 from lbrytools import list_chs_peers
 from lbrytools import list_ch_subs_peers
@@ -1619,7 +1621,41 @@ ab = lbryt.abandon_comment("...",
 The LBRY network allows anybody to host downloaded files and share them
 with the rest of the peers in the network.
 Only claims that can be downloaded (streams) will have peers,
-other types such as reposts or collections will not have peers.
+other types such as channels, reposts or collections will not have peers.
+
+[Go back to _Content_](#content)
+
+### Peers in a single claim
+
+We can get the peers that are hosting a particular claim provided by URI,
+claim ID, or just name:
+```py
+uu = lbryt.list_peers(uri="but-what-is-a-neural-network-deep:f")
+uu = lbryt.list_peers(cid="095962495000d8b052da48649e80ef664f2fab27")
+```
+
+The output will present various types of information on the claim,
+such as duration, size, `sd_hash`, and the number of user and tracker peers.
+
+If we want to produce a single line of information, we can use `inline=True`;
+then we can control whether we print the claim ID, the type of claim,
+or the title of the claim.
+If we use the `sanitize` option, it will remove the emojis from the output,
+which may be useful if we use the output in applications
+that don't support emojis:
+```
+py
+uu = lbryt.list_peers("vim-alchemy-with-macros",
+                      inline=True,
+                      claim_id=True, typ=True, title=True,
+                      sanitize=True)
+```
+
+The output can be printed to a file:
+```py
+uu = lbryt.list_peers("ai-generated-artwork-takes-first-place:1",
+                      file="peers.txt", fdate=True, sep=";")
+```
 
 [Go back to _Content_](#content)
 
@@ -1880,6 +1916,7 @@ lbryt.list_comments(..., server=server)
 lbryt.create_comment(..., server=server)
 lbryt.update_comment(..., server=server)
 lbryt.abandon_comment(..., server=server)
+lbryt.list_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
 lbryt.list_chs_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)
