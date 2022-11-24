@@ -47,6 +47,7 @@
     - [Abandon comments](#abandon-comments)
 - [Peers](#peers)
     - [Peers in a single claim](#peers-in-a-single-claim)
+    - [Peers in multiple claims](#peers-in-multiple-claims)
     - [Peers in a single channel](#peers-in-a-single-channel)
     - [Peers in multiple channels](#peers-in-multiple-channels)
     - [Peers in subscribed channels](#peers-in-subscribed-channels)
@@ -114,6 +115,7 @@ from lbrytools import create_comment
 from lbrytools import update_comment
 from lbrytools import abandon_comment
 from lbrytools import list_peers
+from lbrytools import list_m_peers
 from lbrytools import list_ch_peers
 from lbrytools import list_chs_peers
 from lbrytools import list_ch_subs_peers
@@ -1659,6 +1661,48 @@ uu = lbryt.list_peers("ai-generated-artwork-takes-first-place:1",
 
 [Go back to _Content_](#content)
 
+### Peers in multiple claims
+
+We can get the peers from a list of claims:
+```py
+claims = ["vim-alchemy-with-macros#b",
+          "ai-generated-artwork-takes-first-place:1",
+          "thanksgivingroundup:7",
+          "did-elon-musk-just-save-free-speech:1",
+          "83a23b2e2f20bf9af0d46ad38132e745c35d9ff4",
+          "uncharted-expleened:b"]
+
+vv = lbryt.list_m_peers(claims=claims)
+```
+
+By default it uses maximum 32 threads to search for the peers
+in parallel but we can increase or reduce this value.
+We can also choose to display the claim ID of the claims, their type,
+and show their titles instead of the claim name.
+If we sanitize the name or title, it will remove the emojis from the output,
+which may be useful if we use the output in applications
+that don't support emojis:
+```py
+vv = lbryt.list_m_peers(claims=claims, threads=64,
+                        claim_id=True, typ=True, title=True,
+                        sanitize=True)
+```
+
+By default the peer search summary of each claim is printed in its own line
+but we can choose to print a small paragraph for each claim instead,
+by setting `inline=False`:
+```
+vv = lbryt.list_m_peers(claims=claims, inline=False)
+```
+
+The peer search summary of each claim can be printed to a file:
+```py
+vv = lbryt.list_m_peers(claims=claims,
+                        file="claims_peers.txt", fdate=True, sep=";")
+```
+
+[Go back to _Content_](#content)
+
 ### Peers in a single channel
 
 We can get the peers that are hosting the latest claims of a particular channel,
@@ -1917,6 +1961,7 @@ lbryt.create_comment(..., server=server)
 lbryt.update_comment(..., server=server)
 lbryt.abandon_comment(..., server=server)
 lbryt.list_peers(..., server=server)
+lbryt.list_m_peers(..., server=server)
 lbryt.list_ch_peers(..., server=server)
 lbryt.list_chs_peers(..., server=server)
 lbryt.list_ch_subs_peers(..., server=server)
