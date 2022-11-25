@@ -29,7 +29,7 @@ import time
 
 import lbrytools.funcs as funcs
 import lbrytools.search_ch as srch_ch
-import lbrytools.peers as prs
+import lbrytools.peers_base as prs
 
 
 def process_ch_peers(base_peers_info, print_msg=False):

@@ -23,11 +23,12 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER         #
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
-"""Functions to get the peer list of all claims from a single channel.
+"""Base functions to get the list of peers of a downloadable claim (stream).
 
-It uses `peer_list` to get the peers that have the blobs of a single claim.
-In this way we can determine if many users are currently seeding the claims
-from a channel.
+It uses `peer_list` with the `sd_hash` of a claim to find the peers online.
+
+These methods are used by other methods that find the list of peers
+of a single claim, multiple claims, a channel, or multiple channels.
 
 Originally based on @miko:f/peer-lister:9
 """
