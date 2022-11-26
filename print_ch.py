@@ -336,7 +336,7 @@ def print_ch_claims(channel,
                     start=1, end=0,
                     reverse=False,
                     last_height=99_000_900,
-                    file=None, fdate=None, sep=";",
+                    file=None, fdate=False, sep=";",
                     server="http://localhost:5279"):
     """Print the claims from a single clannel.
 

@@ -134,7 +134,7 @@ def get_bdir(server="http://localhost:5279"):
     return blobdir
 
 
-def print_content(output_list, file=None, fdate=None):
+def print_content(output_list, file=None, fdate=False):
     """Print contents to the terminal or to a file."""
     fd = 0
 

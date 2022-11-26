@@ -358,7 +358,7 @@ def list_ch_subs_peers(number=2, shuffle=False,
                        start=1, end=0,
                        shared=True, valid=True,
                        ch_threads=32, claim_threads=16,
-                       file=None, fdate=None, sep=";",
+                       file=None, fdate=False, sep=";",
                        server="http://localhost:5279"):
     """Print the summary of peers for claims for subscribed channels.
 

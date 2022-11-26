@@ -475,7 +475,7 @@ def print_p_summary(peers_info,
 def print_peers_info(peers_info,
                      claim_id=False, typ=False, title=False,
                      sanitize=False,
-                     file=None, fdate=None, sep=";"):
+                     file=None, fdate=False, sep=";"):
     """Print the summary lines and paragraph of the peer search."""
     print_p_lines(peers_info,
                   cid=claim_id, typ=typ, title=title,
@@ -489,7 +489,7 @@ def list_peers(channel=None, number=2, threads=32,
                print_msg=False,
                claim_id=False, typ=True, title=False,
                sanitize=False,
-               file=None, fdate=None, sep=";",
+               file=None, fdate=False, sep=";",
                server="http://localhost:5279"):
     """Print the peers for the claims of a given channel.
 

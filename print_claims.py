@@ -34,7 +34,7 @@ import lbrytools.funcs as funcs
 
 def print_tr_claims(claims,
                     claim_id=False, sanitize=False,
-                    file=None, fdate=None, sep=";"):
+                    file=None, fdate=False, sep=";"):
     """Print generic claims, particularly trending or searched claims."""
     n_claims = len(claims)
 
@@ -86,7 +86,7 @@ def print_sch_claims(claims,
                      title=False, sanitize=False,
                      start=1, end=0,
                      reverse=False,
-                     file=None, fdate=None, sep=";"):
+                     file=None, fdate=False, sep=";"):
     """Print the provided list of claims, particularly those from a channel."""
     n_claims = len(claims)
 

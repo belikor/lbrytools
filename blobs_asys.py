@@ -267,7 +267,7 @@ def analyze_blobs(blobfiles=None, channel=None,
         if len(rem_blob) != 96:
             out.append(rem_blob)
 
-    funcs.print_content(out, file=None, fdate=None)
+    funcs.print_content(out, file=None, fdate=False)
 
     return {"claims_blobs_complete": claims_blobs_complete,
             "claims_blobs_incomplete": claims_blobs_incomplete,
@@ -507,7 +507,7 @@ def analyze_channel(blobfiles=None, channel=None,
         out.append(f"start: {s_time}")
         out.append(f"end:   {e_time}")
 
-        funcs.print_content(out, file=None, fdate=None)
+        funcs.print_content(out, file=None, fdate=False)
 
     return {"channel": channel,
             "complete_claims": n_claims_complete,

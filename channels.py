@@ -233,7 +233,7 @@ def search_ch_subs(shared=True,
 
 def print_ch_subs(channels=None,
                   claim_id=False,
-                  file=None, fdate=None, sep=";"):
+                  file=None, fdate=False, sep=";"):
     """Print channels found from the subscriptions."""
     out = []
     n_channels = len(channels)
