@@ -24,7 +24,9 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help with searching claims in the LBRY network."""
+import concurrent.futures as fts
 import os
+
 import requests
 
 import lbrytools.funcs as funcs
@@ -391,6 +393,66 @@ def search_item(uri=None, cid=None, name=None, offline=False, repost=True,
         print(f">>> name={name}")
 
     return item
+
+
+def search_th(claim,
+              server="http://localhost:5279"):
+    """Method to resolve a claim using threads."""
+    result = search_item(uri=claim, repost=True,
+                         print_error=False,
+                         server=server)
+
+    if not result:
+        result = search_item(cid=claim, repost=True,
+                             print_error=False,
+                             server=server)
+
+    return {"original": claim,
+            "resolved": result}
+
+
+def resolve_claims(claims, threads=32,
+                   server="http://localhost:5279"):
+    """Resolve a list of claims, whether claim IDs or URLs are given.
+
+    First it tries resolving the item by URL, and if that fails it tries
+    by claim ID.
+
+    Returns
+    -------
+    list of dict
+        It returns a list of dictionaries, one for each claim
+        in the input list. Each dictionary has two keys:
+        - 'original': original input URL or claim ID (40-digit alphanumeric)
+        - 'resolved': the resolved information of the claim, if it was found,
+          or the value `False` if it was not found.
+
+    False
+        If there is a problem or non existing `file`,
+        it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    resolved = []
+    n_claims = len(claims)
+
+    servers = (server for n in range(n_claims))
+
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            # The input must be iterables
+            results = executor.map(search_th,
+                                   claims, servers)
+
+            resolved = list(results)  # generator to list
+    else:
+        for claim in claims:
+            res = search_th(claim, server=server)
+
+            resolved.append(res)
+
+    return resolved
 
 
 def parse_claim_file(file=None, sep=";", start=1, end=0):
