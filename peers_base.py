@@ -34,6 +34,7 @@ Originally based on @miko:f/peer-lister:9
 """
 import os
 import json
+import time
 
 import requests
 
@@ -344,6 +345,100 @@ def get_summary(peers_info, channel=False):
 
     if channel and ch:
         out.insert(0, f"Channel: {ch}")
+
+    summary = "\n".join(out)
+
+    return summary
+
+
+def get_claim_summary(stream_info,
+                      cid=False, typ=True, title=False,
+                      inline=False, sanitize=False,
+                      sep=";"):
+    """Calculate a line of text or paragraph of a single claim peer search."""
+    stream = stream_info["stream"]
+    size = stream_info["size"]
+    seconds = stream_info["duration"]
+    local_node = stream_info["local_node"]
+    local_node = f"{local_node}"
+
+    uri = stream["canonical_url"]
+    name = stream["name"]
+    claim_id = stream["claim_id"]
+    n_peers_tracker = len(stream_info["peers_tracker"])
+    n_peers_user = len(stream_info["peers_user"])
+
+    rels_time = int(stream["value"].get("release_time", 0))
+
+    if not rels_time:
+        rels_time = 8 * "_"
+    else:
+        rels_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
+                                  time.gmtime(rels_time))
+
+    create_time = stream["meta"].get("creation_timestamp", 0)
+    create_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
+                                time.gmtime(create_time))
+
+    if "source" not in stream["value"]:
+        sd_hash = 8 * "_"
+    else:
+        sd_hash = stream["value"]["source"]["sd_hash"]
+
+    claim_title = stream["value"].get("title", "(no title)")
+
+    if title:
+        name = stream["value"].get("title") or name
+
+    if sanitize:
+        name = funcs.sanitize_text(name)
+        claim_title = funcs.sanitize_text(claim_title)
+
+    vtype = stream["value_type"]
+
+    stream_type = stream["value"].get("stream_type", 8 * "_")
+
+    name = f'"{name}"'
+    mi = seconds // 60
+    sec = seconds % 60
+    duration = f"{mi:3d}:{sec:02d}"
+    size_mb = size / (1024**2)
+
+    if rels_time == 8 * "_":
+        line = create_time + f"{sep} "
+    else:
+        line = rels_time + f"{sep} "
+
+    if cid:
+        line += f"{claim_id}" + f"{sep} "
+
+    if typ:
+        line += f"{vtype:10s}" + f"{sep} "
+        line += f"{stream_type:9s}" + f"{sep} "
+
+    line += f"{duration}" + f"{sep} "
+    line += f"{size_mb:9.4f} MB" + f"{sep} "
+
+    line += f"peers: {n_peers_user:2d} ({n_peers_tracker:2d})" + f"{sep} "
+    line += f"hosted: {local_node:5s}" + f"{sep} "
+    line += f"{name}"
+
+    if inline:
+        out = [line]
+    else:
+        out = [f"canonical_url: {uri}",
+               f"claim_id: {claim_id}",
+               f"title: {claim_title}",
+               f"release_time:  {rels_time}",
+               f"creation_time: {create_time}",
+               f"value_type: {vtype}",
+               f"stream_type: {stream_type}",
+               f"size: {size_mb:.4f} MB",
+               f"duration: {mi} min {sec} s",
+               f"sd_hash: {sd_hash}",
+               f"user peers: {n_peers_user}",
+               f"tracker peers: {n_peers_tracker}",
+               f"locally hosted: {local_node}"]
 
     summary = "\n".join(out)
 
