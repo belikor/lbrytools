@@ -292,3 +292,59 @@ def process_claims_peers(base_peers_info,
         peers_info["channel"] = ch
 
     return peers_info
+
+
+def get_summary(peers_info, channel=False):
+    """Calculate a summary paragraph of the results from the peer search."""
+    if channel:
+        ch = peers_info.get("channel", None)
+
+    n_claims = peers_info["n_claims"]
+    n_streams = peers_info["n_streams"]
+    total_size = peers_info["total_size"]
+    total_seconds = peers_info["total_duration"]
+    streams_with_hosts = peers_info["streams_with_hosts"]
+    streams_with_hosts_all = peers_info["streams_with_hosts_all"]
+    total_peers = peers_info["total_peers"]
+    total_peers_all = peers_info["total_peers_all"]
+
+    n_nodes = len(peers_info["unique_nodes"])
+    n_trackers = len(peers_info["unique_trackers"])
+
+    if peers_info["local_node"]:
+        n_nodes = f"{n_nodes} + 1"
+
+    peer_ratio = peers_info["peer_ratio"]
+    peer_ratio_all = peers_info["peer_ratio_all"]
+    hosting_coverage = peers_info["hosting_coverage"] * 100
+    hosting_coverage_all = peers_info["hosting_coverage_all"] * 100
+
+    total_size_gb = total_size / (1024**3)
+    days = (total_seconds / 3600) / 24
+    hr = total_seconds // 3600
+    mi = (total_seconds % 3600) // 60
+    sec = (total_seconds % 3600) % 60
+    duration = f"{hr} h {mi} min {sec} s, or {days:.4f} days"
+
+    out = [f"Claims searched: {n_claims}",
+           f"Downloadable streams: {n_streams}",
+           f"- Streams with at least one user host: {streams_with_hosts}",
+           f"- Streams with all types of host: {streams_with_hosts_all}",
+           f"- Size of streams: {total_size_gb:.4f} GiB",
+           f"- Duration of streams: {duration}",
+           "",
+           f"Total user peers in all searched claims: {total_peers}",
+           f"Total peers in all searched claims: {total_peers_all}",
+           f"Total unique user peers (nodes) hosting streams: {n_nodes}",
+           f"Total unique tracker peers hosting streams: {n_trackers}",
+           f"Average number of user peers per stream: {peer_ratio:.4f}",
+           f"Average number of total peers per stream: {peer_ratio_all:.4f}",
+           f"User hosting coverage: {hosting_coverage:.2f}%",
+           f"Total hosting coverage: {hosting_coverage_all:.2f}%"]
+
+    if channel and ch:
+        out.insert(0, f"Channel: {ch}")
+
+    summary = "\n".join(out)
+
+    return summary
