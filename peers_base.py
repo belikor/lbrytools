@@ -140,3 +140,155 @@ def calculate_peers(claim=None, print_msg=True,
             "size": size,
             "duration": seconds,
             "local_node": local}
+
+
+def process_claims_peers(base_peers_info,
+                         channel=False,
+                         print_msg=False):
+    """Process results from the peer search of multiple claims."""
+    if channel:
+        ch = base_peers_info.get("channel", None)
+
+    n_claims = base_peers_info["n_claims"]
+    n_streams = base_peers_info["n_streams"]
+    streams_info = base_peers_info["streams_info"]
+
+    total_size = 0
+    total_duration = 0
+    streams_with_hosts = 0
+    streams_with_hosts_all = 0
+    total_peers = 0
+    total_peers_all = 0
+    u_nodes_id = []
+    unique_nodes = []
+    u_trackers_addr = []
+    unique_trackers = []
+    peer_ratio = 0.0
+    peer_ratio_all = 0.0
+    hosting_coverage = 0.0
+    hosting_coverage_all = 0.0
+    local_node = False
+
+    if n_streams < 1:
+        peers_info = {"n_claims": n_claims,
+                      "n_streams": n_streams,
+                      "streams_info": streams_info,
+                      "total_size": total_size,
+                      "total_duration": total_duration,
+                      "streams_with_hosts": streams_with_hosts,
+                      "streams_with_hosts_all": streams_with_hosts_all,
+                      "total_peers": total_peers,
+                      "total_peers_all": total_peers_all,
+                      "unique_nodes": unique_nodes,
+                      "unique_trackers": unique_trackers,
+                      "peer_ratio": peer_ratio,
+                      "peer_ratio_all": peer_ratio_all,
+                      "hosting_coverage": hosting_coverage,
+                      "hosting_coverage_all": hosting_coverage_all,
+                      "local_node": local_node}
+
+        if channel and ch:
+            peers_info["channel"] = ch
+
+        return peers_info
+
+    for num, info in enumerate(streams_info, start=1):
+        if "stream" not in info:
+            continue
+
+        stream = info["stream"]
+        peers_all = info["peers"]
+        peers_user = info["peers_user"]
+        total_size += info["size"]
+        total_duration += info["duration"]
+        loc_node = info["local_node"]
+        local_node = local_node or loc_node
+
+        name = stream["name"]
+        claim_id = stream["claim_id"]
+        vtype = stream["value_type"]
+
+        if "source" not in stream["value"]:
+            sd_hash = 8 * "_"
+        else:
+            sd_hash = stream["value"]["source"]["sd_hash"]
+
+        n_peers_user = len(peers_user)
+        n_peers_all = len(peers_all)
+
+        if print_msg:
+            print(f"Stream {num}/{n_claims}")
+            print(f"claim_name: {name}")
+            print(f"claim_id: {claim_id}")
+            print(f"sd_hash: {sd_hash}")
+            print(f"Claim type: {vtype}")
+            print(f"User peers: {n_peers_user}")
+            print(f"Total peers: {n_peers_all}")
+
+        if not peers_all:
+            peer_ratio = total_peers/num
+            peer_ratio_all = total_peers_all/num
+
+            if print_msg:
+                print(f"Average user peers per stream: {peer_ratio:.4f}")
+                print(f"Average peers per stream: {peer_ratio_all:.4f}")
+                print(f"Locally hosted: {loc_node}")
+                print()
+            continue
+
+        total_peers += n_peers_user
+        total_peers_all += n_peers_all
+
+        peer_ratio = total_peers/num
+        peer_ratio_all = total_peers_all/num
+
+        if print_msg:
+            print(f"Average user peers per stream: {peer_ratio:.4f}")
+            print(f"Average peers per stream: {peer_ratio_all:.4f}")
+            print(f"Locally downloaded: {loc_node}")
+            print()
+
+        if n_peers_user > 0:
+            streams_with_hosts += 1
+
+        streams_with_hosts_all += 1
+
+        for peer in peers_all:
+            node = peer["node_id"]
+            address = peer["address"]
+
+            if node and node not in u_nodes_id:
+                u_nodes_id.append(node)
+                unique_nodes.append(peer)
+
+            if node is None and address not in u_trackers_addr:
+                u_trackers_addr.append(address)
+                unique_trackers.append(peer)
+
+    peer_ratio = total_peers/n_streams
+    peer_ratio_all = total_peers_all/n_streams
+
+    hosting_coverage = streams_with_hosts/n_streams
+    hosting_coverage_all = streams_with_hosts_all/n_streams
+
+    peers_info = {"n_claims": n_claims,
+                  "n_streams": n_streams,
+                  "streams_info": streams_info,
+                  "total_size": total_size,
+                  "total_duration": total_duration,
+                  "streams_with_hosts": streams_with_hosts,
+                  "streams_with_hosts_all": streams_with_hosts_all,
+                  "total_peers": total_peers,
+                  "total_peers_all": total_peers_all,
+                  "unique_nodes": unique_nodes,
+                  "unique_trackers": unique_trackers,
+                  "peer_ratio": peer_ratio,
+                  "peer_ratio_all": peer_ratio_all,
+                  "hosting_coverage": hosting_coverage,
+                  "hosting_coverage_all": hosting_coverage_all,
+                  "local_node": local_node}
+
+    if channel and ch:
+        peers_info["channel"] = ch
+
+    return peers_info
