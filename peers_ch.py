@@ -204,59 +204,6 @@ def search_ch_peers(channel=None, number=2, threads=32,
     return peers_info
 
 
-def get_summary(peers_info):
-    """Calculate a summary paragraph of the results from the peer search."""
-    channel = peers_info["channel"]
-
-    n_claims = peers_info["n_claims"]
-    n_streams = peers_info["n_streams"]
-    total_size = peers_info["total_size"]
-    total_seconds = peers_info["total_duration"]
-    streams_with_hosts = peers_info["streams_with_hosts"]
-    streams_with_hosts_all = peers_info["streams_with_hosts_all"]
-    total_peers = peers_info["total_peers"]
-    total_peers_all = peers_info["total_peers_all"]
-
-    n_nodes = len(peers_info["unique_nodes"])
-    n_trackers = len(peers_info["unique_trackers"])
-
-    if peers_info["local_node"]:
-        n_nodes = f"{n_nodes} + 1"
-
-    peer_ratio = peers_info["peer_ratio"]
-    peer_ratio_all = peers_info["peer_ratio_all"]
-    hosting_coverage = peers_info["hosting_coverage"] * 100
-    hosting_coverage_all = peers_info["hosting_coverage_all"] * 100
-
-    total_size_gb = total_size / (1024**3)
-    days = (total_seconds / 3600) / 24
-    hr = total_seconds // 3600
-    mi = (total_seconds % 3600) // 60
-    sec = (total_seconds % 3600) % 60
-    duration = f"{hr} h {mi} min {sec} s, or {days:.4f} days"
-
-    out = [f"Channel: {channel}",
-           f"Claims searched: {n_claims}",
-           f"Downloadable streams: {n_streams}",
-           f"- Streams with at least one user host: {streams_with_hosts}",
-           f"- Streams with all types of host: {streams_with_hosts_all}",
-           f"- Size of streams: {total_size_gb:.4f} GiB",
-           f"- Duration of streams: {duration}",
-           "",
-           f"Total user peers in all searched claims: {total_peers}",
-           f"Total peers in all searched claims: {total_peers_all}",
-           f"Total unique user peers (nodes) hosting streams: {n_nodes}",
-           f"Total unique tracker peers hosting streams: {n_trackers}",
-           f"Average number of user peers per stream: {peer_ratio:.4f}",
-           f"Average number of total peers per stream: {peer_ratio_all:.4f}",
-           f"User hosting coverage: {hosting_coverage:.2f}%",
-           f"Total hosting coverage: {hosting_coverage_all:.2f}%"]
-
-    summary = "\n".join(out)
-
-    return summary
-
-
 def print_p_lines(peers_info,
                   cid=False, typ=True, title=False,
                   sanitize=False,
@@ -450,7 +397,7 @@ def list_ch_peers(channel=None, number=2, threads=32,
                                  print_msg=print_msg,
                                  server=server)
 
-    summary = get_summary(peers_info)
+    summary = prs.get_summary(peers_info, channel=True)
 
     if peers_info["n_streams"] > 0:
         print()
