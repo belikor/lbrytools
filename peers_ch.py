@@ -215,53 +215,12 @@ def print_p_lines(peers_info,
     out = []
 
     for num, info in enumerate(streams_info, start=1):
-        stream = info["stream"]
-        size = info["size"]
-        seconds = info["duration"]
-        local_node = info["local_node"]
-        local_node = f"{local_node}"
+        line = prs.get_claim_summary(info,
+                                     cid=cid, typ=typ, title=title,
+                                     inline=True, sanitize=sanitize,
+                                     sep=sep)
 
-        name = stream["name"]
-        claim_id = stream["claim_id"]
-        n_peers_tracker = len(info["peers_tracker"])
-        n_peers_user = len(info["peers_user"])
-
-        rels_time = int(stream["value"].get("release_time", 0))
-        rels_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                  time.localtime(rels_time))
-
-        if title:
-            name = stream["value"].get("title") or name
-
-        if sanitize:
-            name = funcs.sanitize_text(name)
-
-        vtype = stream["value_type"]
-
-        stream_type = stream["value"].get("stream_type", 8 * "_")
-
-        name = f'"{name}"'
-        mi = seconds // 60
-        sec = seconds % 60
-        duration = f"{mi:3d}:{sec:02d}"
-        size_mb = size / (1024**2)
-
-        line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
-        line += rels_time + f"{sep} "
-
-        if cid:
-            line += f"{claim_id}" + f"{sep} "
-
-        if typ:
-            line += f"{vtype:10s}" + f"{sep} "
-            line += f"{stream_type:9s}" + f"{sep} "
-
-        line += f"{duration}" + f"{sep} "
-        line += f"{size_mb:9.4f} MB" + f"{sep} "
-
-        line += f"peers: {n_peers_user:2d} ({n_peers_tracker:2d})" + f"{sep} "
-        line += f"hosted: {local_node:5s}" + f"{sep} "
-        line += f"{name}"
+        line = f"{num:4d}/{n_claims:4d}" + f"{sep} " + line
         out.append(line)
 
     funcs.print_content(out, file=file, fdate=fdate)
