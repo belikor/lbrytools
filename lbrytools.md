@@ -1644,7 +1644,14 @@ ff = lbryt.list_ch_peers("@fireship", number=50, threads=64,
                          sanitize=True)
 ```
 
-The summary of the peer search per claim can be printed to a file:
+By default the summary of each claim is printed in its own line
+but we can choose to print a small paragraph for each claim instead,
+by setting `inline=False`:
+```py
+ff = lbryt.list_ch_peers("@fireship", number=4, inline=False)
+```
+
+The peer search summary of each claim can be printed to a file:
 ```py
 ff = lbryt.list_ch_peers("@fireship", number=50,
                          file="peers.txt", fdate=True, sep=";")

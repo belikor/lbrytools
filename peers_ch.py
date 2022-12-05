@@ -24,7 +24,6 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to get the peer list of all claims from a single channel."""
-import concurrent.futures as fts
 import time
 
 import lbrytools.funcs as funcs
@@ -150,51 +149,20 @@ def search_ch_peers(channel=None, number=2, threads=32,
                                               print_msg=print_msg)
         return peers_info
 
-    results = []
-
     print()
     print("Count the number of peers")
     print(80 * "-")
 
-    # Iterables to be passed to the ThreadPoolExecutor
-    n_claims = len(claims)
-    falses = (False for n in range(n_claims))
-    servers = (server for n in range(n_claims))
+    peers_info = prs.search_m_claim_peers(claims=claims,
+                                          resolve=False,
+                                          threads=threads,
+                                          print_msg=print_msg,
+                                          server=server)
 
-    if threads:
-        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
-            # The input must be iterables
-            results = executor.map(prs.calculate_peers,
-                                   claims, falses,
-                                   servers)
-            print("Waiting for peer search to finish; "
-                  f"max threads: {threads}")
-            results = list(results)  # generator to list
-    else:
-        for claim in claims:
-            print("Waiting for peer search to finish")
-            result = prs.calculate_peers(claim=claim, print_msg=False,
-                                         server=server)
-            results.append(result)
+    ch = peers_info["streams_info"][0]["stream"]
+    ch = ch["signing_channel"]["canonical_url"].split("lbry://")[1]
 
-    n_streams = 0
-
-    for result in results:
-        if "source" not in result["stream"]["value"]:
-            continue
-        n_streams += 1
-
-    ch = results[0]["stream"]["signing_channel"]["canonical_url"]
-    ch = ch.split("lbry://")[1]
-
-    base_peers_info = {"channel": ch,
-                       "n_claims": n_claims,
-                       "n_streams": n_streams,
-                       "streams_info": results}
-    print()
-    peers_info = prs.process_claims_peers(base_peers_info,
-                                          channel=True,
-                                          print_msg=print_msg)
+    peers_info["channel"] = ch
 
     if print_time:
         e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
@@ -204,29 +172,7 @@ def search_ch_peers(channel=None, number=2, threads=32,
     return peers_info
 
 
-def print_p_lines(peers_info,
-                  cid=False, typ=True, title=False,
-                  sanitize=False,
-                  file=None, fdate=False, sep=";"):
-    """Print a summary for each claim of the peer search."""
-    n_claims = peers_info["n_claims"]
-    streams_info = peers_info["streams_info"]
-
-    out = []
-
-    for num, info in enumerate(streams_info, start=1):
-        line = prs.get_claim_summary(info,
-                                     cid=cid, typ=typ, title=title,
-                                     inline=True, sanitize=sanitize,
-                                     sep=sep)
-
-        line = f"{num:4d}/{n_claims:4d}" + f"{sep} " + line
-        out.append(line)
-
-    funcs.print_content(out, file=file, fdate=fdate)
-
-
-def list_ch_peers(channel=None, number=2, threads=32,
+def list_ch_peers(channel=None, number=2, threads=32, inline=True,
                   print_msg=False,
                   claim_id=False, typ=True, title=False,
                   sanitize=False,
@@ -247,6 +193,11 @@ def list_ch_peers(channel=None, number=2, threads=32,
         It is the number of threads that will be used to search for peers,
         meaning that many claims will be searched in parallel.
         This number shouldn't be large if the CPU doesn't have many cores.
+    inline: bool, optional
+        It defaults to `True`, in which case it will print the information
+        of each claim in its own line.
+        If it is `False` it will print a paragraph of information
+        for each claim.
     print_msg: bool, optional
         It defaults to `False`, in which case only the final result
         will be shown.
@@ -360,10 +311,11 @@ def list_ch_peers(channel=None, number=2, threads=32,
 
     if peers_info["n_streams"] > 0:
         print()
-        print_p_lines(peers_info,
-                      cid=claim_id, typ=typ, title=title,
-                      sanitize=sanitize,
-                      file=file, fdate=fdate, sep=sep)
+        prs.print_claims_lines(peers_info,
+                               inline=inline,
+                               cid=claim_id, typ=typ, title=title,
+                               sanitize=sanitize,
+                               file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
 
