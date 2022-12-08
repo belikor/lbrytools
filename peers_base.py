@@ -32,6 +32,7 @@ of a single claim, multiple claims, a channel, or multiple channels.
 
 Originally based on @miko:f/peer-lister:9
 """
+import concurrent.futures as fts
 import os
 import json
 import time
@@ -39,6 +40,7 @@ import time
 import requests
 
 import lbrytools.funcs as funcs
+import lbrytools.search as srch
 
 
 def get_peers(blob,
@@ -291,6 +293,164 @@ def process_claims_peers(base_peers_info,
 
     if channel and ch:
         peers_info["channel"] = ch
+
+    return peers_info
+
+
+def search_peers_th(claim, server):
+    """Wrapper to use with threads to search for multiple claim peers."""
+    stream_info = claim
+
+    if "resolved" in claim and not claim["resolved"]:
+        return stream_info
+
+    if "resolved" in claim and claim["resolved"]:
+        claim = claim["resolved"]
+
+    stream_info = calculate_peers(claim=claim, print_msg=False,
+                                  server=server)
+
+    return stream_info
+
+
+def search_m_claim_peers(claims=None, resolve=True, threads=32,
+                         print_msg=False,
+                         server="http://localhost:5279"):
+    """Search the peers for the given list of claims.
+
+    Parameters
+    ----------
+    claims: list of str or list of dict
+        Each element of the list is a claim name or claim ID
+        that we wish to examine for peers.
+        It can also be a list of resolved dictionaries if `resolve=False`.
+    resolve: bool, optional
+        It defaults to `True`, in which case `claims` is assumed
+        to be a list of claim URIs or claim IDs, and each of them will be
+        individually resolved.
+        If it is `False` then we assume `claims` already has
+        the resolved claims, so we don't need to resolve them again.
+    threads: int, optional
+        It defaults to 32.
+        It is the number of threads that will be used to search for peers,
+        meaning that many claims will be searched in parallel.
+        This number shouldn't be large if the CPU doesn't have many cores.
+    print_msg: bool, optional
+        It defaults to `False`, in which case only the final result
+        will be shown.
+        If it is `True` a summary of each claim will be printed.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        It has many keys:
+        - 'n_claims': size of the input `claims` list.
+        - 'n_streams': number of actual streams, that is,
+          claims that can be downloaded. It may be the same as `n_claims`
+          or even zero.
+        - 'streams_info': list of dict; each dictionary has information
+          on each claim searched for peers; the keys are
+          - 'stream': the resolved information of the claim, or `None`
+          - 'peers': list of peers for the claim; each peer is a dict
+            with keys 'address'  (IP), 'node_id', 'tcp_port', and 'udp_port'
+          - 'peers_tracker': list of peers corresponding to fixed trackers,
+            for which the 'node_id' is `None`.
+          - 'peers_user': list of peers corresponding to user nodes
+            running their own `lbrynet` daemons. For these the 'node_id'
+            is a 96-character string.
+          - 'size': size in bytes of the claim; could be zero
+          - 'duration': duration in seconds of the claim; could be zero
+          - 'local_node': boolean indicating if the claim is hosted
+            in our `lbrynet` client or not
+        - 'total_size': total size in bytes of all `n_streams` together
+        - 'total_duration': total duration in seconds of all `n_streams`
+          together
+        - 'streams_with_hosts': number of streams that have at least
+          one user peer hosting the stream; the value goes from 0
+          to `n_streams`.
+          A stream is counted as having a host if it has either
+          the manifest blob `sd_hash` or the first data blob.
+        - 'streams_with_hosts_all': number of streams that have any type
+          of peer (user or tracker).
+        - 'total_peers': total number of user peers found for all `n_streams`
+        - 'total_peers_all': total number of peers (user and tracker).
+        - 'unique_nodes': list with dictionaries of unique peers
+          as calculated from their node IDs, meaning that a single node ID
+          only appears once.
+        - 'unique_trackers': list with dictionaries of unique tracker peers
+          as calculated from their IP addresses, meaning that a single
+          IP address only appears once. Tracker peers have an empty node ID.
+        - 'peer_ratio': it is the ratio `total_peers/n_streams`,
+          approximately how many user peers are in each downloadable claim;
+          it should be larger than 1.0 to indicate a well seeded group
+          of claims.
+        - 'peer_ratio_all': it is the ratio `total_peers_all/n_streams`,
+          approximately how many peers in total are in each downloadable claim.
+        - 'hosting_coverage': it is the ratio `streams_with_hosts/n_streams`,
+          how much of the group of claims is seeded by users;
+          if it's 0.0 no stream is seeded by users, if it's 1.0 all streams
+          are seeded at least by one user peer.
+        - 'hosting_coverage_all': ratio `streams_with_hosts_all/n_streams`
+          how much of the group of claims is seeded by any type of peer.
+        - 'local_node': it is `True` if our `lbrynet` client is hosting
+          at least one of the claims, meaning that the initial blobs
+          are found in our system.
+          Our local node is not counted when calculating 'streams_with_hosts',
+          'total_peers', 'unique_nodes', 'peer_ratio', nor 'hosting_coverage'.
+    False
+        If there is a problem it will return `False`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    if resolve:
+        resolved_claims = srch.resolve_claims(claims)
+    else:
+        resolved_claims = claims
+
+    n_claims = len(claims)
+    n_streams = 0
+
+    streams_info = []
+
+    # Iterables to be passed to the ThreadPoolExecutor
+    servers = (server for n in range(n_claims))
+
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            results = executor.map(search_peers_th,
+                                   resolved_claims,
+                                   servers)
+
+            print("Waiting for peer search to finish; "
+                  f"max threads: {threads}")
+            streams_info = list(results)  # generator to list
+    else:
+        for claim in resolved_claims:
+            print("Waiting for peer search to finish")
+            result = search_peers_th(claim, server)
+
+            streams_info.append(result)
+
+    for info in streams_info:
+        if "stream" not in info:
+            continue
+        elif info["stream"]["value_type"] in ("stream"):
+            n_streams += 1
+
+    base_peers_info = {"n_claims": n_claims,
+                       "n_streams": n_streams,
+                       "streams_info": streams_info}
+
+    peers_info = process_claims_peers(base_peers_info,
+                                      channel=False,
+                                      print_msg=print_msg)
 
     return peers_info
 
