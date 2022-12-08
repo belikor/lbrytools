@@ -443,3 +443,42 @@ def get_claim_summary(stream_info,
     summary = "\n".join(out)
 
     return summary
+
+
+def print_claims_lines(peers_info,
+                       inline=True,
+                       cid=False, typ=True, title=False,
+                       sanitize=False,
+                       file=None, fdate=False, sep=";"):
+    """Print a summary text for each claim of the peer search."""
+    n_claims = peers_info["n_claims"]
+    streams_info = peers_info["streams_info"]
+
+    content = []
+
+    for num, info in enumerate(streams_info, start=1):
+        if "resolved" in info:
+            original = info["original"]
+            text = f"Claim does not exist: {original}"
+        else:
+            text = get_claim_summary(info,
+                                     cid=cid, typ=typ, title=title,
+                                     inline=inline, sanitize=sanitize,
+                                     sep=sep)
+
+        if inline:
+            content.append(f"{num:4d}/{n_claims:4d}" + f"{sep} " + text)
+        else:
+            content.append(f"Claim {num}/{n_claims}" + "\n" + text)
+
+    if inline:
+        out = content
+    else:
+        paragraphs = []
+
+        for par in content:
+            paragraphs.append(par + "\n")
+
+        out = paragraphs
+
+    funcs.print_content(out, file=file, fdate=fdate)
