@@ -93,7 +93,7 @@ def search_claim_peers(uri=None, cid=None, name=None,
     return stream_info
 
 
-def list_peers(uri=None, cid=None, name=None,
+def list_peers(uri=None, cid=None, name=None, claim=None,
                inline=False,
                claim_id=False, typ=True, title=False,
                sanitize=False,
@@ -121,6 +121,10 @@ def list_peers(uri=None, cid=None, name=None,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    claims: dict, optional
+        It defaults to `None`.
+        If this is given it should be the dictionary of a fully resolved
+        claim, so the claim does not need to be resolved again.
     inline: bool, optional
         It defaults to `False`, in which case the output of the search
         will be a paragraph of information on the peer search.
@@ -187,8 +191,12 @@ def list_peers(uri=None, cid=None, name=None,
     if not funcs.server_exists(server=server):
         return False
 
-    stream_info = search_claim_peers(uri=uri, cid=cid, name=name,
-                                     server=server)
+    if claim:
+        stream_info = prs.calculate_peers(claim=claim, print_msg=False,
+                                          server=server)
+    else:
+        stream_info = search_claim_peers(uri=uri, cid=cid, name=name,
+                                         server=server)
 
     if not stream_info["stream"]:
         return False
@@ -205,7 +213,7 @@ def list_peers(uri=None, cid=None, name=None,
     return stream_info
 
 
-def list_m_peers(claims=None, threads=32, inline=True,
+def list_m_peers(claims=None, resolve=True, threads=32, inline=True,
                  print_msg=False,
                  claim_id=False, typ=True, title=False,
                  sanitize=False,
@@ -215,9 +223,15 @@ def list_m_peers(claims=None, threads=32, inline=True,
 
     Parameters
     ----------
-    claims: list of str
+    claims: list of str or list of dict
         Each element of the list is a claim name or claim ID
         that we wish to examine for peers.
+    resolve: bool, optional
+        It defaults to `True`, in which case `claims` is assumed
+        to be a list of claim URIs or claim IDs, and each of them will be
+        individually resolved.
+        If it is `False` then we assume `claims` already has
+        the resolved claims, so we don't need to resolve them again.
     threads: int, optional
         It defaults to 32.
         It is the number of threads that will be used to search for peers,
@@ -334,7 +348,7 @@ def list_m_peers(claims=None, threads=32, inline=True,
         print("Input must be a list of URIs or claim IDs.")
         return False
 
-    peers_info = prs.search_m_claim_peers(claims=claims, resolve=True,
+    peers_info = prs.search_m_claim_peers(claims=claims, resolve=resolve,
                                           threads=threads,
                                           print_msg=print_msg,
                                           server=server)

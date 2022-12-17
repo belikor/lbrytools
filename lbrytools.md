@@ -1636,6 +1636,13 @@ uu = lbryt.list_peers(uri="but-what-is-a-neural-network-deep:f")
 uu = lbryt.list_peers(cid="095962495000d8b052da48649e80ef664f2fab27")
 ```
 
+If the `claim` argument is provided it should be an already resolved claim,
+and not just a string:
+```py
+claim = lbryt.search_item("vim-alchemy-with-macros")
+uu = lbryt.list_peers(claim=claim)
+```
+
 The output will present various types of information on the claim,
 such as duration, size, `sd_hash`, and the number of user and tracker peers.
 
@@ -1673,6 +1680,16 @@ claims = ["vim-alchemy-with-macros#b",
           "uncharted-expleened:b"]
 
 vv = lbryt.list_m_peers(claims=claims)
+```
+
+If `resolve=False` the list of claims is assumed to be
+already resolved claims, so we don't need to resolve it again:
+```py
+c1 = lbryt.search_item("vim-alchemy-with-macros")
+c2 = lbryt.search_item("ai-generated-artwork-takes-first-place:1")
+c3 = lbryt.search_item("thanksgivingroundup:7")
+claims = [c1, c2, c3]
+vv = lbryt.list_m_peers(claims=claims, resolve=False)
 ```
 
 By default it uses maximum 32 threads to search for the peers
