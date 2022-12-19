@@ -309,13 +309,12 @@ def list_ch_peers(channel=None, number=2, threads=32, inline=True,
 
     summary = prs.get_summary(peers_info, channel=True)
 
-    if peers_info["n_streams"] > 0:
-        print()
-        prs.print_claims_lines(peers_info,
-                               inline=inline,
-                               cid=claim_id, typ=typ, title=title,
-                               sanitize=sanitize,
-                               file=file, fdate=fdate, sep=sep)
+    print()
+    prs.print_claims_lines(peers_info,
+                           inline=inline,
+                           cid=claim_id, typ=typ, title=title,
+                           sanitize=sanitize,
+                           file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
 

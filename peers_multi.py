@@ -488,10 +488,9 @@ def list_chs_peers(channels=None,
 
     summary = get_chs_summary(chs_peers_info)
 
-    if chs_peers_info["chs_n_streams"] > 0:
-        print()
-        print_ch_p_lines(chs_peers_info,
-                         file=file, fdate=fdate, sep=sep)
+    print()
+    print_ch_p_lines(chs_peers_info,
+                     file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
 
