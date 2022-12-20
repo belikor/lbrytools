@@ -262,21 +262,12 @@ def w_claim_search(page=1,
                    order="release_time",
                    text=None,
                    tags=None,
-                   claim_id=False,
                    claim_type=None,
                    video_stream=False, audio_stream=False,
                    doc_stream=False, img_stream=False,
                    bin_stream=False, model_stream=False,
-                   sanitize=False,
-                   file=None, fdate=False, sep=";",
                    server="http://localhost:5279"):
     """Print trending claims or searched claims in the the network."""
-    print(80 * "-")
-    if what in "trending":
-        print("Show trending claims")
-    elif what in "text":
-        print("Show searched text and tags")
-
     print(f"Page: {page}")
 
     msg = {"method": "claim_search",
@@ -348,12 +339,7 @@ def w_claim_search(page=1,
 
     claims = output["result"]["items"]
 
-    content = prntc.print_tr_claims(claims,
-                                    claim_id=claim_id,
-                                    sanitize=sanitize,
-                                    file=file, fdate=fdate, sep=sep)
-
-    return content
+    return claims
 
 
 def print_trending_claims(page=1,
@@ -418,28 +404,35 @@ def print_trending_claims(page=1,
 
     Returns
     -------
-    str
-        Returns the string to display, that was printed to the terminal
-        or to the file.
+    list of dict
+        Each dictionary in the list corresponds to a claim found
+        in the search.
     False
         If there is a problem it will return `False`.
     """
-    content = w_claim_search(page=page,
-                             what="trending",
-                             trending=trending,
-                             claim_id=claim_id,
-                             claim_type=claim_type,
-                             video_stream=video_stream,
-                             audio_stream=audio_stream,
-                             doc_stream=doc_stream,
-                             img_stream=img_stream,
-                             bin_stream=bin_stream,
-                             model_stream=model_stream,
-                             sanitize=sanitize,
-                             file=file, fdate=fdate, sep=sep,
-                             server=server)
+    if not funcs.server_exists(server=server):
+        return False
 
-    return content
+    print("Show trending claims")
+    claims = w_claim_search(page=page,
+                            what="trending",
+                            trending=trending,
+                            claim_type=claim_type,
+                            video_stream=video_stream,
+                            audio_stream=audio_stream,
+                            doc_stream=doc_stream,
+                            img_stream=img_stream,
+                            bin_stream=bin_stream,
+                            model_stream=model_stream,
+                            server=server)
+
+    if claims:
+        prntc.print_tr_claims(claims,
+                              claim_id=claim_id,
+                              sanitize=sanitize,
+                              file=file, fdate=fdate, sep=sep)
+
+    return claims
 
 
 def print_search_claims(page=1,
@@ -514,32 +507,46 @@ def print_search_claims(page=1,
 
     Returns
     -------
-    str
-        Returns the string to display, that was printed to the terminal
-        or to the file.
+    list of dict
+        Each dictionary in the list corresponds to a claim found
+        in the search.
     False
         If there is a problem it will return `False`.
     """
-    content = w_claim_search(page=page,
-                             what="text",
-                             order=order,
-                             text=text,
-                             tags=tags,
-                             claim_id=claim_id,
-                             claim_type=claim_type,
-                             video_stream=video_stream,
-                             audio_stream=audio_stream,
-                             doc_stream=doc_stream,
-                             img_stream=img_stream,
-                             bin_stream=bin_stream,
-                             model_stream=model_stream,
-                             sanitize=sanitize,
-                             file=file, fdate=fdate, sep=sep,
-                             server=server)
+    if not funcs.server_exists(server=server):
+        return False
 
-    return content
+    print("Show searched text and tags")
+    claims = w_claim_search(page=page,
+                            what="text",
+                            order=order,
+                            text=text,
+                            tags=tags,
+                            claim_type=claim_type,
+                            video_stream=video_stream,
+                            audio_stream=audio_stream,
+                            doc_stream=doc_stream,
+                            img_stream=img_stream,
+                            bin_stream=bin_stream,
+                            model_stream=model_stream,
+                            server=server)
+
+    if claims:
+        prntc.print_tr_claims(claims,
+                              claim_id=claim_id,
+                              sanitize=sanitize,
+                              file=file, fdate=fdate, sep=sep)
+
+    return claims
 
 
 if __name__ == "__main__":
-    claims_bids(show_non_controlling=True, skip_repost=False, channels_only=False)
-    # claims_bids(show_non_controlling=True, skip_repost=True, channels_only=False)
+    claims_bids(show_non_controlling=True, skip_repost=False,
+                channels_only=False, compact=True)
+    print()
+    claims_bids(show_non_controlling=True, skip_repost=True,
+                channels_only=False, compact=True)
+    print()
+    print_trending_claims()
+    print()
+    print_search_claims(text='trees')
