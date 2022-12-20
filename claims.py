@@ -298,7 +298,7 @@ def w_claim_search(page=1,
             tags = []
 
         if text:
-            msg["params"]["text"] = f'"{text}"'
+            msg["params"]["text"] = f"{text}"
         if tags:
             msg["params"]["any_tags"] = tags
 
@@ -335,7 +335,7 @@ def w_claim_search(page=1,
     if what in "trending":
         print(f"order_by: {trending}")
     elif what in "text":
-        print(f'text: "{text}"')
+        print(f"text: '{text}'")
         print(f"tags: " + ", ".join(tags))
         print(f"order_by: {order}")
 
