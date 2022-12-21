@@ -63,7 +63,7 @@ def print_tr_claims(claims,
         if sanitize:
             name = funcs.sanitize_text(claim["name"])
 
-        line = f"{num:2d}/{n_claims:2d}" + f"{sep} "
+        line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
 
         if claim_id:
             line += claim["claim_id"] + f"{sep} "
