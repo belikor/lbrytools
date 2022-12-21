@@ -24,6 +24,8 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to display information on our own claims."""
+import concurrent.futures as fts
+
 import requests
 
 import lbrytools.funcs as funcs
@@ -333,6 +335,7 @@ def claim_search_pg(msg, page, server):
 
 
 def w_claim_search(what="trending",
+                   threads=32,
                    page=None,
                    trending="trending_mixed",
                    order="release_time",
@@ -343,7 +346,7 @@ def w_claim_search(what="trending",
                    doc_stream=False, img_stream=False,
                    bin_stream=False, model_stream=False,
                    server="http://localhost:5279"):
-    """Wrapper to search claims in the network."""
+    """Wrapper to search claims in the network using threads."""
     msg = {"method": "claim_search",
            "params": {"page_size": 100,
                       "no_totals": True}}
@@ -382,6 +385,8 @@ def w_claim_search(what="trending",
     # Page size is maximum 50 even if a higher value is set.
     # The maximum number of claims in 20 x 50 = 1000.
     if page:
+        threads = 0
+
         if page < 0:
             page = abs(page)
         elif page > 20:
@@ -392,16 +397,30 @@ def w_claim_search(what="trending",
     else:
         searched.append("page: all")
         pages = range(1, 21)
+        msg_s = (msg for n in pages)
+        servers = (server for n in pages)
 
     print()
 
     claims = []
 
-    for page in pages:
-        print("Waiting for claim search to finish")
+    if threads:
+        with fts.ThreadPoolExecutor(max_workers=threads) as executor:
+            results = executor.map(claim_search_pg,
+                                   msg_s, pages,
+                                   servers)
 
-        items = claim_search_pg(msg, page, server)
-        claims.extend(items)
+            print("Waiting for claim search to finish; "
+                  f"max threads: {threads}")
+
+            for result in results:
+                claims.extend(result)
+    else:
+        for page in pages:
+            print("Waiting for claim search to finish")
+
+            items = claim_search_pg(msg, page, server)
+            claims.extend(items)
 
     claims_info = sutils.downloadable_size(claims, print_msg=False)
     claims_info["claims"] = claims
@@ -410,7 +429,8 @@ def w_claim_search(what="trending",
     return claims_info
 
 
-def print_trending_claims(page=None,
+def print_trending_claims(threads=32,
+                          page=None,
                           trending="trending_mixed",
                           claim_id=False,
                           claim_type=None,
@@ -424,6 +444,13 @@ def print_trending_claims(page=None,
 
     Parameters
     ----------
+    threads: int, optional
+        It defaults to 32.
+        It is the maximum number of threads that will be used to search
+        for pages of claims.
+        A maximum of twenty pages of claims will be searched,
+        so at least 20 threads is suggested.
+        This number shouldn't be large if the CPU doesn't have many cores.
     page: int, optional
         It defaults to `None`, in which case all 20 pages will be searched.
         If it is an integer between 1 and 20, only that page will be searched.
@@ -488,7 +515,8 @@ def print_trending_claims(page=None,
         return False
 
     print("Show trending claims")
-    claims_info = w_claim_search(page=page,
+    claims_info = w_claim_search(threads=threads,
+                                 page=page,
                                  what="trending",
                                  trending=trending,
                                  claim_type=claim_type,
@@ -514,7 +542,8 @@ def print_trending_claims(page=None,
     return claims_info
 
 
-def print_search_claims(page=None,
+def print_search_claims(threads=32,
+                        page=None,
                         order="release_time",
                         text="lbry",
                         tags=None,
@@ -530,6 +559,13 @@ def print_search_claims(page=None,
 
     Parameters
     ----------
+    threads: int, optional
+        It defaults to 32.
+        It is the maximum number of threads that will be used to search
+        for pages of claims.
+        A maximum of twenty pages of claims will be searched,
+        so at least 20 threads is suggested.
+        This number shouldn't be large if the CPU doesn't have many cores.
     page: int, optional
         It defaults to `None`, in which case all 20 pages will be searched.
         If it is an integer between 1 and 20, only that page will be searched.
@@ -602,7 +638,8 @@ def print_search_claims(page=None,
         return False
 
     print("Show searched text and tags")
-    claims_info = w_claim_search(page=page,
+    claims_info = w_claim_search(threads=threads,
+                                 page=page,
                                  what="text",
                                  order=order,
                                  text=text,
