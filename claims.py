@@ -323,8 +323,17 @@ def params_claim_search(msg=None,
     return msg
 
 
-def w_claim_search(page=1,
-                   what="trending",
+def claim_search_pg(msg, page, server):
+    """Call the search claim method with the appropriate page in a thread."""
+    msg["params"].update({"page": page})
+    output = requests.post(server, json=msg).json()
+    items = output["result"]["items"]
+
+    return items
+
+
+def w_claim_search(what="trending",
+                   page=None,
                    trending="trending_mixed",
                    order="release_time",
                    text=None,
@@ -336,8 +345,7 @@ def w_claim_search(page=1,
                    server="http://localhost:5279"):
     """Wrapper to search claims in the network."""
     msg = {"method": "claim_search",
-           "params": {"page": page,
-                      "page_size": 100,
+           "params": {"page_size": 100,
                       "no_totals": True}}
 
     msg = params_claim_search(msg=msg,
@@ -369,15 +377,31 @@ def w_claim_search(page=1,
                     f"order_by: {order}"]
 
     searched.extend([f"claim_type: {claim_type}",
-                     f"stream_types: {stypes}",
-                     f"page: {page}"])
+                     f"stream_types: {stypes}"])
 
-    output = requests.post(server, json=msg).json()
+    # Page size is maximum 50 even if a higher value is set.
+    # The maximum number of claims in 20 x 50 = 1000.
+    if page:
+        if page < 0:
+            page = abs(page)
+        elif page > 20:
+            page = 20
 
-    if "error" in output:
-        claims = []
+        pages = [page]
+        searched.append(f"page: {page}")
     else:
-        claims = output["result"]["items"]
+        searched.append("page: all")
+        pages = range(1, 21)
+
+    print()
+
+    claims = []
+
+    for page in pages:
+        print("Waiting for claim search to finish")
+
+        items = claim_search_pg(msg, page, server)
+        claims.extend(items)
 
     claims_info = sutils.downloadable_size(claims, print_msg=False)
     claims_info["claims"] = claims
@@ -386,7 +410,7 @@ def w_claim_search(page=1,
     return claims_info
 
 
-def print_trending_claims(page=1,
+def print_trending_claims(page=None,
                           trending="trending_mixed",
                           claim_id=False,
                           claim_type=None,
@@ -401,9 +425,8 @@ def print_trending_claims(page=1,
     Parameters
     ----------
     page: int, optional
-        It defaults to 1.
-        Page of output to show. Each page has 50 elements.
-        At the moment the maximum is 20.
+        It defaults to `None`, in which case all 20 pages will be searched.
+        If it is an integer between 1 and 20, only that page will be searched.
     claim_id: bool, optional
         It defaults to `False`.
         If it is `True` it will print the claim ID (40-character string).
@@ -491,7 +514,7 @@ def print_trending_claims(page=1,
     return claims_info
 
 
-def print_search_claims(page=1,
+def print_search_claims(page=None,
                         order="release_time",
                         text="lbry",
                         tags=None,
@@ -508,9 +531,8 @@ def print_search_claims(page=1,
     Parameters
     ----------
     page: int, optional
-        It defaults to 1.
-        Page of output to show. Each page has 50 elements.
-        At the moment the maximum is 20.
+        It defaults to `None`, in which case all 20 pages will be searched.
+        If it is an integer between 1 and 20, only that page will be searched.
     text: str, optional
         It defaults to 'lbry'.
         Full string to search in the network; it will search in the claim name,
