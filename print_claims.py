@@ -33,7 +33,8 @@ import lbrytools.funcs as funcs
 
 
 def print_tr_claims(claims,
-                    claim_id=False, sanitize=False,
+                    claim_id=False, title=False,
+                    sanitize=False,
                     file=None, fdate=False, sep=";"):
     """Print generic claims, particularly trending or searched claims."""
     n_claims = len(claims)
@@ -52,16 +53,21 @@ def print_tr_claims(claims,
         else:
             mtype = 14 * "_"
 
-        if "signing_channel" in claim:
-            channel = claim["signing_channel"].get("name", 14 * "_")
-            if sanitize:
-                channel = funcs.sanitize_text(channel)
+        if ("signing_channel" in claim
+                and "canonical_url" in claim["signing_channel"]):
+            channel = claim["signing_channel"]["canonical_url"]
+            channel = channel.split("lbry://")[1]
         else:
             channel = 14 * "_"
 
         name = claim["name"]
+
+        if title and "title" in claim["value"]:
+            name = claim["value"]["title"]
+
         if sanitize:
-            name = funcs.sanitize_text(claim["name"])
+            name = funcs.sanitize_text(name)
+            channel = funcs.sanitize_text(channel)
 
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
 
@@ -75,9 +81,7 @@ def print_tr_claims(claims,
         line += f'"{name}"'
         out.append(line)
 
-    content = funcs.print_content(out, file=file, fdate=fdate)
-
-    return content
+    funcs.print_content(out, file=file, fdate=fdate)
 
 
 def print_sch_claims(claims,
