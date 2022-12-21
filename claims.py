@@ -256,31 +256,27 @@ def claims_bids(show_controlling=False, show_non_controlling=True,
     return claims_filtered
 
 
-def w_claim_search(page=1,
-                   what="trending",
-                   trending="trending_mixed",
-                   order="release_time",
-                   text=None,
-                   tags=None,
-                   claim_type=None,
-                   video_stream=False, audio_stream=False,
-                   doc_stream=False, img_stream=False,
-                   bin_stream=False, model_stream=False,
-                   server="http://localhost:5279"):
-    """Print trending claims or searched claims in the the network."""
-    print(f"Page: {page}")
+def params_claim_search(msg=None,
+                        what="trending",
+                        trending="trending_mixed",
+                        order="release_time",
+                        text=None,
+                        tags=None,
+                        claim_type=None,
+                        video_stream=False, audio_stream=False,
+                        doc_stream=False, img_stream=False,
+                        bin_stream=False, model_stream=False):
+    """Get the options needed for the claim search command."""
+    if not msg:
+        msg = {"method": "claim_search",
+               "params": {}}
 
-    msg = {"method": "claim_search",
-           "params": {"page": page,
-                      "page_size": 100,
-                      "no_totals": True}}
-
-    if what in "trending":
+    if what in ("trending"):
         msg["params"]["order_by"] = trending
-    elif what in "text":
+    elif what in ("text"):
         msg["params"]["order_by"] = order
 
-    if what in "text":
+    if what in ("text"):
         if not tags:
             tags = []
         if isinstance(tags, str):
@@ -323,9 +319,48 @@ def w_claim_search(page=1,
     if stypes:
         msg["params"]["stream_types"] = stypes
 
-    if what in "trending":
+    return msg
+
+
+def w_claim_search(page=1,
+                   what="trending",
+                   trending="trending_mixed",
+                   order="release_time",
+                   text=None,
+                   tags=None,
+                   claim_type=None,
+                   video_stream=False, audio_stream=False,
+                   doc_stream=False, img_stream=False,
+                   bin_stream=False, model_stream=False,
+                   server="http://localhost:5279"):
+    """Wrapper to search claims in the network."""
+    msg = {"method": "claim_search",
+           "params": {"page": page,
+                      "page_size": 100,
+                      "no_totals": True}}
+
+    msg = params_claim_search(msg=msg,
+                              what=what,
+                              trending=trending,
+                              order=order,
+                              text=text,
+                              tags=tags,
+                              claim_type=claim_type,
+                              video_stream=video_stream,
+                              audio_stream=audio_stream,
+                              doc_stream=doc_stream,
+                              img_stream=img_stream,
+                              bin_stream=bin_stream,
+                              model_stream=model_stream)
+
+    stypes = msg["params"].get("stream_types", [])
+    tags = msg["params"].get("any_tags", [])
+
+    if what in ("trending"):
+        print("Trending claims")
         print(f"order_by: {trending}")
-    elif what in "text":
+    elif what in ("text"):
+        print("Searched text and tags")
         print(f"text: '{text}'")
         print(f"tags: " + ", ".join(tags))
         print(f"order_by: {order}")
