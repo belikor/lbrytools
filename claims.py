@@ -429,17 +429,17 @@ def w_claim_search(what="trending",
     return claims_info
 
 
-def print_trending_claims(threads=32,
-                          page=None,
-                          trending="trending_mixed",
-                          claim_id=False,
-                          claim_type=None,
-                          video_stream=False, audio_stream=False,
-                          doc_stream=False, img_stream=False,
-                          bin_stream=False, model_stream=False,
-                          sanitize=False,
-                          file=None, fdate=False, sep=";",
-                          server="http://localhost:5279"):
+def list_trending_claims(threads=32,
+                         page=None,
+                         trending="trending_mixed",
+                         claim_id=False,
+                         claim_type=None,
+                         video_stream=False, audio_stream=False,
+                         doc_stream=False, img_stream=False,
+                         bin_stream=False, model_stream=False,
+                         sanitize=False,
+                         file=None, fdate=False, sep=";",
+                         server="http://localhost:5279"):
     """Print trending claims in the network.
 
     Parameters
@@ -542,19 +542,19 @@ def print_trending_claims(threads=32,
     return claims_info
 
 
-def print_search_claims(threads=32,
-                        page=None,
-                        order="release_time",
-                        text="lbry",
-                        tags=None,
-                        claim_id=False,
-                        claim_type=None,
-                        video_stream=False, audio_stream=False,
-                        doc_stream=False, img_stream=False,
-                        bin_stream=False, model_stream=False,
-                        sanitize=False,
-                        file=None, fdate=False, sep=";",
-                        server="http://localhost:5279"):
+def list_search_claims(threads=32,
+                       page=None,
+                       order="release_time",
+                       text="lbry",
+                       tags=None,
+                       claim_id=False,
+                       claim_type=None,
+                       video_stream=False, audio_stream=False,
+                       doc_stream=False, img_stream=False,
+                       bin_stream=False, model_stream=False,
+                       sanitize=False,
+                       file=None, fdate=False, sep=";",
+                       server="http://localhost:5279"):
     """Print the result of the claim search for an arbitrary text.
 
     Parameters
@@ -674,6 +674,6 @@ if __name__ == "__main__":
     claims_bids(show_non_controlling=True, skip_repost=True,
                 channels_only=False, compact=True)
     print()
-    print_trending_claims()
+    list_trending_claims()
     print()
-    print_search_claims(text='trees')
+    list_search_claims(text='trees')

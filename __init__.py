@@ -123,8 +123,8 @@ from lbrytools.blobs_auto import print_network_sd_blobs
 from lbrytools.blobs_auto import sd_blobs_compared
 
 from lbrytools.claims import claims_bids
-from lbrytools.claims import print_trending_claims
-from lbrytools.claims import print_search_claims
+from lbrytools.claims import list_trending_claims
+from lbrytools.claims import list_search_claims
 
 from lbrytools.channels import list_ch_subs
 from lbrytools.channels import list_ch_subs_latest
@@ -226,8 +226,8 @@ True if print_network_sd_blobs else False
 True if sd_blobs_compared else False
 
 True if claims_bids else False
-True if print_trending_claims else False
-True if print_search_claims else False
+True if list_trending_claims else False
+True if list_search_claims else False
 
 True if list_ch_subs else False
 True if list_ch_subs_latest else False

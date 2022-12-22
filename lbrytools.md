@@ -107,8 +107,8 @@ from lbrytools import create_support
 from lbrytools import abandon_support
 from lbrytools import abandon_support_inv
 from lbrytools import target_support
-from lbrytools import print_trending_claims
-from lbrytools import print_search_claims
+from lbrytools import list_trending_claims
+from lbrytools import list_search_claims
 from lbrytools import print_ch_claims
 from lbrytools import list_comments
 from lbrytools import create_comment
@@ -1009,9 +1009,9 @@ We can specify different claim types: `'stream'` (downloadable),
 By default it will display the first page of the results;
 we can choose one page from 1 to 20.
 ```py
-g = lbryt.print_trending_claims()  # all types
-g = lbryt.print_trending_claims(page=12, claim_type="stream")
-g = lbryt.print_trending_claims(page=7, claim_type="channel")
+g = lbryt.list_trending_claims()  # all types
+g = lbryt.list_trending_claims(page=12, claim_type="stream")
+g = lbryt.list_trending_claims(page=7, claim_type="channel")
 ```
 
 Some names have complex unicode characters in them, especially emojis.
@@ -1022,22 +1022,22 @@ by a monospace heavy vertical bar `'❚'` (unicode U+275A).
 In this case, we may decide to display the claim ID, to be able to download
 this claim by ID rather than by name.
 ```py
-g = lbryt.print_trending_claims(claim_id=True, sanitize=True)
+g = lbryt.list_trending_claims(claim_id=True, sanitize=True)
 ```
 
 If the claim type is a stream (downloadable content), we can further specify
 the type of media: `'video'`, `'audio'`, `'document'`, `'image'`, `'binary'`,
 and `'model'`.
 ```py
-g = lbryt.print_trending_claims(claim_type="stream",
-                                video_stream=True, audio_stream=True,
-                                doc_stream=True, img_stream=True,
-                                bin_stream=False, model_stream=False)
+g = lbryt.list_trending_claims(claim_type="stream",
+                               video_stream=True, audio_stream=True,
+                               doc_stream=True, img_stream=True,
+                               bin_stream=False, model_stream=False)
 ```
 
 The trending claims can be printed to a file.
 ```py
-g = lbryt.print_trending_claims(file="claims.txt", fdate=True, sep=';')
+g = lbryt.list_trending_claims(file="claims.txt", fdate=True, sep=';')
 ```
 
 [Go back to _Content_](#content)
@@ -1047,14 +1047,14 @@ g = lbryt.print_trending_claims(file="claims.txt", fdate=True, sep=';')
 Display the claims found by searching for a textual string
 and by a list of tags.
 ```py
-h = lbryt.print_search_claims(page=1, text="lbry")
-h = lbryt.print_search_claims(page=3, text="", tags=["cook", "food"])
+h = lbryt.list_search_claims(page=1, text="lbry")
+h = lbryt.list_search_claims(page=3, text="", tags=["cook", "food"])
 ```
 
 This search is performed by the SDK, and thus it isn't very good.
 Adding many words to the `text` string will return few results or none.
 
-Other options are the same as for `print_trending_claims`, that is,
+Other options are the same as for `list_trending_claims`, that is,
 `claim_id`, `claim_type`, `video_stream`, `audio_stream`,
 `doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
 `sanitize`, `file`, `fdate`, `sep`,
@@ -1970,8 +1970,8 @@ lbryt.create_support(..., server=server)
 lbryt.abandon_support(..., server=server)
 lbryt.abandon_support_inv(..., server=server)
 lbryt.target_support(..., server=server)
-lbryt.print_trending_claims(..., server=server)
-lbryt.print_search_claims(..., server=server)
+lbryt.list_trending_claims(..., server=server)
+lbryt.list_search_claims(..., server=server)
 lbryt.print_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
 lbryt.create_comment(..., server=server)
