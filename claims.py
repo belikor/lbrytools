@@ -432,7 +432,7 @@ def w_claim_search(what="trending",
 def list_trending_claims(threads=32,
                          page=None,
                          trending="trending_mixed",
-                         claim_id=False,
+                         claim_id=False, title=False,
                          claim_type=None,
                          video_stream=False, audio_stream=False,
                          doc_stream=False, img_stream=False,
@@ -457,6 +457,9 @@ def list_trending_claims(threads=32,
     claim_id: bool, optional
         It defaults to `False`.
         If it is `True` it will print the claim ID (40-character string).
+    title: bool, optional
+        It defaults to `False`, in which case the claim name will be printed.
+        If it is `True` it will print the claim title instead.
     claim_type: str, optional
         One of the five types: 'stream', 'channel', 'repost', 'collection',
         or 'livestream'.
@@ -530,7 +533,7 @@ def list_trending_claims(threads=32,
 
     if claims_info["claims"]:
         prntc.print_tr_claims(claims_info["claims"],
-                              claim_id=claim_id,
+                              claim_id=claim_id, title=title,
                               sanitize=sanitize,
                               file=file, fdate=fdate, sep=sep)
 
@@ -547,7 +550,7 @@ def list_search_claims(threads=32,
                        order="release_time",
                        text="lbry",
                        tags=None,
-                       claim_id=False,
+                       claim_id=False, title=False,
                        claim_type=None,
                        video_stream=False, audio_stream=False,
                        doc_stream=False, img_stream=False,
@@ -580,6 +583,9 @@ def list_search_claims(threads=32,
     claim_id: bool, optional
         It defaults to `False`.
         If it is `True` it will print the claim ID (40-character string).
+    title: bool, optional
+        It defaults to `False`, in which case the claim name will be printed.
+        If it is `True` it will print the claim title instead.
     claim_type: str, optional
         One of the five types: 'stream', 'channel', 'repost', 'collection',
         or 'livestream'.
@@ -655,7 +661,7 @@ def list_search_claims(threads=32,
 
     if claims_info["claims"]:
         prntc.print_tr_claims(claims_info["claims"],
-                              claim_id=claim_id,
+                              claim_id=claim_id, title=title,
                               sanitize=sanitize,
                               file=file, fdate=fdate, sep=sep)
 

@@ -1006,10 +1006,11 @@ s = lbryt.claims_bids(show_competing=True, show_reposts=True, compact=True)
 Display the trending claims in the network.
 We can specify different claim types: `'stream'` (downloadable),
 `'channel'`, `'repost'`, `'collection'`, or `'livestream'`.
-By default it will display the first page of the results;
-we can choose one page from 1 to 20.
+By default, `page=None` so it will display 1000 claims of results.
+If we specify a page in the range of 1 to 20, it will only display 50 claims
+from that page:
 ```py
-g = lbryt.list_trending_claims()  # all types
+g = lbryt.list_trending_claims()  # all types, 1000 claims
 g = lbryt.list_trending_claims(page=12, claim_type="stream")
 g = lbryt.list_trending_claims(page=7, claim_type="channel")
 ```
@@ -1018,16 +1019,21 @@ Some names have complex unicode characters in them, especially emojis.
 We can remove these clusters so that the names can be displayed
 without problem in all systems.
 With the `sanitize` option the complex unicode symbols are replaced
-by a monospace heavy vertical bar `'❚'` (unicode U+275A).
-In this case, we may decide to display the claim ID, to be able to download
-this claim by ID rather than by name.
+by a monospace heavy vertical bar `'❚'` (unicode U+275A):
 ```py
-g = lbryt.list_trending_claims(claim_id=True, sanitize=True)
+g = lbryt.list_trending_claims(sanitize=True)
+```
+
+We may decide to display the claim ID, to be able to download
+this claim by ID rather than by name. We can also display the title
+of the claim instead of its name:
+```py
+g = lbryt.list_trending_claims(claim_id=True, title=True, sanitize=True)
 ```
 
 If the claim type is a stream (downloadable content), we can further specify
 the type of media: `'video'`, `'audio'`, `'document'`, `'image'`, `'binary'`,
-and `'model'`.
+and `'model'`:
 ```py
 g = lbryt.list_trending_claims(claim_type="stream",
                                video_stream=True, audio_stream=True,
@@ -1045,19 +1051,27 @@ g = lbryt.list_trending_claims(file="claims.txt", fdate=True, sep=';')
 ### Search for claims
 
 Display the claims found by searching for a textual string
-and by a list of tags.
+and by a list of tags:
 ```py
-h = lbryt.list_search_claims(page=1, text="lbry")
+h = lbryt.list_search_claims(text="lbry")
 h = lbryt.list_search_claims(page=3, text="", tags=["cook", "food"])
+```
+
+If the string has spaces, both terms will be searched,
+but if the words are surrounded by additional quotation marks the search
+will be restricted to the entire phrase:
+```py
+h = lbryt.list_search_claims(text="cooked food", title=True)
+h = lbryt.list_search_claims(text='"cooked food"', title=True)
 ```
 
 This search is performed by the SDK, and thus it isn't very good.
 Adding many words to the `text` string will return few results or none.
 
 Other options are the same as for `list_trending_claims`, that is,
-`claim_id`, `claim_type`, `video_stream`, `audio_stream`,
+`claim_id`, `title`, `claim_type`, `video_stream`, `audio_stream`,
 `doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
-`sanitize`, `file`, `fdate`, `sep`,
+`sanitize`, `file`, `fdate`, `sep`.
 
 [Go back to _Content_](#content)
 
