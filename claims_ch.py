@@ -120,13 +120,20 @@ def list_ch_claims(channel,
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
           and in descending order (newer claims first) if `reverse=True`.
-        - 'size': number of bytes of all downloadable claims (streams)
-          put together.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
         - 'duration': total duration of the claims in seconds.
           It will count only stream types which have a duration
           such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     False
         It there is a problem it will return `False`.
     """
@@ -148,16 +155,17 @@ def list_ch_claims(channel,
                                                    reverse=False,
                                                    server=server)
 
-    if not claims_info:
-        return False
+    if claims_info["claims"]:
+        prntc.print_sch_claims(claims_info["claims"],
+                               blocks=blocks, claim_id=claim_id,
+                               typ=typ, ch_name=ch_name,
+                               title=title, sanitize=sanitize,
+                               start=start, end=end,
+                               reverse=reverse,
+                               file=file, fdate=fdate, sep=sep)
 
-    prntc.print_sch_claims(claims_info["claims"],
-                           blocks=blocks, claim_id=claim_id,
-                           typ=typ, ch_name=ch_name,
-                           title=title, sanitize=sanitize,
-                           start=start, end=end,
-                           reverse=reverse,
-                           file=file, fdate=fdate, sep=sep)
+    print(80 * "-")
+    print(claims_info["summary"])
 
     return claims_info
 

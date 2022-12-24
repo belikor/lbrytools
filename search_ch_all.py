@@ -107,6 +107,7 @@ def search_pages(channel,
                          print_msg=print_init,
                          print_blocks=False,
                          server=server)
+
     if not result:
         return False
 
@@ -127,7 +128,8 @@ def search_pages(channel,
     return results
 
 
-def ch_search_n_claims(channel, number=1000,
+def ch_search_n_claims(channel,
+                       number=1000,
                        last_height=99_000_900,
                        reverse=False,
                        server="http://localhost:5279"):
@@ -160,18 +162,25 @@ def ch_search_n_claims(channel, number=1000,
     Returns
     -------
     dict
-        A dictionary with three keys:
+        A dictionary with nine keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
-          and in descending order (newer claims first) if `reverse=True`.
-        - 'size': number of bytes of all downloadable claims (streams)
-          put together.
+          and in descending order (new claims first) if `reverse=True`.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
         - 'duration': total duration of the claims in seconds.
           It will count only stream types which have a duration
           such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     False
         It there is a problem it will return `False`.
     """
@@ -213,7 +222,9 @@ def ch_search_n_claims(channel, number=1000,
                                    server=server)
 
         if not results:
-            return False
+            claims_info = sutils.sort_filter_size([])
+
+            return claims_info
 
         for page in results:
             all_claims.extend(page["items"])
@@ -224,13 +235,11 @@ def ch_search_n_claims(channel, number=1000,
             break
 
     print()
-    output = sutils.sort_filter_size(all_claims,
-                                     number=number,
-                                     reverse=reverse)
+    claims_info = sutils.sort_filter_size(all_claims,
+                                          number=number,
+                                          reverse=reverse)
 
-    return {"claims": output["claims"],
-            "size": output["size"],
-            "duration": output["duration"]}
+    return claims_info
 
 
 def ch_search_all_claims(channel,
@@ -264,18 +273,25 @@ def ch_search_all_claims(channel,
     Returns
     -------
     dict
-        A dictionary with three keys:
+        A dictionary with nine keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
           and in descending order (newer claims first) if `reverse=True`.
-        - 'size': number of bytes of all downloadable claims (streams)
-          put together.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
         - 'duration': total duration of the claims in seconds.
           It will count only stream types which have a duration
           such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     False
         It there is a problem it will return `False`.
     """
@@ -296,8 +312,11 @@ def ch_search_all_claims(channel,
                            pages=20,
                            print_init=True,
                            server=server)
+
     if not results:
-        return False
+        claims_info = sutils.sort_filter_size([])
+
+        return claims_info
 
     total_items = results[0]["total_items"]
 
@@ -334,13 +353,11 @@ def ch_search_all_claims(channel,
             finished = True
 
     print()
-    output = sutils.sort_filter_size(all_claims,
-                                     number=0,
-                                     reverse=reverse)
+    claims_info = sutils.sort_filter_size(all_claims,
+                                          number=0,
+                                          reverse=reverse)
 
-    return {"claims": output["claims"],
-            "size": output["size"],
-            "duration": output["duration"]}
+    return claims_info
 
 
 def get_all_claims(channel,
@@ -375,18 +392,14 @@ def get_all_claims(channel,
     Returns
     -------
     dict
-        A dictionary with three keys:
+        A dictionary with nine keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
           and in descending order (new claims first) if `reverse=True`.
-        - 'size': number of bytes of all downloadable claims (streams)
-          put together.
-        - 'duration': total duration of the claims in seconds.
-          It will count only stream types which have a duration
-          such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - The other eight keys are the same from
+          `search_utils.downloadable_size`, 'size', 'duration', 'size_GB',
+          'd_h', 'd_min', 'd_s', 'days', and 'summary'.
     False
         It there is a problem it will return `False`.
     """
@@ -450,23 +463,14 @@ def get_all_claims(channel,
             cycle += 1
 
     print()
-    output = sutils.sort_filter_size(claims,
-                                     number=0,
-                                     reverse=reverse)
+    claims_info = sutils.sort_filter_size(claims,
+                                          number=0,
+                                          reverse=reverse)
 
-    return {"claims": output["claims"],
-            "size": output["size"],
-            "duration": output["duration"]}
+    return claims_info
 
 
 if __name__ == "__main__":
-    output = ch_search_all_claims("@AlisonMorrow")  # 410
-#    output = ch_search_all_claims("@BrittanyVenti")  # 600
-#    output = ch_search_all_claims("@BrodieRobertson")  # 860
-#    output = ch_search_all_claims("@Karlyn")  # 950
-#    output = ch_search_all_claims("@DistroTube")  # 1008
-#    output = ch_search_all_claims("@mises")  # 1200
-#    output = ch_search_all_claims("@timcast")  # 1860
-#    output = ch_search_all_claims("@TimcastIRL")  # 2080
-#    output = ch_search_all_claims("@rossmanngroup")  # 2580
-#    output = ch_search_all_claims("@Styxhexenhammer666")  # 3590
+    output = ch_search_all_claims("@AlisonMorrow")  # ~722
+    print()
+    output = ch_search_all_claims("@rossmanngroup")  # ~3152
