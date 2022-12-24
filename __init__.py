@@ -85,7 +85,7 @@ from lbrytools.print_claims import print_sch_claims
 
 from lbrytools.printf import print_summary
 from lbrytools.print_ch import print_channels
-from lbrytools.print_ch import print_ch_claims
+from lbrytools.claims_ch import list_ch_claims
 
 from lbrytools.download import download_single
 
@@ -188,7 +188,7 @@ True if print_sch_claims else False
 
 True if print_summary else False
 True if print_channels else False
-True if print_ch_claims else False
+True if list_ch_claims else False
 
 True if download_single else False
 

@@ -109,7 +109,7 @@ from lbrytools import abandon_support_inv
 from lbrytools import target_support
 from lbrytools import list_trending_claims
 from lbrytools import list_search_claims
-from lbrytools import print_ch_claims
+from lbrytools import list_ch_claims
 from lbrytools import list_comments
 from lbrytools import create_comment
 from lbrytools import update_comment
@@ -1085,15 +1085,15 @@ starting with the newest claim, and going back in time.
 With `reverse=True` the newest claims will come first in the printed output,
 otherwise the oldest claims will be first:
 ```py
-k = lbryt.print_ch_claims("@lbry:3f", number=10, reverse=True)
+k = lbryt.list_ch_claims("@lbry:3f", number=10, reverse=True)
 ```
 
 Various options allow us to display different fields of information.
 If `sanitize=True`, it will remove emojis from the displayed names,
 which may be necessary if we want to use the output in other programs:
 ```py
-k = lbryt.print_ch_claims("@lbry:3f", number=20,
-                          typ=True, ch_name=True, blocks=True, sanitize=True)
+k = lbryt.list_ch_claims("@lbry:3f", number=20,
+                         typ=True, ch_name=True, blocks=True, sanitize=True)
 ```
 
 Instead of displaying the claim name, we can display the title
@@ -1101,23 +1101,23 @@ of the claim. If we want to download the item, we must use
 either the claim name or the claim ID, so the latter
 can be displayed as well:
 ```py
-k = lbryt.print_ch_claims("@lbry:3f", number=15,
-                          claim_id=True, title=True)
+k = lbryt.list_ch_claims("@lbry:3f", number=15,
+                         claim_id=True, title=True)
 ```
 
 If `number` is not provided, it defaults to zero,
 in which case all claims from the channel will be printed.
 If this is done we can also choose an arbitrary range of claims to print:
 ```py
-k = lbryt.print_ch_claims("@TomWoodsTV", start=1005)
-k = lbryt.print_ch_claims("@TomWoodsTV", end=75)
-k = lbryt.print_ch_claims("@TomWoodsTV", start=445, end=600)
+k = lbryt.list_ch_claims("@TomWoodsTV", start=1005)
+k = lbryt.list_ch_claims("@TomWoodsTV", end=75)
+k = lbryt.list_ch_claims("@TomWoodsTV", start=445, end=600)
 ```
 
 The list of claims can be printed directly to a file:
 ```py
-k = lbryt.print_ch_claims("@TomWoodsTV",
-                          file="ch_claims.txt", fdate=True, sep=";")
+k = lbryt.list_ch_claims("@TomWoodsTV",
+                         file="ch_claims.txt", fdate=True, sep=";")
 ```
 
 [Go back to _Content_](#content)
@@ -1177,7 +1177,7 @@ ss = lbryt.list_claims(channel="@MyPersonalChannel")
 ss = lbryt.list_claims(channel_id="c64a02da7f080a81572cac1a51cf7f3464c67058")
 ```
 
-To display claims for any random channel we can use `print_ch_claims`.
+To display claims for any random channel we can use `list_ch_claims`.
 
 To display only those claims that were published anonymously by us,
 that is, without channel:
@@ -1987,7 +1987,7 @@ lbryt.abandon_support_inv(..., server=server)
 lbryt.target_support(..., server=server)
 lbryt.list_trending_claims(..., server=server)
 lbryt.list_search_claims(..., server=server)
-lbryt.print_ch_claims(..., server=server)
+lbryt.list_ch_claims(..., server=server)
 lbryt.list_comments(..., server=server)
 lbryt.create_comment(..., server=server)
 lbryt.update_comment(..., server=server)
