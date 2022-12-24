@@ -146,12 +146,11 @@ def ch_search_fifty_claims(channel, number=2, reverse=True,
         print(">>> No items found; "
               f"check that the name is correct, channel={channel}")
 
-    output = sutils.sort_filter_size(claims,
-                                     number=number,
-                                     reverse=reverse)
-    claims = output["claims"]
+    claims_info = sutils.sort_filter_size(claims,
+                                          number=number,
+                                          reverse=reverse)
 
-    return claims
+    return claims_info
 
 
 def ch_search_latest(channel=None, number=2,
@@ -208,21 +207,20 @@ def ch_search_latest(channel=None, number=2,
         channel = "@" + channel
 
     if number == 0:
-        output = srchall.ch_search_all_claims(channel,
-                                              reverse=True,
-                                              server=server)
-        claims = output["claims"]
-    elif 0 < number <= 50:
-        claims = ch_search_fifty_claims(channel, number=number,
-                                        reverse=True,
-                                        server=server)
-    elif number > 50:
-        output = srchall.ch_search_n_claims(channel, number=number,
-                                            reverse=True,
-                                            server=server)
-        claims = output["claims"]
+        claims_info = srchall.ch_search_all_claims(channel,
+                                                   reverse=True,
+                                                   server=server)
 
-    return claims
+    elif 0 < number <= 50:
+        claims_info = ch_search_fifty_claims(channel, number=number,
+                                             reverse=True,
+                                             server=server)
+    elif number > 50:
+        claims_info = srchall.ch_search_n_claims(channel, number=number,
+                                                 reverse=True,
+                                                 server=server)
+
+    return claims_info["claims"]
 
 
 def get_streams(channel=None, number=2, print_msg=True,
