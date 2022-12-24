@@ -188,7 +188,8 @@ def downloadable_size(claims, local=False, print_msg=True):
             "summary": summary}
 
 
-def sort_filter_size(claims, number=0, reverse=False):
+def sort_filter_size(claims, number=0, reverse=False,
+                     print_msg=False):
     """Sort, filter the claims, and provide the download size and duration.
 
     Parameters
@@ -204,46 +205,31 @@ def sort_filter_size(claims, number=0, reverse=False):
         It defaults to `False`, in which case older items come first
         on the output list.
         If it is `True` the newest items will come first in the output list.
+    print_msg: bool, optional
+        It defaults to `False`.
+        If it `True` it will print the summary information.
 
     Returns
     -------
     dict
-        A dictionary with three keys:
+        A dictionary with nine keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
           and in descending order (new claims first) if `reverse=True`.
-        - 'size': total size of the claims in bytes.
-          It can be divided by 1024 to obtain kibibytes, by another 1024
-          to obtain mebibytes, and by another 1024 to obtain gibibytes.
-        - 'duration': total duration of the claims in seconds.
-          It will count only stream types which have a duration
-          such as audio and video.
-          The duration can be divided by 3600 to obtain hours,
-          then by 24 to obtain days.
+        - The other eight keys are the same from `downloadable_size`,
+          'size', 'duration', 'size_GB', 'd_h', 'd_min', 'd_s', 'days',
+          and 'summary'.
     """
     claims = sort_and_filter(claims, number=number, reverse=reverse)
 
     print()
-    output = downloadable_size(claims)
-    total_size = output["size"]
-    total_duration = output["duration"]
+    claims_info = downloadable_size(claims)
 
-    n_claims = len(claims)
-    GB = total_size / (1024**3)  # to GiB
+    if print_msg:
+        print(40 * "-")
+        print(claims_info["summary"])
 
-    hrs = total_duration / 3600
-    days = hrs / 24
+    claims_info["claims"] = claims
 
-    hr = total_duration // 3600
-    mi = (total_duration % 3600) // 60
-    sec = (total_duration % 3600) % 60
-
-    print(40 * "-")
-    print(f"Total unique claims: {n_claims}")
-    print(f"Total download size: {GB:.4f} GiB")
-    print(f"Total duration: {hr} h {mi} min {sec} s, or {days:.4f} days")
-
-    return {"claims": claims,
-            "size": total_size,
-            "duration": total_duration}
+    return claims_info
