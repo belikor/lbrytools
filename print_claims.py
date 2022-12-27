@@ -150,13 +150,16 @@ def print_sch_claims(claims,
             # channel = claim["signing_channel"].get("name", 14 * "_")
             channel = claim["signing_channel"]["canonical_url"]
             channel = channel.lstrip("lbry://")
-            if sanitize:
-                channel = funcs.sanitize_text(channel)
         else:
             channel = 14 * "_"
 
-        if sanitize:
-            channel = funcs.sanitize_text(channel)
+        if "fee" in claim["value"]:
+            fee = claim["value"]["fee"].get("amount", "___")
+            fee = f"{fee} " + claim["value"]["fee"]["currency"]
+        else:
+            fee = 8 * " "
+
+        fee = f"f: {fee:>9}"
 
         name = claim["name"]
 
@@ -165,6 +168,7 @@ def print_sch_claims(claims,
 
         if sanitize:
             name = funcs.sanitize_text(name)
+            channel = funcs.sanitize_text(channel)
 
         length_s = 0
         rem_s = 0
@@ -204,6 +208,7 @@ def print_sch_claims(claims,
 
         line += f"{rem_min:3d}:{rem_s:02d}" + f"{sep} "
         line += f"{size:9.4f} MB" + f"{sep} "
+        line += f"{fee}" + f"{sep} "
         line += f'"{name}"'
 
         out.append(line)
