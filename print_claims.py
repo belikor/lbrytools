@@ -60,6 +60,14 @@ def print_tr_claims(claims,
         else:
             channel = 14 * "_"
 
+        if "fee" in claim["value"]:
+            fee = claim["value"]["fee"].get("amount", "___")
+            fee = f"{fee} " + claim["value"]["fee"]["currency"]
+        else:
+            fee = 8 * " "
+
+        fee = f"f: {fee:>9}"
+
         name = claim["name"]
 
         if title and "title" in claim["value"]:
@@ -78,6 +86,7 @@ def print_tr_claims(claims,
         line += f"{stream_type:9s}" + f"{sep} "
         line += f"{mtype:17s}" + f"{sep} "
         line += f"{channel:40s}" + f"{sep} "
+        line += f"{fee}" + f"{sep} "
         line += f'"{name}"'
         out.append(line)
 
