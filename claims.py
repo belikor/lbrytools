@@ -27,6 +27,7 @@
 import requests
 
 import lbrytools.funcs as funcs
+import lbrytools.search_utils as sutils
 import lbrytools.print_claims as prntc
 
 
@@ -356,25 +357,33 @@ def w_claim_search(page=1,
     stypes = msg["params"].get("stream_types", [])
     tags = msg["params"].get("any_tags", [])
 
-    if what in ("trending"):
-        print("Trending claims")
-        print(f"order_by: {trending}")
-    elif what in ("text"):
-        print("Searched text and tags")
-        print(f"text: '{text}'")
-        print(f"tags: " + ", ".join(tags))
-        print(f"order_by: {order}")
+    searched = []
 
-    print(f"claim_type: {claim_type}")
-    print(f"stream_types: {stypes}")
+    if what in ("trending"):
+        searched = ["Trending claims",
+                    f"order_by: {trending}"]
+    elif what in ("text"):
+        searched = ["Searched text and tags",
+                    f"text: '{text}'",
+                    f"tags: " + ", ".join(tags),
+                    f"order_by: {order}"]
+
+    searched.extend([f"claim_type: {claim_type}",
+                     f"stream_types: {stypes}",
+                     f"page: {page}"])
 
     output = requests.post(server, json=msg).json()
+
     if "error" in output:
-        return False
+        claims = []
+    else:
+        claims = output["result"]["items"]
 
-    claims = output["result"]["items"]
+    claims_info = sutils.downloadable_size(claims, print_msg=False)
+    claims_info["claims"] = claims
+    claims_info["searched"] = "\n".join(searched)
 
-    return claims
+    return claims_info
 
 
 def print_trending_claims(page=1,
@@ -439,9 +448,16 @@ def print_trending_claims(page=1,
 
     Returns
     -------
-    list of dict
-        Each dictionary in the list corresponds to a claim found
-        in the search.
+    dict
+        A dictionary with ten keys:
+        - 'claims': a list of dictionaries where every dictionary represents
+           a claim returned by `claim_search`.
+        - 'searched': a paragraph of text that with the information
+          that was searched, such as claim type, stream types, and page.
+        - The other eight keys are the same
+          from `search_utils.downloadable_size`, including
+          'size', 'duration', 'size_GB', 'd_h', 'd_min', 'd_s', 'days',
+          and 'summary'.
     False
         If there is a problem it will return `False`.
     """
@@ -449,25 +465,30 @@ def print_trending_claims(page=1,
         return False
 
     print("Show trending claims")
-    claims = w_claim_search(page=page,
-                            what="trending",
-                            trending=trending,
-                            claim_type=claim_type,
-                            video_stream=video_stream,
-                            audio_stream=audio_stream,
-                            doc_stream=doc_stream,
-                            img_stream=img_stream,
-                            bin_stream=bin_stream,
-                            model_stream=model_stream,
-                            server=server)
+    claims_info = w_claim_search(page=page,
+                                 what="trending",
+                                 trending=trending,
+                                 claim_type=claim_type,
+                                 video_stream=video_stream,
+                                 audio_stream=audio_stream,
+                                 doc_stream=doc_stream,
+                                 img_stream=img_stream,
+                                 bin_stream=bin_stream,
+                                 model_stream=model_stream,
+                                 server=server)
 
-    if claims:
-        prntc.print_tr_claims(claims,
+    if claims_info["claims"]:
+        prntc.print_tr_claims(claims_info["claims"],
                               claim_id=claim_id,
                               sanitize=sanitize,
                               file=file, fdate=fdate, sep=sep)
 
-    return claims
+    print(80 * "-")
+    print(claims_info["searched"])
+    print(40 * "-")
+    print(claims_info["summary"])
+
+    return claims_info
 
 
 def print_search_claims(page=1,
@@ -542,9 +563,16 @@ def print_search_claims(page=1,
 
     Returns
     -------
-    list of dict
-        Each dictionary in the list corresponds to a claim found
-        in the search.
+    dict
+        A dictionary with ten keys:
+        - 'claims': a list of dictionaries where every dictionary represents
+           a claim returned by `claim_search`.
+        - 'searched': a paragraph of text that with the information
+          that was searched, such as claim type, stream types, and page.
+        - The other eight keys are the same
+          from `search_utils.downloadable_size`, including
+          'size', 'duration', 'size_GB', 'd_h', 'd_min', 'd_s', 'days',
+          and 'summary'.
     False
         If there is a problem it will return `False`.
     """
@@ -552,27 +580,32 @@ def print_search_claims(page=1,
         return False
 
     print("Show searched text and tags")
-    claims = w_claim_search(page=page,
-                            what="text",
-                            order=order,
-                            text=text,
-                            tags=tags,
-                            claim_type=claim_type,
-                            video_stream=video_stream,
-                            audio_stream=audio_stream,
-                            doc_stream=doc_stream,
-                            img_stream=img_stream,
-                            bin_stream=bin_stream,
-                            model_stream=model_stream,
-                            server=server)
+    claims_info = w_claim_search(page=page,
+                                 what="text",
+                                 order=order,
+                                 text=text,
+                                 tags=tags,
+                                 claim_type=claim_type,
+                                 video_stream=video_stream,
+                                 audio_stream=audio_stream,
+                                 doc_stream=doc_stream,
+                                 img_stream=img_stream,
+                                 bin_stream=bin_stream,
+                                 model_stream=model_stream,
+                                 server=server)
 
-    if claims:
-        prntc.print_tr_claims(claims,
+    if claims_info["claims"]:
+        prntc.print_tr_claims(claims_info["claims"],
                               claim_id=claim_id,
                               sanitize=sanitize,
                               file=file, fdate=fdate, sep=sep)
 
-    return claims
+    print(80 * "-")
+    print(claims_info["searched"])
+    print(40 * "-")
+    print(claims_info["summary"])
+
+    return claims_info
 
 
 if __name__ == "__main__":
