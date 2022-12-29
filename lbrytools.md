@@ -1025,10 +1025,11 @@ g = lbryt.list_trending_claims(sanitize=True)
 ```
 
 We may decide to display the claim ID, to be able to download
-this claim by ID rather than by name. We can also display the title
-of the claim instead of its name:
+this claim by ID rather than by name. We can also display the release time
+(or creation time), and title of the claim instead of its name:
 ```py
-g = lbryt.list_trending_claims(claim_id=True, title=True, sanitize=True)
+g = lbryt.list_trending_claims(release=True, claim_id=True, title=True,
+                               sanitize=True)
 ```
 
 If the claim type is a stream (downloadable content), we can further specify
@@ -1069,7 +1070,7 @@ This search is performed by the SDK, and thus it isn't very good.
 Adding many words to the `text` string will return few results or none.
 
 Other options are the same as for `list_trending_claims`, that is,
-`claim_id`, `title`, `claim_type`, `video_stream`, `audio_stream`,
+`release`, `claim_id`, `title`, `claim_type`, `video_stream`, `audio_stream`,
 `doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
 `sanitize`, `file`, `fdate`, `sep`.
 

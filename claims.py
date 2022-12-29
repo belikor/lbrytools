@@ -432,7 +432,7 @@ def w_claim_search(what="trending",
 def list_trending_claims(threads=32,
                          page=None,
                          trending="trending_mixed",
-                         claim_id=False, title=False,
+                         release=False, claim_id=False, title=False,
                          claim_type=None,
                          video_stream=False, audio_stream=False,
                          doc_stream=False, img_stream=False,
@@ -454,6 +454,10 @@ def list_trending_claims(threads=32,
     page: int, optional
         It defaults to `None`, in which case all 20 pages will be searched.
         If it is an integer between 1 and 20, only that page will be searched.
+    release: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the release time of the claim,
+        if it exists (for stream claims), or the creation time.
     claim_id: bool, optional
         It defaults to `False`.
         If it is `True` it will print the claim ID (40-character string).
@@ -533,7 +537,7 @@ def list_trending_claims(threads=32,
 
     if claims_info["claims"]:
         prntc.print_tr_claims(claims_info["claims"],
-                              claim_id=claim_id, title=title,
+                              release=release, claim_id=claim_id, title=title,
                               sanitize=sanitize,
                               file=file, fdate=fdate, sep=sep)
 
@@ -550,7 +554,7 @@ def list_search_claims(threads=32,
                        order="release_time",
                        text="lbry",
                        tags=None,
-                       claim_id=False, title=False,
+                       release=False, claim_id=False, title=False,
                        claim_type=None,
                        video_stream=False, audio_stream=False,
                        doc_stream=False, img_stream=False,
@@ -580,6 +584,10 @@ def list_search_claims(threads=32,
         will return few results or none.
     tags: list of str, optional
         Each string in the list will be considered a tag that is searched.
+    release: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the release time of the claim,
+        if it exists (for stream claims), or the creation time.
     claim_id: bool, optional
         It defaults to `False`.
         If it is `True` it will print the claim ID (40-character string).
@@ -661,7 +669,7 @@ def list_search_claims(threads=32,
 
     if claims_info["claims"]:
         prntc.print_tr_claims(claims_info["claims"],
-                              claim_id=claim_id, title=title,
+                              release=release, claim_id=claim_id, title=title,
                               sanitize=sanitize,
                               file=file, fdate=fdate, sep=sep)
 
