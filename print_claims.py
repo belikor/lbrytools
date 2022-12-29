@@ -33,7 +33,7 @@ import lbrytools.funcs as funcs
 
 
 def print_tr_claims(claims,
-                    claim_id=False, title=False,
+                    release=False, claim_id=False, title=False,
                     sanitize=False,
                     file=None, fdate=False, sep=";"):
     """Print generic claims, particularly trending or searched claims."""
@@ -42,6 +42,18 @@ def print_tr_claims(claims,
     out = []
     for num, claim in enumerate(claims, start=1):
         vtype = claim["value_type"]
+
+        create_time = claim["meta"].get("creation_timestamp", 0)
+        create_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
+                                    time.gmtime(create_time))
+
+        rels_time = int(claim["value"].get("release_time", 0))
+
+        if not rels_time:
+            rels_time = create_time
+        else:
+            rels_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
+                                      time.gmtime(rels_time))
 
         if "stream_type" in claim["value"]:
             stream_type = claim["value"].get("stream_type")
@@ -79,10 +91,13 @@ def print_tr_claims(claims,
 
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
 
+        if release:
+            line += f"{rels_time}" + f"{sep} "
+
         if claim_id:
             line += claim["claim_id"] + f"{sep} "
 
-        line += f"{vtype:9s}" + f"{sep} "
+        line += f"{vtype:10s}" + f"{sep} "
         line += f"{stream_type:9s}" + f"{sep} "
         line += f"{mtype:17s}" + f"{sep} "
         line += f"{channel:40s}" + f"{sep} "
