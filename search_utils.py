@@ -120,8 +120,9 @@ def downloadable_size(claims, local=False, print_msg=True):
         - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
         - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
         - 'days': total seconds converted into days (floating point value)
-        - 'text': text describing the number of claims, the total size in GiB,
-           and the total duration expressed as HH:MM:SS, and days
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     """
     if print_msg:
         if local:
@@ -175,7 +176,7 @@ def downloadable_size(claims, local=False, print_msg=True):
          f"Total duration: {hr} h {mi} min {sec} s, "
          f"or {days:.4f} days"]
 
-    text = "\n".join(m)
+    summary = "\n".join(m)
 
     return {"size": total_bytes,
             "duration": total_seconds,
@@ -184,7 +185,7 @@ def downloadable_size(claims, local=False, print_msg=True):
             "d_min": mi,
             "d_s": sec,
             "days": days,
-            "text": text}
+            "summary": summary}
 
 
 def sort_filter_size(claims, number=0, reverse=False):

@@ -183,8 +183,9 @@ def print_summary(show="all",
         - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
         - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
         - 'days': total seconds converted into days (floating point value)
-        - 'text': text describing the number of claims, the total size in GiB,
-           and the total duration expressed as HH:MM:SS, and days
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     False
         If there is a problem it will return `False`.
     """
@@ -222,7 +223,7 @@ def print_summary(show="all",
     e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
 
     out = [40 * "-",
-           claims_info["text"],
+           claims_info["summary"],
            "",
            f"start: {s_time}",
            f"end:   {e_time}"]
