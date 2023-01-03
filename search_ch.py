@@ -24,58 +24,8 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to help with searching channels in the LBRY network."""
-import requests
-
 import lbrytools.funcs as funcs
-import lbrytools.resolve_ch as resch
-import lbrytools.search_utils as sutils
 import lbrytools.search_ch_all as srchall
-
-
-def ch_search_fifty_claims(channel, number=2, reverse=True,
-                           server="http://localhost:5279"):
-    """Return only the first page of results."""
-    cmd = ["lbrynet",
-           "claim",
-           "search",
-           "--channel=" + "'" + channel + "'",
-           # "--stream_type=video",
-           "--page_size=" + str(number),
-           "--order_by=release_time"]
-
-    print("Search: " + " ".join(cmd))
-    print(80 * "-")
-
-    msg = {"method": cmd[1] + "_" + cmd[2],
-           "params": {"channel": channel,
-                      "page_size": number,
-                      "order_by": "release_time"}}
-
-    # A bug (lbryio/lbry-sdk #3316) prevents the `lbrynet file list`
-    # command from finding the channel, therefore the channel must be
-    # resolved with `lbrynet resolve` before it becomes known by other
-    # functions.
-    ch = resch.resolve_channel(channel=channel, server=server)
-    if not ch:
-        return False
-
-    output = requests.post(server, json=msg).json()
-
-    if "error" in output:
-        print(">>> No 'result' in the JSON-RPC server output")
-        return False
-
-    claims = output["result"]["items"]
-
-    if len(claims) < 1:
-        print(">>> No items found; "
-              f"check that the name is correct, channel={channel}")
-
-    claims_info = sutils.sort_filter_size(claims,
-                                          number=number,
-                                          reverse=reverse)
-
-    return claims_info
 
 
 def ch_search_latest(channel=None, number=2,
@@ -131,19 +81,15 @@ def ch_search_latest(channel=None, number=2,
     if not channel.startswith("@"):
         channel = "@" + channel
 
-    if number == 0:
+    if number:
+        claims_info = srchall.ch_search_n_claims(channel,
+                                                 number=number,
+                                                 reverse=True,
+                                                 server=server)
+    else:
         claims_info = srchall.ch_search_all_claims(channel,
                                                    reverse=True,
                                                    server=server)
-
-    elif 0 < number <= 50:
-        claims_info = ch_search_fifty_claims(channel, number=number,
-                                             reverse=True,
-                                             server=server)
-    elif number > 50:
-        claims_info = srchall.ch_search_n_claims(channel, number=number,
-                                                 reverse=True,
-                                                 server=server)
 
     return claims_info["claims"]
 

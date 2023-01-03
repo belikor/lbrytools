@@ -38,6 +38,53 @@ import lbrytools.funcs as funcs
 import lbrytools.search_utils as sutils
 
 
+def ch_search_fifty_claims(channel, number=2,
+                           reverse=True,
+                           server="http://localhost:5279"):
+    """Return only the first page of results."""
+    cmd = ["lbrynet",
+           "claim",
+           "search",
+           "--channel=" + "'" + channel + "'",
+           # "--stream_type=video",
+           "--page_size=" + str(number),
+           "--order_by=release_time"]
+
+    print("Search: " + " ".join(cmd))
+    print(80 * "-")
+
+    msg = {"method": cmd[1] + "_" + cmd[2],
+           "params": {"channel": channel,
+                      "page_size": number,
+                      "order_by": "release_time"}}
+
+    # A bug (lbryio/lbry-sdk #3316) prevents the `lbrynet file list`
+    # command from finding the channel, therefore the channel must be
+    # resolved with `lbrynet resolve` before it becomes known by other
+    # functions.
+    # ch = resch.resolve_channel(channel=channel, server=server)
+    # if not ch:
+    #     return False
+
+    output = requests.post(server, json=msg).json()
+
+    if "error" in output:
+        print(">>> No 'result' in the JSON-RPC server output")
+        return False
+
+    claims = output["result"]["items"]
+
+    if len(claims) < 1:
+        print(">>> No items found; "
+              f"check that the name is correct, channel={channel}")
+
+    claims_info = sutils.sort_filter_size(claims,
+                                          number=number,
+                                          reverse=reverse)
+
+    return claims_info
+
+
 def search_page(channel, page=1,
                 last_height=99_000_900,
                 print_msg=True,

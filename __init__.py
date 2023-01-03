@@ -71,9 +71,6 @@ from lbrytools.search import parse_claim_file
 from lbrytools.resolve_ch import resolve_channel
 from lbrytools.resolve_ch import find_channel
 
-from lbrytools.search_ch_all import ch_search_n_claims
-from lbrytools.search_ch_all import ch_search_all_claims
-
 from lbrytools.search_ch import ch_search_latest
 
 from lbrytools.sort import sort_items
@@ -174,9 +171,6 @@ True if parse_claim_file else False
 
 True if resolve_channel else False
 True if find_channel else False
-
-True if ch_search_n_claims else False
-True if ch_search_all_claims else False
 
 True if ch_search_latest else False
 
