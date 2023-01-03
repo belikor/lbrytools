@@ -29,15 +29,19 @@ import concurrent.futures as fts
 
 import lbrytools.funcs as funcs
 import lbrytools.sort as sort
-import lbrytools.search_ch as srch_ch
+import lbrytools.resolve_ch as resch
 
 
 def find_ch_th(cid, full, canonical, offline, server):
     """Wrapper to use with threads in 'print_channels'."""
-    channel = srch_ch.find_channel(cid=cid,
-                                   full=full, canonical=canonical,
-                                   offline=offline,
-                                   server=server)
+    channel = resch.find_channel(cid=cid,
+                                 full=full, canonical=canonical,
+                                 offline=offline,
+                                 server=server)
+
+    if not channel:
+        print()
+
     return channel
 
 
@@ -276,10 +280,9 @@ def print_channels(full=True, canonical=False,
             if end != 0 and num > end:
                 break
 
-            channel = srch_ch.find_channel(cid=item["claim_id"],
-                                           full=full, canonical=canonical,
-                                           offline=offline,
-                                           server=server)
+            channel = find_ch_th(item["claim_id"],
+                                 full, canonical, offline,
+                                 server)
             if channel:
                 all_channels.append(channel)
 

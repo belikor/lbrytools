@@ -28,7 +28,7 @@ import os
 
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
-import lbrytools.search_ch as srch_ch
+import lbrytools.resolve_ch as resch
 import lbrytools.sort as sort
 import lbrytools.clean as clean
 
@@ -328,9 +328,9 @@ def remove_media(never_delete=None,
     for it, item in enumerate(items, start=1):
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
         if never_delete:
-            channel = srch_ch.find_channel(cid=item["claim_id"],
-                                           full=False,
-                                           server=server)
+            channel = resch.find_channel(cid=item["claim_id"],
+                                         full=False,
+                                         server=server)
             if not channel:
                 continue
 

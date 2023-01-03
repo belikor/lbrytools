@@ -27,7 +27,7 @@
 import time
 
 import lbrytools.funcs as funcs
-import lbrytools.search_ch as srch_ch
+import lbrytools.resolve_ch as resch
 
 
 def print_info_pre_get(item=None, offline=False):
@@ -483,9 +483,9 @@ def print_items(items=None, show="all",
         if ch:
             if ch_online:
                 # Searching online is slower but it gets the full channel name
-                st_channel = srch_ch.find_channel(cid=item["claim_id"],
-                                                  full=True,
-                                                  server=server)
+                st_channel = resch.find_channel(cid=item["claim_id"],
+                                                full=True,
+                                                server=server)
                 if not st_channel:
                     print(st_claim_name)
                     print()

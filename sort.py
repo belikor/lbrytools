@@ -31,7 +31,7 @@ import requests
 import lbrytools.funcs as funcs
 import lbrytools.search as srch
 import lbrytools.search_utils as sutils
-import lbrytools.search_ch as srch_ch
+import lbrytools.resolve_ch as resch
 
 
 def sort_items(channel=None, reverse=False,
@@ -109,7 +109,7 @@ def sort_items(channel=None, reverse=False,
         # command from finding the channel, therefore the channel must be
         # resolved with `lbrynet resolve` before it becomes known by other
         # functions.
-        ch = srch_ch.resolve_channel(channel=channel, server=server)
+        ch = resch.resolve_channel(channel=channel, server=server)
         if not ch:
             return False
 

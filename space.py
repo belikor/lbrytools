@@ -28,7 +28,7 @@ import os
 import shutil
 
 import lbrytools.funcs as funcs
-import lbrytools.search_ch as srch_ch
+import lbrytools.resolve_ch as resch
 import lbrytools.sort as sort
 import lbrytools.clean as clean
 
@@ -315,9 +315,9 @@ def cleanup_space(main_dir=None, size=1000, percent=90,
         out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
 
         if never_delete:
-            channel = srch_ch.find_channel(cid=item["claim_id"],
-                                           full=False,
-                                           server=server)
+            channel = resch.find_channel(cid=item["claim_id"],
+                                         full=False,
+                                         server=server)
             if channel in never_delete:
                 print(out + f"item from {channel} will not be deleted. "
                       "Skipping.")
