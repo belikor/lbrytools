@@ -150,7 +150,8 @@ def search_pages(channel,
     to use as reference; it will look for claims before this block.
     """
     # Initial search just to know how big the channel is
-    result = search_page(channel, page=1, last_height=last_height,
+    result = search_page(channel, page=1,
+                         last_height=last_height,
                          print_msg=print_init,
                          print_blocks=False,
                          server=server)
@@ -166,10 +167,12 @@ def search_pages(channel,
     results = []
 
     for page in range(1, total_pages + 1):
-        res = search_page(channel, page=page, last_height=last_height,
+        res = search_page(channel, page=page,
+                          last_height=last_height,
                           print_msg=False,
                           print_blocks=True,
                           server=server)
+
         results.append(res)
 
     return results
@@ -258,15 +261,15 @@ def ch_search_n_claims(channel,
         print(f"Search cycle: {cycle}")
 
         if cycle == 1:
-            results = search_pages(channel, last_height=last_height,
-                                   pages=pages,
-                                   print_init=True,
-                                   server=server)
+            print_init = True
         else:
-            results = search_pages(channel, last_height=last_height,
-                                   pages=pages,
-                                   print_init=False,
-                                   server=server)
+            print_init = False
+
+        results = search_pages(channel,
+                               last_height=last_height,
+                               pages=pages,
+                               print_init=print_init,
+                               server=server)
 
         if not results:
             claims_info = sutils.sort_filter_size([])
@@ -355,7 +358,8 @@ def ch_search_all_claims(channel,
 
     cycle = 1
     print(f"Search cycle: {cycle}")
-    results = search_pages(channel, last_height=last_height,
+    results = search_pages(channel,
+                           last_height=last_height,
                            pages=20,
                            print_init=True,
                            server=server)
@@ -387,10 +391,12 @@ def ch_search_all_claims(channel,
     while not finished:
         cycle += 1
         print(f"Search cycle: {cycle}")
-        results = search_pages(channel, last_height=earliest_height,
+        results = search_pages(channel,
+                               last_height=earliest_height,
                                pages=20,
                                print_init=False,
                                server=server)
+
         for page in results:
             all_claims.extend(page["items"])
 
