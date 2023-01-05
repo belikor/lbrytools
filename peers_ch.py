@@ -135,6 +135,7 @@ def search_ch_peers(channel=None, number=2, threads=32,
     # srch_ch.get_streams(...)
     claims = srch_ch.ch_search_latest(channel=channel, number=number,
                                       server=server)
+
     if not claims:
         results = prs.calculate_peers(claim=None, print_msg=False,
                                       server=server)
@@ -142,7 +143,7 @@ def search_ch_peers(channel=None, number=2, threads=32,
         base_peers_info = {"channel": channel,
                            "n_claims": number,
                            "n_streams": 0,
-                           "streams_info": results}
+                           "streams_info": [results]}
 
         peers_info = prs.process_claims_peers(base_peers_info,
                                               channel=True,
@@ -309,12 +310,13 @@ def list_ch_peers(channel=None, number=2, threads=32, inline=True,
 
     summary = prs.get_summary(peers_info, channel=True)
 
-    print()
-    prs.print_claims_lines(peers_info,
-                           inline=inline,
-                           cid=claim_id, typ=typ, title=title,
-                           sanitize=sanitize,
-                           file=file, fdate=fdate, sep=sep)
+    if peers_info["streams_info"][0]["stream"]:
+        print()
+        prs.print_claims_lines(peers_info,
+                               inline=inline,
+                               cid=claim_id, typ=typ, title=title,
+                               sanitize=sanitize,
+                               file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
 
