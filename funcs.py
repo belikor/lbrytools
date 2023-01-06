@@ -37,6 +37,10 @@ try:
 except ModuleNotFoundError:
     EMOJI_LOADED = False
 
+TFMT = "%Y-%m-%d_%H:%M:%S%z %A"
+TFMTp = "%Y-%m-%d_%H:%M:%S%z"
+TFMTf = "%Y%m%d_%H%M"
+
 
 def start_lbry():
     """Launch the lbrynet client through subprocess."""
@@ -143,7 +147,7 @@ def print_content(output_list, file=None, fdate=False):
         base = os.path.basename(file)
 
         if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+            fdate = time.strftime(TFMTf, time.gmtime()) + "_"
         else:
             fdate = ""
 
