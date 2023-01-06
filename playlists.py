@@ -24,45 +24,15 @@
 # DEALINGS IN THE SOFTWARE.                                                   #
 # --------------------------------------------------------------------------- #
 """Functions to display playlist information."""
-import os
 import requests
 import time
 
 import lbrytools.funcs as funcs
 
 
-def list_playlists(shared=True,
-                   file=None, fdate=False,
-                   server="http://localhost:5279"):
-    """Display the playlists.
-
-    Parameters
-    ----------
-    shared: bool, optional
-        It defaults to `True`, in which case it uses the shared database
-        synchronized with Odysee online.
-        If it is `False` it will use only the local database
-        to the LBRY Desktop application.
-    file: str, optional
-        It defaults to `None`.
-        It must be a writable path to which the summary will be written.
-        Otherwise the summary will be printed to the terminal.
-    fdate: bool, optional
-        It defaults to `False`.
-        If it is `True` it will add the date to the name of the summary file.
-    server: str, optional
-        It defaults to `'http://localhost:5279'`.
-        This is the address of the `lbrynet` daemon, which should be running
-        in your computer before using any `lbrynet` command.
-        Normally, there is no need to change this parameter from its default
-        value.
-
-    Returns
-    -------
-    bool
-        It returns `True` if it prints the information successfully.
-        If there is a problem it will return `False`.
-    """
+def search_playlists(shared=True,
+                     server="http://localhost:5279"):
+    """Search the playlists in the wallet."""
     if not funcs.server_exists(server=server):
         return False
 
@@ -86,8 +56,6 @@ def list_playlists(shared=True,
     if "shared" in result:
         r_shared = result["shared"]
 
-    print("Playlists")
-    print(80 * "-")
     print(f"Synchronization: {sync}")
 
     builtin = False
@@ -132,84 +100,220 @@ def list_playlists(shared=True,
         pl_unpub = pl_unpub_local
 
     pl_favorites = pl_builtin["favorites"]
-    n_favs = len(pl_favorites["items"])
-    time_favs = time.localtime(int(pl_favorites["updatedAt"]))
-    time_favs = time.strftime("%Y-%m-%d_%H%M", time_favs)
-
     pl_watchlater = pl_builtin["watchlater"]
+
+    return {"favorites": pl_favorites,
+            "watchlater": pl_watchlater,
+            "unpublished": pl_unpub}
+
+
+def print_playlists(playlists,
+                    claim_id=False,
+                    sanitize=False,
+                    file=None, fdate=False, sep=";"):
+    """Print the playlists, favorites, watch later, and unpublished."""
+    pl_favorites = playlists["favorites"]
+    pl_watchlater = playlists["watchlater"]
+    pl_unpub = playlists["unpublished"]
+
+    name_fav = pl_favorites["name"]
+    n_fav = len(pl_favorites["items"])
+    time_fav = time.gmtime(int(pl_favorites["updatedAt"]))
+    time_fav = time.strftime(funcs.TFMT, time_fav)
+
+    out_fav = [f'"{name_fav}", updated: {time_fav}']
+
+    for num, claim in enumerate(pl_favorites["items"], start=1):
+        name, cid = claim.split("lbry://")[1].split("#")
+        uri = name + "#" + cid[0:3]
+
+        if sanitize:
+            uri = funcs.sanitize_text(uri)
+
+        line = f"{num:3d}/{n_fav:3d}" + f"{sep} "
+
+        if claim_id:
+            line += f"{cid}" + f"{sep} "
+
+        line += f"{uri}"
+        out_fav.append(line)
+
+    out_fav.append("")
+
+    name_later = pl_watchlater["name"]
     n_later = len(pl_watchlater["items"])
-    time_later = time.localtime(int(pl_watchlater["updatedAt"]))
-    time_later = time.strftime("%Y-%m-%d_%H%M", time_later)
+    time_later = time.gmtime(int(pl_watchlater["updatedAt"]))
+    time_later = time.strftime(funcs.TFMT, time_later)
 
-    out = [f"Favorites, updated: {time_favs}"]
-    out2 = [f"Watch later, updated: {time_later}"]
+    out_later = [f'"{name_later}", updated: {time_later}']
 
-    for it, item in enumerate(pl_favorites["items"], start=1):
-        line = f"{it:3d}/{n_favs:3d}, "
-        uri, cid = item.lstrip("lbry://").split("#")
-        uri = uri + "#" + cid[0:3]
-        out += [line + f"{uri}"]
+    for num, claim in enumerate(pl_watchlater["items"], start=1):
+        name, cid = claim.split("lbry://")[1].split("#")
+        uri = name + "#" + cid[0:3]
 
-    for it, item in enumerate(pl_watchlater["items"], start=1):
-        line = f"{it:3d}/{n_later:3d}, "
-        uri, cid = item.lstrip("lbry://").split("#")
-        uri = uri + "#" + cid[0:3]
-        out2 += [line + f"{uri}"]
+        if sanitize:
+            uri = funcs.sanitize_text(uri)
 
-    out3 = []
+        line = f"{num:3d}/{n_later:3d}" + f"{sep} "
 
-    for it, k in enumerate(pl_unpub, start=1):
-        updated = time.localtime(int(pl_unpub[k]["updatedAt"]))
-        updated = time.strftime("%Y-%m-%d_%H%M", updated)
-        name = pl_unpub[k]["name"]
-        title = f"{name}, updated: {updated}"
+        if claim_id:
+            line += f"{cid}" + f"{sep} "
+
+        line += f"{uri}"
+        out_later.append(line)
+
+    out_later.append("")
+
+    n_unpub = len(pl_unpub)
+
+    out_unpub = [f"Unpublished playlists: {n_unpub}"]
+
+    for num_pl, k in enumerate(pl_unpub, start=1):
+        pl_updated = time.gmtime(int(pl_unpub[k]["updatedAt"]))
+        pl_updated = time.strftime(funcs.TFMT, pl_updated)
+        pl_name = pl_unpub[k]["name"]
+        pl_title = f'"{pl_name}", updated: {pl_updated}'
 
         items = pl_unpub[k]["items"]
         n_items = len(items)
 
-        elems = []
-        for itt, item in enumerate(items, start=1):
-            line = f"{itt:3d}/{n_items:3d}, "
-            uri, cid = item.lstrip("lbry://").split("#")
-            uri = uri + "#" + cid[0:3]
-            line = line + f"{uri}"
-            elems.append(line)
+        pl_elems = []
 
-        lines = "\n".join(elems)
-        out3 += [f"{title}\n"
-                 + lines + "\n"]
+        for num, claim in enumerate(items, start=1):
+            name, cid = claim.split("lbry://")[1].split("#")
+            uri = name + "#" + cid[0:3]
 
-    fd = 0
+            if sanitize:
+                uri = funcs.sanitize_text(uri)
 
-    if file:
-        dirn = os.path.dirname(file)
-        base = os.path.basename(file)
+            line = f"{num:3d}/{n_items:3d}" + f"{sep} "
 
-        if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
-        else:
-            fdate = ""
+            if claim_id:
+                line += f"{cid}" + f"{sep} "
 
-        file = os.path.join(dirn, fdate + base)
+            line += f"{uri}"
+            pl_elems.append(line)
 
-        try:
-            fd = open(file, "w")
-        except (FileNotFoundError, PermissionError) as err:
-            print(f"Cannot open file for writing; {err}")
+        pl_paragraph = "\n".join(pl_elems)
 
-    if file and fd:
-        print("\n".join(out), file=fd)
-        print("", file=fd)
-        print("\n".join(out2), file=fd)
-        print("", file=fd)
-        print("\n".join(out3), file=fd)
-        fd.close()
-        print(f"Summary written: {file}")
-    else:
-        print("\n".join(out))
-        print("")
-        print("\n".join(out2))
-        print("")
-        print("\n".join(out3))
+        if num_pl != n_unpub:
+            pl_paragraph += "\n"
 
-    return True
+        out_unpub.append(f"{pl_title}\n" + pl_paragraph)
+
+    out = []
+    out.extend(out_fav)
+    out.extend(out_later)
+    out.extend(out_unpub)
+
+    funcs.print_content(out, file=file, fdate=fdate)
+
+
+def print_summary_playlists(playlists):
+    """Print a summary of the playlists."""
+    pl_favorites = playlists["favorites"]
+    pl_watchlater = playlists["watchlater"]
+    pl_unpub = playlists["unpublished"]
+
+    name_fav = pl_favorites["name"]
+    n_fav = len(pl_favorites["items"])
+
+    name_later = pl_watchlater["name"]
+    n_later = len(pl_watchlater["items"])
+
+    n_unpub = len(pl_unpub)
+
+    pl_elems = []
+
+    for k in pl_unpub:
+        pl_name = pl_unpub[k]["name"]
+        n_items = len(pl_unpub[k]["items"])
+        pl_elems.append(f'"{pl_name}": {n_items}')
+
+    unpub_paragraph = "\n".join(pl_elems)
+
+    out = [f'"{name_fav}" items:   {n_fav:4d}',
+           f'"{name_later}" items: {n_later:4d}',
+           32 * "-",
+           f"Unpublished playlists: {n_unpub}",
+           32 * "-"]
+
+    out.append(unpub_paragraph)
+
+    funcs.print_content(out, file=None, fdate=False)
+
+
+def list_playlists(shared=True,
+                   claim_id=False,
+                   sanitize=False,
+                   file=None, fdate=False, sep=";",
+                   server="http://localhost:5279"):
+    """Display the claims in the existing playlists.
+
+    Parameters
+    ----------
+    shared: bool, optional
+        It defaults to `True`, in which case it uses the shared database
+        synchronized with Odysee online.
+        If it is `False` it will use only the local database
+        to the LBRY Desktop application.
+    claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the claim ID (40-character string)
+        of each claim.
+    sanitize: bool, optional
+        It defaults to `False`, in which case it will not remove the emojis
+        from the name of the claim and channel.
+        If it is `True` it will remove these unicode characters.
+        This option requires the `emoji` package to be installed.
+    file: str, optional
+        It defaults to `None`.
+        It must be a writable path to which the summary will be written.
+        Otherwise the summary will be printed to the terminal.
+    fdate: bool, optional
+        It defaults to `False`.
+        If it is `True` it will add the date to the name of the summary file.
+    sep: str, optional
+        It defaults to `;`. It is the separator character between
+        the data fields in the printed summary. Since the claim name
+        can have commas, a semicolon `;` is used by default.
+    server: str, optional
+        It defaults to `'http://localhost:5279'`.
+        This is the address of the `lbrynet` daemon, which should be running
+        in your computer before using any `lbrynet` command.
+        Normally, there is no need to change this parameter from its default
+        value.
+
+    Returns
+    -------
+    dict
+        It has three keys:
+        - 'favorites': a dictionary with five keys, 'id', 'items', 'name',
+          'type', and 'updatedAt'. The 'items' key contains a list with
+          the individual URIs of the claims in this playlist.
+        - 'watchlater': a dictionary with the same five keys as 'favorites'.
+        - 'unpublished': a dictionary containing a variable number
+          of dictionaries, each of them representing an unpublished playlist.
+          Each playlist has the same five keys of the 'favorites'
+          and 'watchlater' dictionaries.
+          Each subdictionary has a key that is an alphanumeric string,
+          although this key doesn't really need to be used,
+          as we can just loop using `unpublished.values()`.
+    """
+    if not funcs.server_exists(server=server):
+        return False
+
+    print("Playlists")
+    print(80 * "-")
+
+    playlists = search_playlists(shared=shared)
+
+    print_playlists(playlists,
+                    claim_id=claim_id,
+                    sanitize=sanitize,
+                    file=file, fdate=fdate, sep=sep)
+
+    print(40 * "-")
+    print_summary_playlists(playlists)
+
+    return playlists
