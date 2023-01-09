@@ -66,7 +66,7 @@ from lbrytools.s_wallet import sync_wallet
 
 from lbrytools.search import check_repost
 from lbrytools.search import search_item
-from lbrytools.search import parse_claim_file
+from lbrytools.parse import parse_claim_file
 
 from lbrytools.resolve_ch import resolve_channel
 from lbrytools.resolve_ch import find_channel

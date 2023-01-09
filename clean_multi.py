@@ -27,7 +27,7 @@
 import os
 
 import lbrytools.funcs as funcs
-import lbrytools.search as srch
+import lbrytools.parse as parse
 import lbrytools.resolve_ch as resch
 import lbrytools.sort as sort
 import lbrytools.clean as clean
@@ -440,7 +440,7 @@ def remove_claims(start=1, end=0, file=None, invalid=False,
             return False
 
         print("Remove claims from existing file")
-        sorted_items = srch.parse_claim_file(file=file)
+        sorted_items = parse.parse_claim_file(file=file)
         print()
 
         if not sorted_items:

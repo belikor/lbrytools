@@ -28,7 +28,7 @@ import os
 import random
 
 import lbrytools.funcs as funcs
-import lbrytools.search as srch
+import lbrytools.parse as parse
 import lbrytools.search_ch as srch_ch
 import lbrytools.sort as sort
 import lbrytools.download as dld
@@ -435,7 +435,7 @@ def download_claims(ddir=None, own_dir=True, save_file=True,
             return False
 
         print("Download from existing file")
-        sorted_items = srch.parse_claim_file(file=file, sep=sep)
+        sorted_items = parse.parse_claim_file(file=file, sep=sep)
         print()
 
         if not sorted_items:
