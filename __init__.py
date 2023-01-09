@@ -78,10 +78,10 @@ from lbrytools.sort import sort_invalid
 from lbrytools.sort import sort_items_size
 
 from lbrytools.print import print_multi_list
-from lbrytools.print import print_items
-from lbrytools.print_claims import print_sch_claims
-
+from lbrytools.printf import print_f_claims
 from lbrytools.printf import print_summary
+
+from lbrytools.print_claims import print_sch_claims
 from lbrytools.print_ch import print_channels
 from lbrytools.claims_ch import list_ch_claims
 
@@ -179,10 +179,10 @@ True if sort_invalid else False
 True if sort_items_size else False
 
 True if print_multi_list else False
-True if print_items else False
-True if print_sch_claims else False
-
+True if print_f_claims else False
 True if print_summary else False
+
+True if print_sch_claims else False
 True if print_channels else False
 True if list_ch_claims else False
 
