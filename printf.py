@@ -221,8 +221,7 @@ def print_f_claims(items=None, show="all",
 
         st_height = item["height"]
         st_time = int(meta["release_time"])
-        st_time = time.strftime("%Y%m%d_%H:%M:%S%z",
-                                time.localtime(st_time))
+        st_time = time.strftime(funcs.TFMTp, time.gmtime(st_time))
 
         st_claim_id = item["claim_id"]
         st_type = meta.get("stream_type", 8 * "_")
@@ -480,7 +479,7 @@ def print_summary(show="all",
     if not funcs.server_exists(server=server):
         return False
 
-    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
 
     claims_info = sort.sort_items_size(reverse=False, invalid=invalid,
                                        threads=threads,
@@ -508,7 +507,7 @@ def print_summary(show="all",
                    file=file, fdate=fdate, sep=sep,
                    server=server)
 
-    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
 
     out = [40 * "-",
            claims_info["summary"],
