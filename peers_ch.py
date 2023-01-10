@@ -128,8 +128,7 @@ def search_ch_peers(channel=None, number=2, threads=32,
     if not funcs.server_exists(server=server):
         return False
 
-    if print_time:
-        s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
 
     # Ideally, it should return only stream claims.
     # srch_ch.get_streams(...)
@@ -165,8 +164,9 @@ def search_ch_peers(channel=None, number=2, threads=32,
 
     peers_info["channel"] = ch
 
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
+
     if print_time:
-        e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
         print(f"start: {s_time}")
         print(f"end:   {e_time}")
 
