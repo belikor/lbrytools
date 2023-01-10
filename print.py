@@ -29,12 +29,12 @@ import time
 import lbrytools.funcs as funcs
 
 
-def print_info_pre_get(item=None, offline=False):
+def print_info_pre_get(claim=None, offline=False):
     """Print information about the item found in the LBRY network.
 
     Parameters
     ----------
-    item: dict
+    claim: dict
         A dictionary with the information of an item, obtained
         from `search_item`.
         ::
@@ -51,87 +51,85 @@ def print_info_pre_get(item=None, offline=False):
 
     Returns
     -------
-    list of 7 elements (str)
-        If the item is valid, it will return a list of strings
-        with information on that item.
-        The information is `'canonical_url'` or `'claim_name'`, `'claim_id'`,
-        `'release_time'` including date and time,
-        `'title'`, `'stream_type'` (video, audio, document, etc.),
-        `'size'` in MB, and `'duration'` in minutes and seconds.
-
-        Due to the different types of claims in the network,
-        some of them may not have `'release_time'`, `'size'`,
-        or `'duration'`.
-        In this case the corresponding missing value is set to `'0'`.
     False
         If there is a problem or no item, it will return `False`.
     """
-    if not item:
+    if not claim:
         print("Error: no item. Get one item with `search_item(uri)`")
         return False
 
     if offline:
-        item["value"] = item["metadata"]
+        value = claim["metadata"]
+    else:
+        value = claim["value"]
 
-    cl_time = "0"
-    if "release_time" in item["value"]:
-        cl_time = int(item["value"]["release_time"])
-        cl_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                                time.localtime(cl_time))
-
-    cl_size = 0
-    if "source" in item["value"] and "size" in item["value"]["source"]:
-        cl_size = float(item["value"]["source"]["size"])/(1024**2)  # to MiB
+    title = value.get("title", "(no title)")
 
     if offline:
-        cl_title = item["claim_name"]
+        create_time = 14 * "_"
     else:
-        cl_title = item["name"]
+        create_time = claim["meta"].get("creation_timestamp", 0)
+        create_time = time.strftime(funcs.TFMT, time.gmtime(create_time))
 
-    if "title" in item["value"]:
-        cl_title = item["value"]["title"]
+    rels_time = int(value.get("release_time", 0))
+
+    if not rels_time:
+        rels_time = 14 * "_"
+    else:
+        rels_time = time.strftime(funcs.TFMT, time.gmtime(rels_time))
 
     if offline:
-        cl_type = item["mime_type"]
+        vtype = "stream"
     else:
-        cl_type = item["type"]
+        vtype = claim["value_type"]
 
-    if "stream_type" in item["value"]:
-        cl_type = item["value"]["stream_type"]
+    stream_type = value.get("stream_type", 14 * "_")
+
+    mtype = 14 * "_"
 
     if offline:
-        cl_vtype = "stream"
+        mtype = claim["mime_type"]
     else:
-        cl_vtype = item["value_type"]
+        if "source" in value and "media_type" in value["source"]:
+            mtype = value["source"]["media_type"]
 
-    length_s = 0
-    rem_s = 0
-    rem_min = 0
+    seconds = 0
 
-    if "video" in item["value"] and "duration" in item["value"]["video"]:
-        length_s = item["value"]["video"]["duration"]
-    if "audio" in item["value"] and "duration" in item["value"]["audio"]:
-        length_s = item["value"]["audio"]["duration"]
+    if "video" in value and "duration" in value["video"]:
+        seconds = value["video"]["duration"]
+    if "audio" in value and "duration" in value["audio"]:
+        seconds = value["audio"]["duration"]
 
-    rem_s = length_s % 60  # remainder
-    rem_min = length_s // 60  # integer part
+    sec = seconds % 60  # remainder
+    mi = seconds // 60  # integer part
+    duration = f"{mi} min {sec} s"
+
+    size = 0
+
+    if "source" in value and "size" in value["source"]:
+        size = float(value["source"]["size"])
+
+    size_mb = size / (1024**2)
 
     if offline:
-        info = ["claim_name: " + item["claim_name"]]
+        info = ["claim_name: " + claim["claim_name"]]
     else:
-        info = ["canonical_url: " + item["canonical_url"]]
+        info = ["canonical_url: " + claim["canonical_url"]]
 
-    info2 = ["claim_id: " + item["claim_id"],
-             "release_time: " + cl_time,
-             "value_type: " + cl_vtype,
-             "stream_type: " + cl_type,
-             "title: " + cl_title,
-             f"size: {cl_size:.4f} MB",
-             f"duration: {rem_min} min {rem_s} s"]
+    info2 = ["claim_id: " + claim["claim_id"],
+             f"title: {title}",
+             f"creation_timestamp: {create_time}",
+             f"release_time:       {rels_time}",
+             f"value_type:  {vtype}",
+             f"stream_type: {stream_type}",
+             f"media_type:  {mtype}",
+             f"duration: {duration}",
+             f"size: {size_mb:.4f} MB"]
     info.extend(info2)
 
     print("\n".join(info))
-    return info
+
+    return True
 
 
 def print_info_post_get(info_get=None):
