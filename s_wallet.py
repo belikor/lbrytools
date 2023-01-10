@@ -259,7 +259,7 @@ def get_sync_data(auth_token, sync_hash,
     if response["success"]:
         sync_data = d = response["data"]
         last = time.gmtime(d.get("last_updated", 0))
-        last = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", last)
+        last = time.strftime(funcs.TFMT, last)
 
         out += ["Changed: " + str(d.get("changed", False)),
                 "Hash: " + d.get("hash", "0"),
