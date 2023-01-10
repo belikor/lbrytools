@@ -142,8 +142,8 @@ def plot_histogram(up_times_days, down_times_days, now=0.0,
     """
     if not now:
         now = time.time()
-    now_txt = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                            time.localtime(now))
+
+    now_txt = time.strftime(funcs.TFMT, time.gmtime(now))
 
     up_times_d = np.array(up_times_days)
     down_times_d = np.array(down_times_days)
@@ -164,11 +164,15 @@ def plot_histogram(up_times_days, down_times_days, now=0.0,
 
     blobs_up = len(up_times_d)
     blobs_down = len(down_times_d)
-    ratio = 0.0
-    try:
+
+    if not blobs_down:
+        if not blobs_up:
+            ratio = "Indeterminate"
+        else:
+            ratio = "Infinity"
+    else:
         ratio = float(blobs_up)/blobs_down
-    except ZeroDivisionError:
-        pass
+        ratio = f"{ratio:.4f}"
 
     xlabel = "Time (days ago)"
     ylabel = "Blobs per hour"
@@ -187,7 +191,7 @@ def plot_histogram(up_times_days, down_times_days, now=0.0,
     axs[0].set_ylabel(ylabel)
     axs[0].plot(X0, Y0, markerfacecolor="g", **mk)
     axs[0].legend()
-    axs[0].set_title(f"Up/down ratio: {ratio:.4f}")
+    axs[0].set_title(f"Up/down ratio: {ratio}")
 
     axs[1].hist(down_times_d, bins=fractions_day,
                 color="r", label=f"Downloaded: {blobs_down}", **opt)
@@ -211,7 +215,8 @@ def plot_histogram(up_times_days, down_times_days, now=0.0,
 
 
 def print_blobs_ratio(data_dir=None, plot_hst=False,
-                      file=None, fdate=False, sep=";", tk_frame=None,
+                      file=None, fdate=False, sep=";",
+                      tk_frame=None,
                       server="http://localhost:5279"):
     """Estimate the number of blobs uploaded and downloaded from the logs.
 
@@ -318,16 +323,19 @@ def print_blobs_ratio(data_dir=None, plot_hst=False,
     out.append(f"Uploaded blobs: {blobs_up}")
     out.append(f"Downloaded blobs: {blobs_down}")
 
-    ratio = 0.0
-    try:
+    if not blobs_down:
+        if not blobs_up:
+            ratio = "Indeter."
+        else:
+            ratio = "Infinity"
+    else:
         ratio = float(blobs_up)/blobs_down
-    except ZeroDivisionError:
-        pass
+        ratio = f"{ratio:8.4f}"
 
-    out.append(f"Up/down ratio: {ratio:8.4f}")
+    out.append(f"Up/down ratio: {ratio}")
+
     now = time.time()
-    out.append("Now: " + time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                                       time.localtime(now)))
+    out.append("Now: " + time.strftime(funcs.TFMT, time.gmtime(now)))
 
     max_utime = 0
     min_utime = 0
@@ -348,40 +356,44 @@ def print_blobs_ratio(data_dir=None, plot_hst=False,
     out.append(f"Oldest downloaded blob: {min_dtime:7.2f} days ago")
 
     out.append(40 * "-")
-    for estimation in estimations:
-        _name = os.path.basename(estimation["log_file"]) + sep
-        _blobs_up = estimation["blobs_up"]
-        _blobs_down = estimation["blobs_down"]
-        ratio = 0.0
-        try:
-            ratio = float(_blobs_up)/_blobs_down
-        except ZeroDivisionError:
-            pass
 
-        _now = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                             time.localtime(estimation["now"]))
-        _max_utime = 0
-        _min_utime = 0
-        _max_dtime = 0
-        _min_dtime = 0
+    for estimation in estimations:
+        e_name = os.path.basename(estimation["log_file"]) + sep
+        e_blobs_up = estimation["blobs_up"]
+        e_blobs_down = estimation["blobs_down"]
+
+        if not e_blobs_down:
+            if not e_blobs_up:
+                e_ratio = "Indeter."
+            else:
+                e_ratio = "Infinity"
+        else:
+            e_ratio = float(e_blobs_up)/e_blobs_down
+            e_ratio = f"{e_ratio:8.4f}"
+
+        e_now = time.strftime(funcs.TFMT, time.gmtime(estimation["now"]))
+        e_max_utime = 0
+        e_min_utime = 0
+        e_max_dtime = 0
+        e_min_dtime = 0
 
         if len(estimation["up_times_days"]) > 0:
-            _max_utime = max(estimation["up_times_days"])
-            _min_utime = min(estimation["up_times_days"])
+            e_max_utime = max(estimation["up_times_days"])
+            e_min_utime = min(estimation["up_times_days"])
 
         if len(estimation["down_times_days"]) > 0:
-            _max_dtime = max(estimation["down_times_days"])
-            _min_dtime = min(estimation["down_times_days"])
+            e_max_dtime = max(estimation["down_times_days"])
+            e_min_dtime = min(estimation["down_times_days"])
 
-        out.append(f"{_name:15s} "
-                   f"up: {_blobs_up:5d}" + f"{sep} "
-                   f"down: {_blobs_down:5d}" + f"{sep} "
-                   f"ratio: {ratio:8.4f}" + f"{sep} "
-                   f"up new: {_max_utime:7.2f}" + f"{sep} "
-                   f"up old: {_min_utime:7.2f}" + f"{sep} "
-                   f"down new: {_max_dtime:7.2f}" + f"{sep} "
-                   f"down old: {_min_dtime:7.2f}" + f"{sep} "
-                   f"{_now}")
+        out.append(f"{e_name:15s} "
+                   f"up: {e_blobs_up:5d}" + f"{sep} "
+                   f"down: {e_blobs_down:5d}" + f"{sep} "
+                   f"ratio: {e_ratio}" + f"{sep} "
+                   f"up new: {e_max_utime:7.2f}" + f"{sep} "
+                   f"up old: {e_min_utime:7.2f}" + f"{sep} "
+                   f"down new: {e_max_dtime:7.2f}" + f"{sep} "
+                   f"down old: {e_min_dtime:7.2f}" + f"{sep} "
+                   f"{e_now}")
 
     if not PLOTTING:
         print("Numpy and Matplotlib not available; no plot generated")
