@@ -208,7 +208,7 @@ def ch_search_ch_peers(channels=None,
     if not funcs.server_exists(server=server):
         return False
 
-    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
 
     processed_chs = funcs.process_ch_num(channels=channels,
                                          number=number, shuffle=shuffle)
@@ -252,7 +252,7 @@ def ch_search_ch_peers(channels=None,
 
     chs_peers_info = process_chs_peers(base_chs_peers_info)
 
-    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
     print(f"start: {s_time}")
     print(f"end:   {e_time}")
 
