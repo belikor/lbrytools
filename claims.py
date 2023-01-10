@@ -432,12 +432,14 @@ def w_claim_search(what="trending",
 def list_trending_claims(threads=32,
                          page=None,
                          trending="trending_mixed",
-                         release=False, claim_id=False, title=False,
                          claim_type=None,
                          video_stream=False, audio_stream=False,
                          doc_stream=False, img_stream=False,
                          bin_stream=False, model_stream=False,
-                         sanitize=False,
+                         create=False, height=False, release=True,
+                         claim_id=False, typ=True, ch_name=True,
+                         sizes=True, fees=True,
+                         title=False, sanitize=False,
                          file=None, fdate=False, sep=";",
                          server="http://localhost:5279"):
     """Print trending claims in the network.
@@ -454,16 +456,6 @@ def list_trending_claims(threads=32,
     page: int, optional
         It defaults to `None`, in which case all 20 pages will be searched.
         If it is an integer between 1 and 20, only that page will be searched.
-    release: bool, optional
-        It defaults to `False`.
-        If it is `True` it will print the release time of the claim,
-        if it exists (for stream claims), or the creation time.
-    claim_id: bool, optional
-        It defaults to `False`.
-        If it is `True` it will print the claim ID (40-character string).
-    title: bool, optional
-        It defaults to `False`, in which case the claim name will be printed.
-        If it is `True` it will print the claim title instead.
     claim_type: str, optional
         One of the five types: 'stream', 'channel', 'repost', 'collection',
         or 'livestream'.
@@ -479,6 +471,40 @@ def list_trending_claims(threads=32,
         Show 'binary' streams.
     model_stream: bool, optional
         Show 'model' streams.
+    create: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the creation height and creation time
+        of each claim.
+    height: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the block height and timestamp
+        of each claim.
+    release: bool, optional
+        It defaults to `True`, in which case it will print the release time
+        of the claim, if it exists (for stream claims),
+        or just the creation time.
+    claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the claim ID (40-character string).
+    typ: bool, optional
+        It defaults to `True`, in which case it will print the value type
+        of the claim, and if applicable (for stream claims)
+        the stream type and the media type.
+    ch_name: bool, optional
+        It defaults to `True`, in which case it will print the channel name
+        that published the claim.
+    sizes: bool, optional
+        It defaults to `True`, in which case it will print the duration
+        in minutes and seconds, and size in MB of each claim, if applicable
+        (streams of type `'audio'` and `'video'`).
+    fees: bool, optional
+        It defaults to `True`, in which case it will print the fee (quantity
+        and currency) associated with accessing each claim, if applicable.
+    title: bool, optional
+        It defaults to `False`, in which case the claim `'name'`
+        will be printed.
+        If it is `True` it will print the claim `'title'` instead.
+        To download a stream, the claim name or the claim ID must be used.
     sanitize: bool, optional
         It defaults to `False`, in which case it will not remove the emojis
         from the name of the claim and channel.
@@ -511,10 +537,20 @@ def list_trending_claims(threads=32,
            a claim returned by `claim_search`.
         - 'searched': a paragraph of text that with the information
           that was searched, such as claim type, stream types, and page.
-        - The other eight keys are the same
-          from `search_utils.downloadable_size`, including
-          'size', 'duration', 'size_GB', 'd_h', 'd_min', 'd_s', 'days',
-          and 'summary'.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     False
         If there is a problem it will return `False`.
     """
@@ -537,8 +573,12 @@ def list_trending_claims(threads=32,
 
     if claims_info["claims"]:
         prntc.print_tr_claims(claims_info["claims"],
-                              release=release, claim_id=claim_id, title=title,
-                              sanitize=sanitize,
+                              create=create, height=height, release=release,
+                              claim_id=claim_id, typ=typ, ch_name=ch_name,
+                              sizes=sizes, fees=fees,
+                              title=title, sanitize=sanitize,
+                              start=1, end=0,
+                              reverse=False,
                               file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
@@ -554,12 +594,14 @@ def list_search_claims(threads=32,
                        order="release_time",
                        text="lbry",
                        tags=None,
-                       release=False, claim_id=False, title=False,
                        claim_type=None,
                        video_stream=False, audio_stream=False,
                        doc_stream=False, img_stream=False,
                        bin_stream=False, model_stream=False,
-                       sanitize=False,
+                       create=False, height=False, release=True,
+                       claim_id=False, typ=True, ch_name=True,
+                       sizes=True, fees=True,
+                       title=False, sanitize=False,
                        file=None, fdate=False, sep=";",
                        server="http://localhost:5279"):
     """Print the result of the claim search for an arbitrary text.
@@ -584,16 +626,6 @@ def list_search_claims(threads=32,
         will return few results or none.
     tags: list of str, optional
         Each string in the list will be considered a tag that is searched.
-    release: bool, optional
-        It defaults to `False`.
-        If it is `True` it will print the release time of the claim,
-        if it exists (for stream claims), or the creation time.
-    claim_id: bool, optional
-        It defaults to `False`.
-        If it is `True` it will print the claim ID (40-character string).
-    title: bool, optional
-        It defaults to `False`, in which case the claim name will be printed.
-        If it is `True` it will print the claim title instead.
     claim_type: str, optional
         One of the five types: 'stream', 'channel', 'repost', 'collection',
         or 'livestream'.
@@ -609,6 +641,40 @@ def list_search_claims(threads=32,
         Show 'binary' streams.
     model_stream: bool, optional
         Show 'model' streams.
+    create: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the creation height and creation time
+        of each claim.
+    height: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the block height and timestamp
+        of each claim.
+    release: bool, optional
+        It defaults to `True`, in which case it will print the release time
+        of the claim, if it exists (for stream claims),
+        or just the creation time.
+    claim_id: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the claim ID (40-character string).
+    typ: bool, optional
+        It defaults to `True`, in which case it will print the value type
+        of the claim, and if applicable (for stream claims)
+        the stream type and the media type.
+    ch_name: bool, optional
+        It defaults to `True`, in which case it will print the channel name
+        that published the claim.
+    sizes: bool, optional
+        It defaults to `True`, in which case it will print the duration
+        in minutes and seconds, and size in MB of each claim, if applicable
+        (streams of type `'audio'` and `'video'`).
+    fees: bool, optional
+        It defaults to `True`, in which case it will print the fee (quantity
+        and currency) associated with accessing each claim, if applicable.
+    title: bool, optional
+        It defaults to `False`, in which case the claim `'name'`
+        will be printed.
+        If it is `True` it will print the claim `'title'` instead.
+        To download a stream, the claim name or the claim ID must be used.
     sanitize: bool, optional
         It defaults to `False`, in which case it will not remove the emojis
         from the name of the claim and channel.
@@ -641,10 +707,20 @@ def list_search_claims(threads=32,
            a claim returned by `claim_search`.
         - 'searched': a paragraph of text that with the information
           that was searched, such as claim type, stream types, and page.
-        - The other eight keys are the same
-          from `search_utils.downloadable_size`, including
-          'size', 'duration', 'size_GB', 'd_h', 'd_min', 'd_s', 'days',
-          and 'summary'.
+        - 'size': total size of the claims in bytes.
+          It can be divided by 1024 to obtain kibibytes, by another 1024
+          to obtain mebibytes, and by another 1024 to obtain gibibytes.
+        - 'duration': total duration of the claims in seconds.
+          It will count only stream types which have a duration
+          such as audio and video.
+        - 'size_GB': total size in GiB (floating point value)
+        - 'd_h': integer hours HH when the duration is shown as HH:MM:SS
+        - 'd_min': integer minutes MM when the duration is shown as HH:MM:SS
+        - 'd_s`: integer seconds SS when the duration is shown as HH:MM:SS
+        - 'days': total seconds converted into days (floating point value)
+        - 'summary': paragraph of text describing the number of claims,
+           the total size in GiB, and the total duration expressed as HH:MM:SS,
+           and days
     False
         If there is a problem it will return `False`.
     """
@@ -669,8 +745,12 @@ def list_search_claims(threads=32,
 
     if claims_info["claims"]:
         prntc.print_tr_claims(claims_info["claims"],
-                              release=release, claim_id=claim_id, title=title,
-                              sanitize=sanitize,
+                              create=create, height=height, release=release,
+                              claim_id=claim_id, typ=typ, ch_name=ch_name,
+                              sizes=sizes, fees=fees,
+                              title=title, sanitize=sanitize,
+                              start=1, end=0,
+                              reverse=False,
                               file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")

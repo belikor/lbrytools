@@ -1017,19 +1017,33 @@ g = lbryt.list_trending_claims(page=7, claim_type="channel")
 
 Some names have complex unicode characters in them, especially emojis.
 We can remove these clusters so that the names can be displayed
-without problem in all systems.
-With the `sanitize` option the complex unicode symbols are replaced
-by a monospace heavy vertical bar `'❚'` (unicode U+275A):
+in all systems, even in those that don't support emojis.
+With the `sanitize` option the complex unicode symbols in the name, title,
+or channel name are replaced by a monospace heavy vertical bar `'❚'`
+(unicode U+275A):
 ```py
 g = lbryt.list_trending_claims(sanitize=True)
 ```
 
-We may decide to display the claim ID, to be able to download
-this claim by ID rather than by name. We can also display the release time
-(or creation time), and title of the claim instead of its name:
+Instead of displaying the claim name, we can display the title
+of the claim. If we want to download the item, we must use
+either the claim name or the claim ID, so the latter
+can be displayed as well:
 ```py
-g = lbryt.list_trending_claims(release=True, claim_id=True, title=True,
-                               sanitize=True)
+g = lbryt.list_trending_claims(claim_id=True, title=False)
+```
+
+Other information that we can display optionally include the creation time,
+the block height, the release time (or creation time if release time
+is unavailable), type of claim (also type of media), publishing channel name,
+size of the claim, given by its duration in minutes and seconds (if applicable),
+and size of the media in MiB (if applicable), and associated fee to access
+the content (if any):
+```py
+g = lbryt.list_trending_claims(create=True, height=True, release=True,
+                               claim_id=True, typ=True, ch_name=True,
+                               sizes=True, fees=True,
+                               title=False, sanitize=True)
 ```
 
 If the claim type is a stream (downloadable content), we can further specify
@@ -1070,9 +1084,10 @@ This search is performed by the SDK, and thus it isn't very good.
 Adding many words to the `text` string will return few results or none.
 
 Other options are the same as for `list_trending_claims`, that is,
-`release`, `claim_id`, `title`, `claim_type`, `video_stream`, `audio_stream`,
+`claim_type`, `video_stream`, `audio_stream`,
 `doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
-`sanitize`, `file`, `fdate`, `sep`.
+`create`, `height`, `release`, `claim_id`, `typ`, `ch_name`,
+`sizes`, `fees`, `title`, `sanitize`, `file`, `fdate`, `sep`.
 
 [Go back to _Content_](#content)
 

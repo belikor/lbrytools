@@ -33,15 +33,27 @@ import lbrytools.funcs as funcs
 
 
 def print_tr_claims(claims,
-                    release=False, claim_id=False, title=False,
-                    sanitize=False,
+                    create=False, height=False, release=True,
+                    claim_id=False, typ=True, ch_name=True,
+                    sizes=True, fees=True,
+                    title=False, sanitize=False,
+                    start=1, end=0,
+                    reverse=False,
                     file=None, fdate=False, sep=";"):
     """Print generic claims, particularly trending or searched claims."""
     n_claims = len(claims)
 
+    if reverse:
+        claims.reverse()
+
     out = []
 
     for num, claim in enumerate(claims, start=1):
+        if num < start:
+            continue
+        if end != 0 and num > end:
+            break
+
         meta = claim["meta"]
         value = claim["value"]
 
@@ -123,19 +135,35 @@ def print_tr_claims(claims,
 
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
 
+        if create:
+            line += f"{create_height}" + f"{sep} "
+            line += f"{create_time}" + f"{sep} "
+
+        if height:
+            line += f"{block_height}" + f"{sep} "
+            line += f"{timestamp}" + f"{sep} "
+
         if release:
             line += f"{rels_time}" + f"{sep} "
 
         if claim_id:
             line += claim["claim_id"] + f"{sep} "
 
-        line += f"{vtype:10s}" + f"{sep} "
-        line += f"{stream_type:9s}" + f"{sep} "
-        line += f"{mtype:17s}" + f"{sep} "
-        line += f"{channel:40s}" + f"{sep} "
-        line += f"{duration}" + f"{sep} "
-        line += f"{size_mb}" + f"{sep} "
-        line += f"{fee}" + f"{sep} "
+        if typ:
+            line += f"{vtype:10s}" + f"{sep} "
+            line += f"{stream_type:9s}" + f"{sep} "
+            line += f"{mtype:17s}" + f"{sep} "
+
+        if ch_name:
+            line += f"{channel:40s}" + f"{sep} "
+
+        if sizes:
+            line += f"{duration}" + f"{sep} "
+            line += f"{size_mb}" + f"{sep} "
+
+        if fees:
+            line += f"{fee}" + f"{sep} "
+
         line += f'"{name}"'
 
         out.append(line)
