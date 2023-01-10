@@ -443,7 +443,7 @@ def search_ch_subs_latest(number=4, override=False,
     if not funcs.server_exists(server=server):
         return False
 
-    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
 
     if number < 0:
         number = 1
@@ -482,7 +482,8 @@ def search_ch_subs_latest(number=4, override=False,
                                         server=server)
             ch_latest_claims.append(claims)
 
-    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
+
     print()
     print(f"start: {s_time}")
     print(f"end:   {e_time}")
@@ -523,47 +524,53 @@ def print_ch_subs_latest(ch_latest_claims,
             continue
 
         n_claims = len(claims)
-        for k, claim in enumerate(claims, start=1):
-            source_info = claim["value"]
 
-            r_time = int(source_info.get("release_time", 0))
-            r_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                   time.localtime(r_time))
+        for k, claim in enumerate(claims, start=1):
+            value = claim["value"]
+
+            if "release_time" in value:
+                rels_time = int(value.get("release_time", 0))
+            else:
+                rels_time = claim["meta"].get("creation_timestamp", 0)
+
+            rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
 
             vtype = claim["value_type"]
 
-            if "stream_type" in source_info:
-                stream_type = source_info.get("stream_type")
+            if "stream_type" in value:
+                stream_type = value.get("stream_type")
             else:
                 stream_type = 8 * "_"
 
-            size = 0
-            if "source" in source_info:
-                size = int(source_info["source"].get("size", 0))
-
             seconds = 0
-            if "video" in source_info:
-                seconds = source_info["video"].get("duration", 0)
-            elif "audio" in source_info:
-                seconds = source_info["audio"].get("duration", 0)
+            if "video" in value:
+                seconds = value["video"].get("duration", 0)
+            elif "audio" in value:
+                seconds = value["audio"].get("duration", 0)
 
             mi = seconds // 60
             sec = seconds % 60
             duration = f"{mi:3d}:{sec:02d}"
+
+            size = 0
+            if "source" in value:
+                size = int(value["source"].get("size", 0))
+
             size_mb = size / (1024**2)
 
-            c_name = claim["name"]
-            if title and "title" in source_info:
-                c_name = source_info["title"]
+            name = claim["name"]
+
+            if title:
+                name = value.get("title") or name
 
             if sanitize:
-                c_name = funcs.sanitize_text(c_name)
+                name = funcs.sanitize_text(name)
 
             line = f" {k:2d}/{n_claims:2d}" + f"{sep} "
-            line += r_time + f"{sep} "
+            line += f"{rels_time}" + f"{sep} "
 
             if claim_id:
-                line += '"' + claim["claim_id"] + '"' + f"{sep} "
+                line += claim["claim_id"] + f"{sep} "
 
             if typ:
                 line += f"{vtype:10s}" + f"{sep} "
@@ -571,13 +578,13 @@ def print_ch_subs_latest(ch_latest_claims,
 
             line += f"{duration}" + f"{sep} "
             line += f"{size_mb:9.4f} MB" + f"{sep} "
-            line += '"' + c_name + '"'
+            line += '"' + name + '"'
+
             out.append(line)
 
         if num < n_channels:
             out.append("")
 
-    print()
     funcs.print_content(out, file=file, fdate=fdate)
 
 
@@ -719,6 +726,7 @@ def list_ch_subs_latest(number=4, override=False,
                                              threads=threads,
                                              server=server)
 
+    print()
     print_ch_subs_latest(ch_latest_claims,
                          claim_id=claim_id, typ=typ, title=title,
                          sanitize=sanitize,
