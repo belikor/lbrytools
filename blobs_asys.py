@@ -382,7 +382,8 @@ def analyze_channel(blobfiles=None, channel=None,
     if not funcs.server_exists(server=server):
         return False
 
-    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
+
     if (not blobfiles or not isinstance(blobfiles, str)
             or not os.path.exists(blobfiles)):
 
@@ -481,7 +482,7 @@ def analyze_channel(blobfiles=None, channel=None,
     n_blobs_all = n_blobs_complete + n_blobs_incomplete
     n_size_all = size_complete + size_incomplete
 
-    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
 
     out = []
 
@@ -643,7 +644,8 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
     if not funcs.server_exists(server=server):
         return False
 
-    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
+
     channels = prnt_ch.print_channels(full=False, canonical=False,
                                       invalid=False, offline=False,
                                       threads=threads,
@@ -764,7 +766,8 @@ def print_channel_analysis(blobfiles=None, split=True, bar=False,
     funcs.print_content(out, file=file, fdate=fdate)
 
     print()
-    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
+
     print(f"start: {s_time}")
     print(f"end:   {e_time}")
 
