@@ -132,9 +132,7 @@ def print_network_sd_blobs(data_dir=None,
     out = []
     out.append(f"Downloaded sd_blobs: {blobs_down}")
 
-    now = time.time()
-    out.append("Now: " + time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                                       time.localtime(now)))
+    out.append("Now: " + time.strftime(funcs.TFMT, time.gmtime()))
 
     max_dtime = 0
     min_dtime = 0
@@ -149,13 +147,13 @@ def print_network_sd_blobs(data_dir=None,
     all_sd_blobs = []
 
     out.append(40 * "-")
+
     for estimation in estimations:
         all_sd_blobs.extend(estimation["sd_blobs"])
         _name = os.path.basename(estimation["log_file"]) + sep
         _blobs_down = estimation["blobs_down"]
 
-        _now = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                             time.localtime(estimation["now"]))
+        _now = time.strftime(funcs.TFMT, time.gmtime(estimation["now"]))
         _max_dtime = 0
         _min_dtime = 0
 
@@ -179,12 +177,12 @@ def print_network_sd_blobs(data_dir=None,
     return estimations
 
 
-def sd_blobs_compared(print_blobs=True,
+def sd_blobs_compared(print_blobs=False,
                       server="http://localhost:5279"):
     """Find the blobs estimated that we have already donwloaded."""
     items = sort.sort_items(server=server)
     print()
-    estimates = print_network_sd_blobs(print_blobs=False,
+    estimates = print_network_sd_blobs(print_blobs=print_blobs,
                                        server=server)
     print()
 
@@ -196,10 +194,14 @@ def sd_blobs_compared(print_blobs=True,
         all_sd_blobs.extend(est["sd_blobs"])
 
     exist = []
+    out = []
+
     for num, blob in enumerate(all_sd_blobs, start=1):
         for claim in items:
             if blob in claim["sd_hash"] and claim not in exist:
                 exist.append(claim)
-                print(f"{num:4d}; {blob}; {claim['claim_name']}")
+                out.append(f"{num:4d}; {blob}; {claim['claim_name']}")
+
+    funcs.print_content(out, file=None, fdate=False)
 
     return exist
