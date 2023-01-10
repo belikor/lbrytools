@@ -238,7 +238,8 @@ def print_channels(full=True, canonical=False,
     if not funcs.server_exists(server=server):
         return False
 
-    s_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    s_time = time.strftime(funcs.TFMT, time.gmtime())
+
     if invalid:
         items = sort.sort_invalid(server=server)
     else:
@@ -320,7 +321,8 @@ def print_channels(full=True, canonical=False,
         print_three_cols(all_channels,
                          file=file, fdate=fdate, pre_num=pre_num, sep=sep)
 
-    e_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A", time.localtime())
+    e_time = time.strftime(funcs.TFMT, time.gmtime())
+
     if print_msg:
         print()
         print(f"start: {s_time}")
