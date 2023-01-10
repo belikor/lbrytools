@@ -528,17 +528,20 @@ def get_claim_summary(stream_info,
     n_peers_tracker = len(stream_info["peers_tracker"])
     n_peers_user = len(stream_info["peers_user"])
 
+    if inline:
+        time_fmt = funcs.TFMTp
+    else:
+        time_fmt = funcs.TFMT
+
     rels_time = int(stream["value"].get("release_time", 0))
 
     if not rels_time:
         rels_time = 8 * "_"
     else:
-        rels_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                  time.gmtime(rels_time))
+        rels_time = time.strftime(time_fmt, time.gmtime(rels_time))
 
     create_time = stream["meta"].get("creation_timestamp", 0)
-    create_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                time.gmtime(create_time))
+    create_time = time.strftime(time_fmt, time.gmtime(create_time))
 
     if "source" not in stream["value"]:
         sd_hash = 8 * "_"
