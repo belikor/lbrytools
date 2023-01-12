@@ -143,10 +143,10 @@ from lbrytools.support import target_support
 
 from lbrytools.blobs_ratio import print_blobs_ratio
 
-from lbrytools.comments import list_comments
-from lbrytools.comments import create_comment
-from lbrytools.comments import update_comment
-from lbrytools.comments import abandon_comment
+from lbrytools.comments_list import list_comments
+from lbrytools.comments_act import create_comment
+from lbrytools.comments_act import update_comment
+from lbrytools.comments_act import abandon_comment
 
 from lbrytools.peers_claims import list_peers
 from lbrytools.peers_claims import list_m_peers
