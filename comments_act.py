@@ -34,12 +34,10 @@ import lbrytools.comments_base as comm
 def print_cmnt_result(result, file=None, fdate=False):
     """Print the response of the comment server when successful."""
     cmt_time = result["timestamp"]
-    cmt_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                             time.localtime(cmt_time))
+    cmt_time = time.strftime(funcs.TFMT, time.gmtime(cmt_time))
 
     sig_ts = int(result["signing_ts"])
-    sig_ts = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                           time.localtime(sig_ts))
+    sig_ts = time.strftime(funcs.TFMT, time.gmtime(sig_ts))
 
     out = ["claim_id: " + result["claim_id"],
            "timestamp:  " + cmt_time,
@@ -181,26 +179,28 @@ def create_comment(comment=None,
     uri = item["canonical_url"]
     title = item["value"].get("title", "(None)")
 
-    cl_time = 0
-    if "release_time" in item["value"]:
-        cl_time = int(item["value"]["release_time"])
-        cl_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                                time.localtime(cl_time))
+    rels_time = int(item["value"].get("release_time", 0))
+
+    if not rels_time:
+        rels_time = item["meta"].get("creation_timestamp", 0)
+
+    rels_time = time.strftime(funcs.TFMT, time.gmtime(rels_time))
 
     ch = srch.search_item(uri=author_uri, cid=author_cid, name=author_name,
                           server=server)
     if not ch:
         return False
 
-    print(f"canonical_url: {uri}")
-    print(f"claim_id: {claim_id}")
-    print(f"release_time: {cl_time}")
-    print(f"title: {title}")
-    print("comment author:", ch["name"])
-    print("comment author ID:", ch["claim_id"])
-    print(f"comment server: {comm_server}")
+    out = [f"canonical_url: {uri}",
+           f"claim_id: {claim_id}",
+           f"release_time: {rels_time}",
+           f"title: {title}",
+           "comment author:", ch["name"],
+           "comment author ID:", ch["claim_id"],
+           f"comment server: {comm_server}",
+           40 * "-"]
 
-    print(40 * "-")
+    funcs.print_content(out, file=None, fdate=False)
 
     sign = comm.sign_comment(comment, ch["name"],
                              wallet_id=wallet_id,

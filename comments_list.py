@@ -147,7 +147,7 @@ def print_f_comments(comments, sub_replies=True, full=False,
         base = os.path.basename(file)
 
         if fdate:
-            fdate = time.strftime("%Y%m%d_%H%M", time.localtime()) + "_"
+            fdate = time.strftime(funcs.TFMTf, time.gmtime()) + "_"
         else:
             fdate = ""
 
@@ -261,11 +261,12 @@ def list_comments(uri=None, cid=None, name=None,
     uri = item["canonical_url"]
     title = item["value"].get("title", "(None)")
 
-    cl_time = 0
-    if "release_time" in item["value"]:
-        cl_time = int(item["value"]["release_time"])
-        cl_time = time.strftime("%Y-%m-%d_%H:%M:%S%z %A",
-                                time.localtime(cl_time))
+    rels_time = int(item["value"].get("release_time", 0))
+
+    if not rels_time:
+        rels_time = item["meta"].get("creation_timestamp", 0)
+
+    rels_time = time.strftime(funcs.TFMT, time.gmtime(rels_time))
 
     # Only one of them is True
     if hidden ^ visible:
@@ -306,16 +307,15 @@ def list_comments(uri=None, cid=None, name=None,
     n_base = len(root_comments)
     n_replies = len(all_replies)
 
-    print(f"canonical_url: {uri}")
-    print(f"claim_id: {claim_id}")
-    print(f"release_time: {cl_time}")
-    print(f"title: {title}")
-    print(f"comment server: {comm_server}")
-
-    print(80 * "-")
-    print(f"Total comments: {n_comms}")
-    print(f"Total base comments: {n_base}")
-    print(f"Total replies: {n_replies}")
+    out = [f"canonical_url: {uri}",
+           f"claim_id: {claim_id}",
+           f"release_time: {rels_time}",
+           f"title: {title}",
+           f"comment server: {comm_server}",
+           80 * "-",
+           f"Total comments: {n_comms}",
+           f"Total base comments: {n_base}",
+           f"Total replies: {n_replies}"]
 
     n = 1
     lvl_comments = {n: augment_replies(root_comments)}
@@ -327,9 +327,11 @@ def list_comments(uri=None, cid=None, name=None,
         if n_lvl:
             n += 1
             lvl_comments[n] = replies_sub
-            print(f" - Level {n} replies: {n_lvl}")
+            out.append(f" - Level {n} replies: {n_lvl}")
         else:
             break
+
+    funcs.print_content(out, file=None, fdate=False)
 
     indices = list(range(2, len(lvl_comments) + 1))
     indices.reverse()
