@@ -259,8 +259,7 @@ def print_s_claims(claims, output=None,
 
         claim_op = claim["claim_op"]
         tstamp = claim["timestamp"]
-        timestamp = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                  time.localtime(tstamp))
+        timestamp = time.strftime(funcs.TFMTp, time.gmtime(tstamp))
 
         vtype = claim["value_type"]
         if "stream_type" in value:
@@ -315,8 +314,7 @@ def print_s_claims(claims, output=None,
         # height = claim["height"]
 
         rels_time = int(value.get("release_time", 0))
-        rels_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                  time.localtime(rels_time))
+        rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
 
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
         line += rels_time + f"{sep} "

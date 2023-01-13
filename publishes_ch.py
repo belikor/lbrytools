@@ -223,8 +223,7 @@ def print_channels(channels,
         name = '"' + name + '"'
 
         timestamp = ch["timestamp"]
-        timestamp = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                  time.localtime(timestamp))
+        timestamp = time.strftime(funcs.TFMTp, time.gmtime(timestamp))
 
         title = value.get("title", 10 * "_")
         if sanitize:
@@ -235,8 +234,8 @@ def print_channels(channels,
         amount = float(ch["amount"])
 
         c_timestamp = meta.get("creation_timestamp", 0)
-        c_timestamp = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                    time.localtime(c_timestamp))
+        c_timestamp = time.strftime(funcs.TFMTp, time.gmtime(c_timestamp))
+
         if "error" in meta:
             c_timestamp = 24 * "_"
 
