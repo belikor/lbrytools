@@ -128,8 +128,8 @@ from lbrytools.channels import list_ch_subs
 from lbrytools.channels import list_ch_subs_latest
 
 from lbrytools.accounts import list_accounts
-from lbrytools.publishes import list_channels
-from lbrytools.publishes import list_claims
+from lbrytools.publishes_ch import list_channels
+from lbrytools.publishes_claims import list_claims
 
 from lbrytools.playlists import list_playlists
 
