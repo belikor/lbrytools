@@ -41,19 +41,19 @@ def print_tr_claims(claims,
 
     out = []
     for num, claim in enumerate(claims, start=1):
+        value = claim["value"]
+
         vtype = claim["value_type"]
 
         create_time = claim["meta"].get("creation_timestamp", 0)
-        create_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                    time.gmtime(create_time))
+        create_time = time.strftime(funcs.TFMTp, time.gmtime(create_time))
 
-        rels_time = int(claim["value"].get("release_time", 0))
+        rels_time = int(value.get("release_time", 0))
 
         if not rels_time:
             rels_time = create_time
         else:
-            rels_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                      time.gmtime(rels_time))
+            rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
 
         if "stream_type" in claim["value"]:
             stream_type = claim["value"].get("stream_type")
@@ -128,11 +128,12 @@ def print_sch_claims(claims,
         if end != 0 and num > end:
             break
 
+        value = claim["value"]
+
         creation = claim["meta"]["creation_height"]
         height = claim["height"]
-        res_time = int(claim["value"].get("release_time", 0))
-        res_time = time.strftime("%Y-%m-%d_%H:%M:%S%z",
-                                 time.localtime(res_time))
+        rels_time = int(value.get("release_time", 0))
+        rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
 
         vtype = claim["value_type"]
 
@@ -193,7 +194,7 @@ def print_sch_claims(claims,
             line += f"{creation:8d}" + f"{sep}"
             line += f"{height:8d}" + f"{sep} "
 
-        line += res_time + f"{sep} "
+        line += f"{rels_time}" + f"{sep} "
 
         if claim_id:
             line += claim["claim_id"] + f"{sep} "
