@@ -245,79 +245,77 @@ def print_s_claims(claims, output=None,
         meta = claim["meta"]
         value = claim["value"]
 
+        rels_time = int(value.get("release_time", 0))
+
+        if not rels_time:
+            rels_time = meta.get("creation_timestamp", 0)
+
+        rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
+
+        claim_op = claim["claim_op"]
+        timestamp = claim["timestamp"]
+        timestamp = time.strftime(funcs.TFMTp, time.gmtime(timestamp))
+
         cid = claim["claim_id"]
         ad = claim["address"]
 
-        name = claim["name"]
-
-        if title and "title" in value:
-            name = value["title"]
-
-        if sanitize:
-            name = funcs.sanitize_text(name)
-        name = '"' + name + '"'
-
-        claim_op = claim["claim_op"]
-        tstamp = claim["timestamp"]
-        timestamp = time.strftime(funcs.TFMTp, time.gmtime(tstamp))
-
         vtype = claim["value_type"]
-        if "stream_type" in value:
-            stream_type = value.get("stream_type", 8 * "_")
-        else:
-            stream_type = 8 * "_"
+
+        stream_type = value.get("stream_type", 8 * "_")
 
         if "source" in value:
             mtype = value["source"].get("media_type", 14 * "_")
         else:
             mtype = 14 * "_"
 
+        amount = float(claim["amount"])
+        t_amount = float(meta.get("effective_amount", 0))
+
         if "signing_channel" in claim:
             if "canonical_url" in claim["signing_channel"]:
                 channel = claim["signing_channel"]["canonical_url"]
-                channel = channel.lstrip("lbry://")
+                channel = channel.split("lbry://")[1]
             else:
                 channel = claim["signing_channel"]["permanent_url"]
                 _ch, _id = channel.split("#")
-                _ch = _ch.lstrip("lbry://")
+                _ch = _ch.split("lbry://")[1]
                 channel = _ch + "#" + _id[0:3]
-
-            if sanitize:
-                channel = funcs.sanitize_text(channel)
         else:
             channel = 14 * "_"
 
-        if sanitize:
-            channel = funcs.sanitize_text(channel)
+        rep = meta.get("reposted", 0)
 
-        length_s = 0
-        rem_s = 0
-        rem_min = 0
+        seconds = 0
 
         if "video" in value and "duration" in value["video"]:
-            length_s = value["video"]["duration"]
+            seconds = value["video"]["duration"]
         if "audio" in value and "duration" in value["audio"]:
-            length_s = value["audio"]["duration"]
+            seconds = value["audio"]["duration"]
 
-        rem_s = length_s % 60
-        rem_min = length_s // 60
+        sec = seconds % 60
+        mi = seconds // 60
+        duration = f"{mi:3d}:{sec:02d}"
 
         size = 0
+
         if "source" in value and "size" in value["source"]:
             size = float(value["source"]["size"])
-            size = size/(1024**2)  # to MB
 
-        amount = float(claim["amount"])
-        t_amount = float(meta.get("effective_amount", 0))
-        rep = meta.get("reposted", 0)
-        # creation = meta.get("creation_height", 0)
-        # height = claim["height"]
+        size_mb = size / (1024**2)  # to MB
 
-        rels_time = int(value.get("release_time", 0))
-        rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
+        name = claim["name"]
+
+        if title:
+            name = value.get("title") or name
+
+        name = '"' + name + '"'
+
+        if sanitize:
+            name = funcs.sanitize_text(name)
+            channel = funcs.sanitize_text(channel)
 
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
-        line += rels_time + f"{sep} "
+        line += f"{rels_time}" + f"{sep} "
 
         if updates:
             line += f"{claim_op}" + f"{sep} "
@@ -327,7 +325,7 @@ def print_s_claims(claims, output=None,
             line += f"{cid}" + f"{sep} "
 
         if addresses:
-            line += f"{ad}" + f"{sep} "
+            line += f"add. {ad}" + f"{sep} "
 
         if typ:
             line += f"{vtype:10s}" + f"{sep} "
@@ -342,8 +340,8 @@ def print_s_claims(claims, output=None,
             line += f"{channel}" + f"{sep} "
 
         line += f"r.{rep:3d}" + f"{sep} "
-        line += f"{rem_min:3d}:{rem_s:02d}" + f"{sep} "
-        line += f"{size:9.4f} MB" + f"{sep} "
+        line += f"{duration}" + f"{sep} "
+        line += f"{size_mb:9.4f} MB" + f"{sep} "
 
         line += f"{name}"
         output.append(line)

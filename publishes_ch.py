@@ -212,53 +212,55 @@ def print_channels(channels,
         meta = ch["meta"]
         value = ch["value"]
 
-        cid = ch["claim_id"]
-        address = ch["address"]
+        create_time = meta.get("creation_timestamp", 0)
+        create_time = time.strftime(funcs.TFMTp, time.gmtime(create_time))
 
-        # name = ch["name"]
-        name = ch["canonical_url"].split("lbry://")[1]
+        if "error" in meta:
+            create_time = 24 * "_"
 
-        if sanitize:
-            name = funcs.sanitize_text(name)
-        name = '"' + name + '"'
-
+        claim_op = ch["claim_op"]
         timestamp = ch["timestamp"]
         timestamp = time.strftime(funcs.TFMTp, time.gmtime(timestamp))
 
-        title = value.get("title", 10 * "_")
-        if sanitize:
-            title = funcs.sanitize_text(title)
+        ch_claim_id = ch["claim_id"]
+        address = ch["address"]
+        ch_acc = ch["account"]
+        ch_gen = ch["generator"]
+        ch_gen = f"{ch_gen:<19}"
+        ch_acc_name = ch["account_name"]
+        ch_acc_name = f"{ch_acc_name:<12}"
+
+        amount = float(ch["amount"])
+        e_amount = float(meta.get("effective_amount", 0))
+        n_claims = meta.get("claims_in_channel", 0)
+
+        name = ch["canonical_url"].split("lbry://")[1]
+        name = '"' + name + '"'
+
+        title = value.get("title", "(no title)")
         title = '"' + title + '"'
 
-        claim_op = ch["claim_op"]
-        amount = float(ch["amount"])
-
-        c_timestamp = meta.get("creation_timestamp", 0)
-        c_timestamp = time.strftime(funcs.TFMTp, time.gmtime(c_timestamp))
-
-        if "error" in meta:
-            c_timestamp = 24 * "_"
-
-        n_claims = meta.get("claims_in_channel", 0)
-        e_amount = float(meta.get("effective_amount", 0))
-
-        ch_acc = ch["account"]
+        if sanitize:
+            name = funcs.sanitize_text(name)
+            title = funcs.sanitize_text(title)
 
         line = f"{num:2d}/{n_channels:2d}" + f"{sep} "
-        line += f"{c_timestamp}" + f"{sep} "
+        line += f"{create_time}" + f"{sep} "
 
         if updates:
             line += f"{claim_op}" + f"{sep} "
             line += f"{timestamp}" + f"{sep} "
 
         if claim_id:
-            line += f"{cid}" + f"{sep} "
+            line += f"{ch_claim_id}" + f"{sep} "
 
         if addresses:
-            line += f"{address}" + f"{sep} "
+            line += f"add. {address}" + f"{sep} "
 
         if accounts:
-            line += f"in {ch_acc}" + f"{sep} "
+            line += f"acc. {ch_acc}" + f"{sep} "
+            line += f"{ch_gen}" + f"{sep} "
+            line += f"{ch_acc_name}" + f"{sep} "
 
         if amounts:
             line += f"{amount:14.8f}" + f"{sep} "
