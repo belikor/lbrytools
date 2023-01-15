@@ -31,8 +31,9 @@ import lbrytools.print_claims as prntc
 
 def list_ch_claims(channel,
                    number=0,
-                   blocks=False, claim_id=False,
-                   typ=False, ch_name=False,
+                   create=False, height=False, release=True,
+                   claim_id=False, typ=True, ch_name=False,
+                   sizes=True, fees=True,
                    title=False, sanitize=False,
                    start=1, end=0,
                    reverse=False,
@@ -50,31 +51,45 @@ def list_ch_claims(channel,
         all unique claims.
         If this is any other number, it return only the newest claims
         up to an including `number`.
-    blocks: bool, optional
-        It defaults to `False`, in which case it won't print
-        the `creation height` and `height` blocks of the claims.
-        If it is `True` it will print these values, which gives some idea
-        of when the claim was registered in the blockchain.
+    create: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the creation height and creation time
+        of each claim.
+    height: bool, optional
+        It defaults to `False`.
+        If it is `True` it will print the block height and timestamp
+        of each claim.
+    release: bool, optional
+        It defaults to `True`, in which case it will print the release time
+        of each claim.
     claim_id: bool, optional
         It defaults to `False`.
         If it is `True` it will print the claim ID (40-character string).
     typ: bool, optional
-        It defaults to `False`.
-        If it is `True` it will print the value type of the claim,
-        the stream type (only for `stream` claims), and the media type
-        (only for `stream` claims).
+        It defaults to `True`, in which case it will print the value type
+        of the claim, and if applicable (for stream claims)
+        the stream type and the media type.
     ch_name: bool, optional
-        It defaults to `False` in which case the name of the channel
-        won't appear.
-        If it is `True` it will print the channel name.
+        It defaults to `False`.
+        If it is `True` it will print the channel name that published
+        the claim.
+    sizes: bool, optional
+        It defaults to `True`, in which case it will print the duration
+        in minutes and seconds, and size in MB of each claim, if applicable
+        (streams of type `'audio'` and `'video'`).
+    fees: bool, optional
+        It defaults to `True`, in which case it will print the fee (quantity
+        and currency) associated with accessing each claim, if applicable.
     title: bool, optional
-        It defaults to `False`, in which case the claim name will be printed.
-        If it is `True` it will print the title of the claim instead.
+        It defaults to `False`, in which case the claim `'name'`
+        will be printed.
+        If it is `True` it will print the claim `'title'` instead.
         To download a stream, the claim name or the claim ID must be used.
     sanitize: bool, optional
         It defaults to `False`, in which case it will not remove the emojis
         from the name of the claim and channel.
-        If it is `True` it will remove these unicode characters.
+        If it is `True` it will remove these unicode characters
+        and replace them with a simple black square.
         This option requires the `emoji` package to be installed.
     start: int, optional
         It defaults to 1.
@@ -115,7 +130,7 @@ def list_ch_claims(channel,
     Returns
     -------
     dict
-        A dictionary with three keys:
+        A dictionary with nine keys:
         - 'claims': a list of dictionaries where every dictionary represents
           a claim returned by `claim_search`.
           The list is ordered in ascending order by default (old claims first),
@@ -156,9 +171,11 @@ def list_ch_claims(channel,
                                                    server=server)
 
     if claims_info["claims"]:
+        print()
         prntc.print_sch_claims(claims_info["claims"],
-                               blocks=blocks, claim_id=claim_id,
-                               typ=typ, ch_name=ch_name,
+                               create=create, height=height, release=release,
+                               claim_id=claim_id, typ=typ, ch_name=ch_name,
+                               sizes=sizes, fees=fees,
                                title=title, sanitize=sanitize,
                                start=start, end=end,
                                reverse=reverse,

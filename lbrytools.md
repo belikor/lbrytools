@@ -1090,10 +1090,14 @@ k = lbryt.list_ch_claims("@lbry:3f", number=10, reverse=True)
 
 Various options allow us to display different fields of information.
 If `sanitize=True`, it will remove emojis from the displayed names,
-which may be necessary if we want to use the output in other programs:
+which may be necessary if we want to use the output in programs
+that don't support emojis:
 ```py
 k = lbryt.list_ch_claims("@lbry:3f", number=20,
-                         typ=True, ch_name=True, blocks=True, sanitize=True)
+                         create=True, height=True, release=True,
+                         typ=True, ch_name=True,
+                         sizes=True, fees=True,
+                         sanitize=True)
 ```
 
 Instead of displaying the claim name, we can display the title

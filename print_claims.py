@@ -109,8 +109,9 @@ def print_tr_claims(claims,
 
 
 def print_sch_claims(claims,
-                     blocks=False, claim_id=False,
-                     typ=False, ch_name=False,
+                     create=False, height=False, release=True,
+                     claim_id=False, typ=True, ch_name=False,
+                     sizes=True, fees=True,
                      title=False, sanitize=False,
                      start=1, end=0,
                      reverse=False,
@@ -206,12 +207,16 @@ def print_sch_claims(claims,
 
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
 
-        if blocks:
+        if create:
             line += f"{create_height}" + f"{sep} "
             line += f"{create_time}" + f"{sep} "
+
+        if height:
             line += f"{block_height}" + f"{sep} "
             line += f"{timestamp}" + f"{sep} "
-        line += f"{rels_time}" + f"{sep} "
+
+        if release:
+            line += f"{rels_time}" + f"{sep} "
 
         if claim_id:
             line += claim["claim_id"] + f"{sep} "
@@ -224,9 +229,13 @@ def print_sch_claims(claims,
         if ch_name:
             line += f"{channel}" + f"{sep} "
 
-        line += f"{duration}" + f"{sep} "
-        line += f"{size_mb}" + f"{sep} "
-        line += f"{fee}" + f"{sep} "
+        if sizes:
+            line += f"{duration}" + f"{sep} "
+            line += f"{size_mb}" + f"{sep} "
+
+        if fees:
+            line += f"{fee}" + f"{sep} "
+
         line += f'"{name}"'
 
         out.append(line)
