@@ -122,78 +122,95 @@ def print_sch_claims(claims,
         claims.reverse()
 
     out = []
+
     for num, claim in enumerate(claims, start=1):
         if num < start:
             continue
         if end != 0 and num > end:
             break
 
+        meta = claim["meta"]
         value = claim["value"]
 
-        creation = claim["meta"]["creation_height"]
-        height = claim["height"]
+        create_height = meta.get("creation_height", 0)
+        create_height = f"{create_height:8d}"
+
+        create_time = meta.get("creation_timestamp", 0)
+        create_time = time.strftime(funcs.TFMTp, time.gmtime(create_time))
+
+        block_height = claim["height"]
+        block_height = f"{block_height:8d}"
+
+        timestamp = claim["timestamp"]
+        timestamp = time.strftime(funcs.TFMTp, time.gmtime(timestamp))
+
         rels_time = int(value.get("release_time", 0))
         rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
 
         vtype = claim["value_type"]
 
-        if "stream_type" in claim["value"]:
-            stream_type = claim["value"].get("stream_type")
-        else:
-            stream_type = 8 * "_"
+        stream_type = value.get("stream_type", 8 * "_")
 
-        if "source" in claim["value"]:
-            mtype = claim["value"]["source"].get("media_type", 14 * "_")
+        if "source" in value:
+            mtype = value["source"].get("media_type", 14 * "_")
         else:
             mtype = 14 * "_"
 
         if "signing_channel" in claim:
-            # channel = claim["signing_channel"].get("name", 14 * "_")
-            channel = claim["signing_channel"]["canonical_url"]
-            channel = channel.lstrip("lbry://")
+            if "canonical_url" in claim["signing_channel"]:
+                channel = claim["signing_channel"]["canonical_url"]
+                channel = channel.split("lbry://")[1]
+            else:
+                channel = claim["signing_channel"]["permanent_url"]
+                _ch, _id = channel.split("#")
+                _ch = _ch.split("lbry://")[1]
+                channel = _ch + "#" + _id[0:3]
         else:
             channel = 14 * "_"
 
-        if "fee" in claim["value"]:
-            fee = claim["value"]["fee"].get("amount", "___")
-            fee = f"{fee} " + claim["value"]["fee"]["currency"]
+        seconds = 0
+
+        if "video" in value and "duration" in value["video"]:
+            seconds = value["video"]["duration"]
+        if "audio" in value and "duration" in value["audio"]:
+            seconds = value["audio"]["duration"]
+
+        mi = seconds // 60
+        sec = seconds % 60
+        duration = f"{mi:3d}:{sec:02d}"
+
+        size = 0
+
+        if "source" in value and "size" in value["source"]:
+            size = float(value["source"]["size"])
+
+        size_mb = size / (1024**2)  # to MB
+        size_mb = f"{size_mb:9.4f} MB"
+
+        if "fee" in value:
+            fee = value["fee"].get("amount", "___")
+            fee = f"{fee} " + value["fee"]["currency"]
         else:
-            fee = 8 * " "
+            fee = " "
 
         fee = f"f: {fee:>9}"
 
         name = claim["name"]
 
-        if title and "title" in claim["value"]:
-            name = claim["value"]["title"]
+        if title:
+            name = value.get("title") or name
 
         if sanitize:
             name = funcs.sanitize_text(name)
             channel = funcs.sanitize_text(channel)
 
-        length_s = 0
-        rem_s = 0
-        rem_min = 0
-
-        if "video" in claim["value"] and "duration" in claim["value"]["video"]:
-            length_s = claim["value"]["video"]["duration"]
-        if "audio" in claim["value"] and "duration" in claim["value"]["audio"]:
-            length_s = claim["value"]["audio"]["duration"]
-
-        rem_s = length_s % 60
-        rem_min = length_s // 60
-
-        size = 0
-        if "source" in claim["value"] and "size" in claim["value"]["source"]:
-            size = float(claim["value"]["source"]["size"])
-            size = size/(1024**2)  # to MB
-
         line = f"{num:4d}/{n_claims:4d}" + f"{sep} "
 
         if blocks:
-            line += f"{creation:8d}" + f"{sep}"
-            line += f"{height:8d}" + f"{sep} "
-
+            line += f"{create_height}" + f"{sep} "
+            line += f"{create_time}" + f"{sep} "
+            line += f"{block_height}" + f"{sep} "
+            line += f"{timestamp}" + f"{sep} "
         line += f"{rels_time}" + f"{sep} "
 
         if claim_id:
@@ -207,13 +224,11 @@ def print_sch_claims(claims,
         if ch_name:
             line += f"{channel}" + f"{sep} "
 
-        line += f"{rem_min:3d}:{rem_s:02d}" + f"{sep} "
-        line += f"{size:9.4f} MB" + f"{sep} "
+        line += f"{duration}" + f"{sep} "
+        line += f"{size_mb}" + f"{sep} "
         line += f"{fee}" + f"{sep} "
         line += f'"{name}"'
 
         out.append(line)
 
-    content = funcs.print_content(out, file=file, fdate=fdate)
-
-    return content
+    funcs.print_content(out, file=file, fdate=fdate)
