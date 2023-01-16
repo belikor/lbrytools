@@ -45,8 +45,17 @@ def print_tr_claims(claims,
         meta = claim["meta"]
         value = claim["value"]
 
+        create_height = meta.get("creation_height", 0)
+        create_height = f"{create_height:8d}"
+
         create_time = meta.get("creation_timestamp", 0)
         create_time = time.strftime(funcs.TFMTp, time.gmtime(create_time))
+
+        block_height = claim["height"]
+        block_height = f"{block_height:8d}"
+
+        timestamp = claim["timestamp"]
+        timestamp = time.strftime(funcs.TFMTp, time.gmtime(timestamp))
 
         rels_time = int(value.get("release_time", 0))
 
@@ -75,6 +84,25 @@ def print_tr_claims(claims,
                 channel = _ch + "#" + _id[0:3]
         else:
             channel = 14 * "_"
+
+        seconds = 0
+
+        if "video" in value and "duration" in value["video"]:
+            seconds = value["video"]["duration"]
+        if "audio" in value and "duration" in value["audio"]:
+            seconds = value["audio"]["duration"]
+
+        mi = seconds // 60
+        sec = seconds % 60
+        duration = f"{mi:3d}:{sec:02d}"
+
+        size = 0
+
+        if "source" in value and "size" in value["source"]:
+            size = float(value["source"]["size"])
+
+        size_mb = size / (1024**2)  # to MB
+        size_mb = f"{size_mb:9.4f} MB"
 
         if "fee" in value:
             fee = value["fee"].get("amount", "___")
@@ -105,6 +133,8 @@ def print_tr_claims(claims,
         line += f"{stream_type:9s}" + f"{sep} "
         line += f"{mtype:17s}" + f"{sep} "
         line += f"{channel:40s}" + f"{sep} "
+        line += f"{duration}" + f"{sep} "
+        line += f"{size_mb}" + f"{sep} "
         line += f"{fee}" + f"{sep} "
         line += f'"{name}"'
 
