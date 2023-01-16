@@ -40,12 +40,12 @@ def print_tr_claims(claims,
     n_claims = len(claims)
 
     out = []
+
     for num, claim in enumerate(claims, start=1):
+        meta = claim["meta"]
         value = claim["value"]
 
-        vtype = claim["value_type"]
-
-        create_time = claim["meta"].get("creation_timestamp", 0)
+        create_time = meta.get("creation_timestamp", 0)
         create_time = time.strftime(funcs.TFMTp, time.gmtime(create_time))
 
         rels_time = int(value.get("release_time", 0))
@@ -55,35 +55,39 @@ def print_tr_claims(claims,
         else:
             rels_time = time.strftime(funcs.TFMTp, time.gmtime(rels_time))
 
-        if "stream_type" in claim["value"]:
-            stream_type = claim["value"].get("stream_type")
-        else:
-            stream_type = 8 * "_"
+        vtype = claim["value_type"]
 
-        if "source" in claim["value"]:
-            mtype = claim["value"]["source"].get("media_type", 14 * "_")
+        stream_type = value.get("stream_type", 8 * "_")
+
+        if "source" in value:
+            mtype = value["source"].get("media_type", 14 * "_")
         else:
             mtype = 14 * "_"
 
-        if ("signing_channel" in claim
-                and "canonical_url" in claim["signing_channel"]):
-            channel = claim["signing_channel"]["canonical_url"]
-            channel = channel.split("lbry://")[1]
+        if "signing_channel" in claim:
+            if "canonical_url" in claim["signing_channel"]:
+                channel = claim["signing_channel"]["canonical_url"]
+                channel = channel.split("lbry://")[1]
+            else:
+                channel = claim["signing_channel"]["permanent_url"]
+                _ch, _id = channel.split("#")
+                _ch = _ch.split("lbry://")[1]
+                channel = _ch + "#" + _id[0:3]
         else:
             channel = 14 * "_"
 
-        if "fee" in claim["value"]:
-            fee = claim["value"]["fee"].get("amount", "___")
-            fee = f"{fee} " + claim["value"]["fee"]["currency"]
+        if "fee" in value:
+            fee = value["fee"].get("amount", "___")
+            fee = f"{fee} " + value["fee"]["currency"]
         else:
-            fee = 8 * " "
+            fee = " "
 
         fee = f"f: {fee:>9}"
 
         name = claim["name"]
 
-        if title and "title" in claim["value"]:
-            name = claim["value"]["title"]
+        if title:
+            name = value.get("title") or name
 
         if sanitize:
             name = funcs.sanitize_text(name)
@@ -103,6 +107,7 @@ def print_tr_claims(claims,
         line += f"{channel:40s}" + f"{sep} "
         line += f"{fee}" + f"{sep} "
         line += f'"{name}"'
+
         out.append(line)
 
     funcs.print_content(out, file=file, fdate=fdate)
