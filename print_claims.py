@@ -210,27 +210,6 @@ def get_line(claim,
     return line
 
 
-def print_tr_claims(claims,
-                    create=False, height=False, release=True,
-                    claim_id=False, typ=True, ch_name=True,
-                    long_chan=True,
-                    sizes=True, fees=True,
-                    title=False, sanitize=False,
-                    start=1, end=0,
-                    reverse=False,
-                    file=None, fdate=False, sep=";"):
-    """Print generic claims, particularly trending or searched claims."""
-    print_sch_claims(claims,
-                     create=create, height=height, release=release,
-                     claim_id=claim_id, typ=typ, ch_name=ch_name,
-                     long_chan=long_chan,
-                     sizes=sizes, fees=fees,
-                     title=title, sanitize=sanitize,
-                     start=start, end=end,
-                     reverse=reverse,
-                     file=file, fdate=fdate, sep=sep)
-
-
 def print_sch_claims(claims,
                      create=False, height=False, release=True,
                      claim_id=False, typ=True, ch_name=False,

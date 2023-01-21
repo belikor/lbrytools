@@ -572,14 +572,15 @@ def list_trending_claims(threads=32,
                                  server=server)
 
     if claims_info["claims"]:
-        prntc.print_tr_claims(claims_info["claims"],
-                              create=create, height=height, release=release,
-                              claim_id=claim_id, typ=typ, ch_name=ch_name,
-                              sizes=sizes, fees=fees,
-                              title=title, sanitize=sanitize,
-                              start=1, end=0,
-                              reverse=False,
-                              file=file, fdate=fdate, sep=sep)
+        prntc.print_sch_claims(claims_info["claims"],
+                               create=create, height=height, release=release,
+                               claim_id=claim_id, typ=typ, ch_name=ch_name,
+                               long_chan=True,
+                               sizes=sizes, fees=fees,
+                               title=title, sanitize=sanitize,
+                               start=1, end=0,
+                               reverse=False,
+                               file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
     print(claims_info["searched"])
@@ -744,14 +745,15 @@ def list_search_claims(threads=32,
                                  server=server)
 
     if claims_info["claims"]:
-        prntc.print_tr_claims(claims_info["claims"],
-                              create=create, height=height, release=release,
-                              claim_id=claim_id, typ=typ, ch_name=ch_name,
-                              sizes=sizes, fees=fees,
-                              title=title, sanitize=sanitize,
-                              start=1, end=0,
-                              reverse=False,
-                              file=file, fdate=fdate, sep=sep)
+        prntc.print_sch_claims(claims_info["claims"],
+                               create=create, height=height, release=release,
+                               claim_id=claim_id, typ=typ, ch_name=ch_name,
+                               long_chan=True,
+                               sizes=sizes, fees=fees,
+                               title=title, sanitize=sanitize,
+                               start=1, end=0,
+                               reverse=False,
+                               file=file, fdate=fdate, sep=sep)
 
     print(80 * "-")
     print(claims_info["searched"])
