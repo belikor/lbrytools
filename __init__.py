@@ -120,7 +120,7 @@ from lbrytools.blobs_mv import blobs_move_all
 from lbrytools.blobs_auto import print_network_sd_blobs
 from lbrytools.blobs_auto import sd_blobs_compared
 
-from lbrytools.claims import claims_bids
+from lbrytools.claims_bid import claims_bids
 from lbrytools.claims import list_trending_claims
 from lbrytools.claims import list_search_claims
 
