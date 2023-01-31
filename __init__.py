@@ -121,8 +121,8 @@ from lbrytools.blobs_auto import print_network_sd_blobs
 from lbrytools.blobs_auto import sd_blobs_compared
 
 from lbrytools.claims_bid import claims_bids
-from lbrytools.claims import list_trending_claims
-from lbrytools.claims import list_search_claims
+from lbrytools.claims_search import list_trending_claims
+from lbrytools.claims_search import list_search_claims
 
 from lbrytools.channels import list_ch_subs
 from lbrytools.channels import list_ch_subs_latest
