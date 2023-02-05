@@ -160,7 +160,8 @@ def search_item_uri(uri=None, repost=True,
     return item
 
 
-def search_item_cid(cid=None, name=None, offline=False, repost=True,
+def search_item_cid(cid=None, name=None,
+                    repost=True, offline=False,
                     print_error=True,
                     server="http://localhost:5279"):
     """Find a single item in the LBRY network, resolving the claim id or name.
@@ -178,20 +179,24 @@ def search_item_cid(cid=None, name=None, offline=False, repost=True,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claim
+        is a repost, and if it is, it will return the original claim.
+        If it is `False`, it won't check for a repost, it will simply return
+        the found claim.
     offline: bool, optional
         It defaults to `False`, in which case it will use
         `lbrynet claim search` to search `cid` or `name` in the online
         database.
 
         If it is `True` it will use `lbrynet file list` to search
-        `cid` or `name` in the offline database.
+        `cid` or `name` in the offline database, that is,
+        in the downloaded content.
         This is required for 'invalid' claims, which have been removed from
-        the online database and only exist locally.
-    repost: bool, optional
-        It defaults to `True`, in which case it will check if the claim
-        is a repost, and if it is, it will return the original claim.
-        If it is `False`, it won't check for a repost, it will simply return
-        the found claim.
+        the online database but may still exist locally.
+
+        When `offline=True`, `repost=True` has no effect because reposts
+        must be resolved online.
     print_error: bool, optional
         It defaults to `True`, in which case it will print an error message
         if the claim is not found.
@@ -302,7 +307,8 @@ def search_item_cid(cid=None, name=None, offline=False, repost=True,
     return item
 
 
-def search_item(uri=None, cid=None, name=None, offline=False, repost=True,
+def search_item(uri=None, cid=None, name=None,
+                repost=True, offline=False,
                 print_error=True,
                 server="http://localhost:5279"):
     """Find a single item in the LBRY network resolving URI, claim id, or name.
@@ -330,24 +336,29 @@ def search_item(uri=None, cid=None, name=None, offline=False, repost=True,
         ::
             uri = 'lbry://@MyChannel#3/some-video-name#2'
             name = 'some-video-name'
+    repost: bool, optional
+        It defaults to `True`, in which case it will check if the claim
+        is a repost, and if it is, it will return the original claim.
+        If it is `False`, it won't check for a repost, it will simply return
+        the found claim.
     offline: bool, optional
         It defaults to `False`, in which case it will use
         `lbrynet claim search` to search `cid` or `name` in the online
         database.
 
         If it is `True` it will use `lbrynet file list` to search
-        `cid` or `name` in the offline database.
+        `cid` or `name` in the offline database, that is,
+        in the downloaded content.
         This is required for 'invalid' claims, which have been removed from
-        the online database and only exist locally.
-    repost: bool, optional
-        It defaults to `True`, in which case it will check if the claim
-        is a repost, and if it is, it will return the original claim.
-        If it is `False`, it won't check for a repost, it will simply return
-        the found claim.
+        the online database but may still exist locally.
+
+        When `offline=True`, `repost=True` has no effect because reposts
+        must be resolved online. In this case, if `uri` is provided,
+        and `name` is not, `uri` will be used as the value of `name`.
     print_error: bool, optional
         It defaults to `True`, in which case it will print the error message
         that `lbrynet resolve` or `lbrynet claim search` returns.
-        By setting this value to `False` no messages will be printed;
+        If it is `False` no error messages will be printed;
         this is useful inside other functions when we want to limit
         the terminal output.
     server: str, optional
@@ -360,11 +371,10 @@ def search_item(uri=None, cid=None, name=None, offline=False, repost=True,
     Returns
     -------
     dict
-        Returns the dictionary that represents the `claim` that was found
-        matching the URI, `'claim_id'` or `'name'`.
+        The dictionary that represents the `claim` that was found
+        matching `uri`, `cid` or `name`.
     False
-        If the dictionary seems to have no items found, it will print
-        an error message and return `False`.
+        If there is a problem or no claim was found, it will return `False`.
     """
     if not funcs.server_exists(server=server):
         return False
@@ -376,15 +386,25 @@ def search_item(uri=None, cid=None, name=None, offline=False, repost=True,
         print(f"name={name}")
         return False
 
-    if uri:
-        item = search_item_uri(uri=uri, repost=repost,
+    if offline:
+        if uri and not name:
+            name = uri
+
+        item = search_item_cid(cid=cid, name=name,
+                               repost=repost, offline=offline,
                                print_error=print_error,
                                server=server)
     else:
-        item = search_item_cid(cid=cid, name=name, offline=offline,
-                               repost=repost,
-                               print_error=print_error,
-                               server=server)
+        if uri:
+            item = search_item_uri(uri=uri,
+                                   repost=repost,
+                                   print_error=print_error,
+                                   server=server)
+        else:
+            item = search_item_cid(cid=cid, name=name,
+                                   repost=repost, offline=offline,
+                                   print_error=print_error,
+                                   server=server)
 
     if not item and print_error:
         print(f">>> uri={uri}")
