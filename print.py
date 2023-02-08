@@ -29,8 +29,9 @@ import time
 import lbrytools.funcs as funcs
 
 
-def print_info_pre_get(claim=None, offline=False):
-    """Print information about the item found in the LBRY network.
+def print_info_pre_get(claim=None, offline=False,
+                       print_text=True):
+    """Get and print information about the item found in the LBRY network.
 
     Parameters
     ----------
@@ -40,17 +41,24 @@ def print_info_pre_get(claim=None, offline=False):
         ::
             item = search_item(uri="some-video-name")
     offline: bool, optional
-        It defaults to `False`, in which case it assumes the item was
+        It defaults to `False`, in which case it assumes the input `claim` was
         resolved online through `lbrynet resolve` or `lbrynet claim search`.
 
-        If it is `True` it assumes the item was resolved offline
-        through `lbrynet file list`.
-        This is required for 'invalid' claims, that is,
-        those that have been removed from the online database
-        and only exists locally.
+        If it is `True` it assumes the `claim` was resolved offline
+        through `lbrynet file list`, that is, in the downloaded content.
+        This is required for 'invalid' claims, which have been removed from
+        the online database but may still exist locally.
+    print_text: bool, optional
+        It defaults to `True`, in which case it will print
+        the summary of the claim to the terminal.
+        If it is `False` it will just return the summary text
+        but it won't be printed.
 
     Returns
     -------
+    str
+        A paragraph of text with information from the claim
+        that can be directly printed to the terminal or to another interface.
     False
         If there is a problem or no item, it will return `False`.
     """
@@ -62,6 +70,13 @@ def print_info_pre_get(claim=None, offline=False):
         value = claim["metadata"]
     else:
         value = claim["value"]
+
+    claimid = claim["claim_id"]
+
+    if offline:
+        address = 14 * "_"
+    else:
+        address = claim.get("address")
 
     title = value.get("title", "(no title)")
 
@@ -77,6 +92,16 @@ def print_info_pre_get(claim=None, offline=False):
         rels_time = 14 * "_"
     else:
         rels_time = time.strftime(funcs.TFMT, time.gmtime(rels_time))
+
+    if offline:
+        amount = 8 * "_"
+    else:
+        amount = claim["amount"]
+
+    if offline:
+        effective = 8 * "_"
+    else:
+        effective = claim["meta"].get("effective_amount")
 
     if offline:
         vtype = "stream"
@@ -116,10 +141,13 @@ def print_info_pre_get(claim=None, offline=False):
     else:
         info = ["canonical_url: " + claim["canonical_url"]]
 
-    info2 = ["claim_id: " + claim["claim_id"],
+    info2 = [f"claim_id: {claimid}",
+             f"address: {address}",
              f"title: {title}",
              f"creation_timestamp: {create_time}",
              f"release_time:       {rels_time}",
+             f"amount: {amount}",
+             f"effective_amount: {effective}",
              f"value_type:  {vtype}",
              f"stream_type: {stream_type}",
              f"media_type:  {mtype}",
@@ -127,9 +155,12 @@ def print_info_pre_get(claim=None, offline=False):
              f"size: {size_mb:.4f} MB"]
     info.extend(info2)
 
-    print("\n".join(info))
+    summary = "\n".join(info)
 
-    return True
+    if print_text:
+        print(summary)
+
+    return summary
 
 
 def print_info_post_get(info_get=None):
