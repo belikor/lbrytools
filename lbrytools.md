@@ -94,6 +94,7 @@ from lbrytools import analyze_channel
 from lbrytools import print_channel_analysis
 from lbrytools import blobs_move
 from lbrytools import blobs_move_all
+from lbrytools import check
 from lbrytools import claims_bids
 from lbrytools import list_ch_subs
 from lbrytools import list_ch_subs_latest
@@ -951,9 +952,44 @@ g = lbryt.blobs_move_all(move_dir=mdir, blobfiles=bdir, channel="@ragreynolds", 
 
 A claim is any object that is recorded in the blockchain,
 and that has some LBC supporting its `'name'`.
-This is typically channels (the highest bid controls the default `'name'`),
-streams (video and audio files, documents), but also reposts, playlists,
-and other types.
+This is typically channels, streams (video, audio, documents, etc.),
+but also reposts, playlists, and other types.
+
+To see the basic properties of a claim, such as creation time or duration,
+we can use the `check` method.
+The claim can be given by canonical URL (URI), claim ID (40-digits),
+or claim name (portion of the URI):
+```py
+z = lbryt.check(uri="@lbry")
+z = lbryt.check(cid="37c6878fbd35b153c4f7807dfb74d45abf3dbee3")
+z = lbryt.check(name="1M")
+```
+
+By the default, if the claim is a repost, it will be resolved
+and the information printed will be that of the original claim.
+To inspect the repost claim itself we can use `repost=False`:
+```py
+z = lbryt.check("grin-hunter-defi", repost=False)
+```
+
+By default the claim is searched online. If we want to inspect
+a claim offline, that is, in the database of already downloaded claims,
+we can use `offline=True`:
+```py
+z = lbryt.check(name="hubba-hubba", offline=True)
+```
+
+This is required for 'invalid' claims, which have been removed from
+the online database but may still exist locally, if we downloaded them
+previously.
+
+When `offline=True`, `repost=True` has no effect because reposts
+cannot be downloaded; they are just pointers to a claim online.
+
+[Go back to _Content_](#content)
+
+### Controlling claims
+
 We may want to see information on our claims, and how many other claims
 are competing for the same `'name'`.
 
@@ -1991,6 +2027,7 @@ lbryt.analyze_channel(..., server=server)
 lbryt.print_channel_analysis(..., server=server)
 lbryt.blobs_move(..., server=server)
 lbryt.blobs_move_all(..., server=server)
+lbryt.check(..., server=server)
 lbryt.claims_bids(..., server=server)
 lbryt.list_ch_subs(..., server=server)
 lbryt.list_ch_subs_latest(..., server=server)
