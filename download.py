@@ -28,7 +28,7 @@ import os
 import requests
 
 import lbrytools.funcs as funcs
-import lbrytools.search as srch
+import lbrytools.claims_check as cchk
 import lbrytools.resolve_ch as resch
 import lbrytools.print as prnt
 
@@ -156,10 +156,14 @@ def download_collection(collection, max_claims=2, reverse=False,
             break
 
         print(f"Claim {num}/{n_claims}")
-        claim = srch.search_item(cid=cid, offline=False,
-                                 server=server)
+        checked = cchk.check(cid=cid, offline=False,
+                             print_text=True,
+                             server=server)
 
-        prnt.print_info_pre_get(claim=claim, offline=False)
+        claim = checked["claim"]
+
+        if not claim:
+            continue
 
         info = lbrynet_get(uri=claim["canonical_url"], ddir=ddir,
                            save_file=save_file,
@@ -296,14 +300,15 @@ def download_single(uri=None, cid=None, name=None,
 
     # It also checks if it's a reposted claim, and returns the original
     # claim in case it is.
-    claim = srch.search_item(uri=uri, cid=cid, name=name, offline=False,
-                             repost=repost,
-                             server=server)
+    checked = cchk.check(uri=uri, cid=cid, name=name, offline=False,
+                         repost=repost,
+                         print_text=True,
+                         server=server)
+
+    claim = checked["claim"]
 
     if not claim:
         return False
-
-    prnt.print_info_pre_get(claim, offline=False)
 
     uri = claim["canonical_url"]
 
@@ -514,13 +519,14 @@ def download_invalid(cid=None, name=None,
 
     # It also checks if it's a reposted claim, although 'invalid' claims
     # cannot be reposts, as the original claim is already downloaded.
-    claim = srch.search_item(cid=cid, name=name, offline=True,
-                             server=server)
+    checked = cchk.check(cid=cid, name=name, offline=True,
+                         print_text=True,
+                         server=server)
+
+    claim = checked["claim"]
 
     if not claim:
         return False
-
-    prnt.print_info_pre_get(claim, offline=True)
 
     claim_id = claim["claim_id"]
     claim_name = claim["claim_name"]
