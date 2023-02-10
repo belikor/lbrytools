@@ -152,23 +152,28 @@ def download_collection(collection, max_claims=2, reverse=False,
     print("Collection")
     print(80 * "-")
     for num, cid in enumerate(claims, start=1):
-        s = srch.search_item(cid=cid, offline=False,
-                             server=server)
         if num > max_claims:
             break
 
         print(f"Claim {num}/{n_claims}")
-        prnt.print_info_pre_get(s, offline=False)
-        info = lbrynet_get(uri=s["canonical_url"], ddir=ddir,
+        claim = srch.search_item(cid=cid, offline=False,
+                                 server=server)
+
+        prnt.print_info_pre_get(claim=claim, offline=False)
+
+        info = lbrynet_get(uri=claim["canonical_url"], ddir=ddir,
                            save_file=save_file,
                            server=server)
+
         info_get.append(info)
 
         if info:
             prnt.print_info_post_get(info)
         else:
             print(">>> Empty information from `lbrynet get`")
+
         print()
+
     return info_get
 
 
@@ -291,15 +296,18 @@ def download_single(uri=None, cid=None, name=None,
 
     # It also checks if it's a reposted claim, and returns the original
     # claim in case it is.
-    item = srch.search_item(uri=uri, cid=cid, name=name, offline=False,
-                            repost=repost,
-                            server=server)
-    if not item:
+    claim = srch.search_item(uri=uri, cid=cid, name=name, offline=False,
+                             repost=repost,
+                             server=server)
+
+    if not claim:
         return False
 
-    uri = item["canonical_url"]
+    prnt.print_info_pre_get(claim, offline=False)
 
-    if "signing_channel" in item and "name" in item["signing_channel"]:
+    uri = claim["canonical_url"]
+
+    if "signing_channel" in claim and "name" in claim["signing_channel"]:
         # A bug (lbryio/lbry-sdk #3316) prevents
         # the `lbrynet file list --channel_name=@Channel`
         # command from finding the channel, therefore the channel must be
@@ -309,8 +317,8 @@ def download_single(uri=None, cid=None, name=None,
         # Both the short `@Name` and the canonical `@Name#7` are resolved.
         # The second form is necessary to get the exact channel, in case
         # it has the same base name as another channel.
-        channel = item["signing_channel"]["name"]
-        ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
+        channel = claim["signing_channel"]["name"]
+        ch_full = claim["signing_channel"]["canonical_url"].lstrip("lbry://")
 
         resch.resolve_channel(channel=channel, server=server)
         resch.resolve_channel(channel=ch_full, server=server)
@@ -331,17 +339,15 @@ def download_single(uri=None, cid=None, name=None,
                 return False
         ddir = subdir
 
-    prnt.print_info_pre_get(item, offline=False)
-
     info_get = []
 
     is_collection = False
 
-    if item["value_type"] in "collection":
+    if claim["value_type"] in "collection":
         is_collection = True
 
     if collection and is_collection:
-        info_get = download_collection(item,
+        info_get = download_collection(claim,
                                        max_claims=max_claims,
                                        reverse=reverse_collection,
                                        ddir=ddir, save_file=save_file,
@@ -508,14 +514,17 @@ def download_invalid(cid=None, name=None,
 
     # It also checks if it's a reposted claim, although 'invalid' claims
     # cannot be reposts, as the original claim is already downloaded.
-    item = srch.search_item(cid=cid, name=name, offline=True,
-                            server=server)
-    if not item:
+    claim = srch.search_item(cid=cid, name=name, offline=True,
+                             server=server)
+
+    if not claim:
         return False
 
-    claim_id = item["claim_id"]
-    claim_name = item["claim_name"]
-    channel = item["channel_name"]
+    prnt.print_info_pre_get(claim, offline=True)
+
+    claim_id = claim["claim_id"]
+    claim_name = claim["claim_name"]
+    channel = claim["channel_name"]
 
     if not channel:
         channel = "@_Unknown_"
@@ -530,7 +539,6 @@ def download_invalid(cid=None, name=None,
                 return False
         ddir = subdir
 
-    prnt.print_info_pre_get(item, offline=True)
     info_save = lbrynet_save(claim_id=claim_id, claim_name=claim_name,
                              ddir=ddir,
                              server=server)
