@@ -200,7 +200,7 @@ def download_collection(collection, max_claims=2, reverse=False,
 
         subdir = os.path.join(orig_ddir, channel)
 
-        if own_dir:
+        if own_dir and claim["value_type"] in ("stream"):
             if not os.path.exists(subdir):
                 try:
                     os.mkdir(subdir)
@@ -353,14 +353,12 @@ def download_single(uri=None, cid=None, name=None,
     if not claim:
         return False
 
-    uri = claim["canonical_url"]
-
     channel = get_channel(claim, server=server)
 
     orig_ddir = ddir[:]
     subdir = os.path.join(ddir, channel)
 
-    if own_dir:
+    if own_dir and claim["value_type"] in ("stream"):
         if not os.path.exists(subdir):
             try:
                 os.mkdir(subdir)
@@ -385,6 +383,8 @@ def download_single(uri=None, cid=None, name=None,
                                        save_file=save_file,
                                        server=server)
         return info_get
+
+    uri = claim["canonical_url"]
 
     if not is_collection:
         info_get = lbrynet_get(uri=uri, ddir=ddir,
@@ -563,6 +563,7 @@ def download_invalid(cid=None, name=None,
         channel = "@_Unknown_"
 
     subdir = os.path.join(ddir, channel)
+
     if own_dir:
         if not os.path.exists(subdir):
             try:
