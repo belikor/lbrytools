@@ -133,8 +133,37 @@ def lbrynet_get(uri=None, ddir=None, save_file=True,
     return info_get
 
 
+def get_channel(claim,
+                server="http://localhost:5279"):
+    """Get the channel from the canonical url of the claim."""
+    channel = "@_Unknown_"
+
+    if "signing_channel" in claim and "name" in claim["signing_channel"]:
+        # A bug (lbryio/lbry-sdk #3316) prevents
+        # the `lbrynet file list --channel_name=@Channel`
+        # command from finding the channel, therefore the channel must be
+        # resolved with `lbrynet resolve` before it becomes known by other
+        # functions.
+        #
+        # Both the short `@Name` and the canonical `@Name#7` are resolved.
+        # The second form is necessary to get the exact channel, in case
+        # it has the same base name as another channel.
+        channel = claim["signing_channel"]["name"]
+        ch_full = claim["signing_channel"]["canonical_url"].split("lbry://")
+        ch_full = ch_full[1]
+
+        resch.resolve_channel(channel=channel, server=server)
+        resch.resolve_channel(channel=ch_full, server=server)
+
+        # Windows doesn't like # or : in the subdirectory; use a _
+        # channel = ch_full.replace("#", ":")
+        channel = ch_full.replace("#", "_")
+
+    return channel
+
+
 def download_collection(collection, max_claims=2, reverse=False,
-                        ddir=None, save_file=True,
+                        ddir=None, own_dir=True, save_file=True,
                         server="http://localhost:5279"):
     """Internal function to download the claims inside a collection."""
     claims = collection["value"]["claims"]
@@ -148,9 +177,11 @@ def download_collection(collection, max_claims=2, reverse=False,
 
     info_get = []
 
-    print()
     print("Collection")
     print(80 * "-")
+
+    orig_ddir = ddir[:]
+
     for num, cid in enumerate(claims, start=1):
         if num > max_claims:
             break
@@ -164,6 +195,18 @@ def download_collection(collection, max_claims=2, reverse=False,
 
         if not claim:
             continue
+
+        channel = get_channel(claim, server=server)
+
+        subdir = os.path.join(orig_ddir, channel)
+
+        if own_dir:
+            if not os.path.exists(subdir):
+                try:
+                    os.mkdir(subdir)
+                except (FileNotFoundError, PermissionError) as err:
+                    print(f"Cannot open directory for writing; {err}")
+            ddir = subdir
 
         info = lbrynet_get(uri=claim["canonical_url"], ddir=ddir,
                            save_file=save_file,
@@ -312,29 +355,11 @@ def download_single(uri=None, cid=None, name=None,
 
     uri = claim["canonical_url"]
 
-    if "signing_channel" in claim and "name" in claim["signing_channel"]:
-        # A bug (lbryio/lbry-sdk #3316) prevents
-        # the `lbrynet file list --channel_name=@Channel`
-        # command from finding the channel, therefore the channel must be
-        # resolved with `lbrynet resolve` before it becomes known by other
-        # functions.
-        #
-        # Both the short `@Name` and the canonical `@Name#7` are resolved.
-        # The second form is necessary to get the exact channel, in case
-        # it has the same base name as another channel.
-        channel = claim["signing_channel"]["name"]
-        ch_full = claim["signing_channel"]["canonical_url"].lstrip("lbry://")
+    channel = get_channel(claim, server=server)
 
-        resch.resolve_channel(channel=channel, server=server)
-        resch.resolve_channel(channel=ch_full, server=server)
-
-        # Windows doesn't like # or : in the subdirectory; use a _
-        # channel = ch_full.replace("#", ":")
-        channel = ch_full.replace("#", "_")
-    else:
-        channel = "@_Unknown_"
-
+    orig_ddir = ddir[:]
     subdir = os.path.join(ddir, channel)
+
     if own_dir:
         if not os.path.exists(subdir):
             try:
@@ -352,10 +377,12 @@ def download_single(uri=None, cid=None, name=None,
         is_collection = True
 
     if collection and is_collection:
+        print()
         info_get = download_collection(claim,
                                        max_claims=max_claims,
                                        reverse=reverse_collection,
-                                       ddir=ddir, save_file=save_file,
+                                       ddir=orig_ddir, own_dir=own_dir,
+                                       save_file=save_file,
                                        server=server)
         return info_get
 
