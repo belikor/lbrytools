@@ -58,6 +58,7 @@ from lbrytools.zeed_defaults import z_defaults
 
 from lbrytools.funcs import check_lbry
 from lbrytools.funcs import server_exists
+from lbrytools.funcs import get_download_dir
 from lbrytools.funcs import sanitize_text
 
 from lbrytools.status import list_lbrynet_status
@@ -160,6 +161,7 @@ True if z_defaults else False
 
 True if check_lbry else False
 True if server_exists else False
+True if get_download_dir else False
 True if sanitize_text else False
 
 True if list_lbrynet_status else False

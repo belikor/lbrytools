@@ -138,6 +138,30 @@ def get_bdir(server="http://localhost:5279"):
     return blobdir
 
 
+def default_ddir(server="http://localhost:5279"):
+    """Get the default download directory for lbrynet."""
+    if not server_exists(server=server):
+        return os.path.expanduser("~")
+
+    msg = {"method": "settings_get"}
+    out_set = requests.post(server, json=msg).json()
+    ddir = out_set["result"]["download_dir"]
+    return ddir
+
+
+def get_download_dir(ddir=None,
+                     server="http://localhost:5279"):
+    """Get the entered directory if it exists, or the default directory."""
+    old_ddir = str(ddir)
+
+    if not ddir or not os.path.exists(ddir):
+        ddir = default_ddir(server=server)
+        print(f"Directory does not exist: {old_ddir}")
+        print(f"Default directory: {ddir}")
+
+    return ddir
+
+
 def print_content(output_list, file=None, fdate=False):
     """Print contents to the terminal or to a file."""
     fd = 0
