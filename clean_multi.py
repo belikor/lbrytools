@@ -125,7 +125,6 @@ def ch_cleanup(channel=None, number=2, what="media",
         if remaining == 0:
             print(8*"-")
             print(f"Finished deleting; remaining {remaining}")
-            print()
 
     return list_info_del
 
