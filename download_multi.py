@@ -113,15 +113,17 @@ def ch_download_latest(channel=None, number=2,
 
     n_items = len(items)
 
-    for it, item in enumerate(items, start=1):
-        print(f"Claim {it}/{n_items}")
+    for num, item in enumerate(items, start=1):
+        print(f"Claim {num}/{n_items}")
         info_get = dld.download_single(cid=item["claim_id"],
                                        repost=repost,
                                        ddir=ddir, own_dir=own_dir,
                                        save_file=save_file,
                                        server=server)
         list_info_get.append(info_get)
-        print()
+
+        if num < n_items:
+            print()
 
     return list_info_get
 
