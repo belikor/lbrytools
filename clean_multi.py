@@ -109,7 +109,6 @@ def ch_cleanup(channel=None, number=2, what="media",
         if remaining <= number:
             print(8*"-")
             print(f"Finished deleting; remaining {remaining}")
-            print()
             break
 
         print(f"Claim {it}/{n_items}")
