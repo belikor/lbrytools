@@ -109,13 +109,16 @@ def get_fields(claim,
     size_mb = size / (1024**2)  # to MB
     size_mb = f"{size_mb:9.4f} MB"
 
+    support = meta.get("effective_amount", "")
+    support = f"{support:>13s}"
+
     fee = " "
 
     if "fee" in value:
         fee = value["fee"].get("amount", "___")
         fee = f"{fee} " + value["fee"]["currency"]
 
-    fee = f"f: {fee:>9}"
+    fee = f"f: {fee:>9s}"
 
     name = claim["name"]
 
@@ -141,6 +144,7 @@ def get_fields(claim,
             "channel": channel,
             "duration": duration,
             "size_mb": size_mb,
+            "support": support,
             "fee": fee,
             "name": name}
 
@@ -149,7 +153,7 @@ def get_line(claim,
              create=False, height=False, release=True,
              claim_id=False, typ=True, ch_name=True,
              long_chan=True,
-             sizes=True, fees=True,
+             sizes=True, supports=True, fees=True,
              title=False, sanitize=False,
              sep=";"):
     """Get a line to print information for a single claim."""
@@ -170,6 +174,7 @@ def get_line(claim,
 
     duration = fields["duration"]
     size_mb = fields["size_mb"]
+    support = fields["support"]
     fee = fields["fee"]
 
     name = fields["name"]
@@ -202,6 +207,9 @@ def get_line(claim,
         line += f"{duration}" + f"{sep} "
         line += f"{size_mb}" + f"{sep} "
 
+    if supports:
+        line += f"{support}" + f"{sep} "
+
     if fees:
         line += f"{fee}" + f"{sep} "
 
@@ -214,7 +222,7 @@ def print_sch_claims(claims,
                      create=False, height=False, release=True,
                      claim_id=False, typ=True, ch_name=False,
                      long_chan=False,
-                     sizes=True, fees=True,
+                     sizes=True, supports=True, fees=True,
                      title=False, sanitize=False,
                      start=1, end=0,
                      reverse=False,
@@ -236,7 +244,7 @@ def print_sch_claims(claims,
         line_add = get_line(claim, long_chan=long_chan,
                             create=create, height=height, release=release,
                             claim_id=claim_id, typ=typ, ch_name=ch_name,
-                            sizes=sizes, fees=fees,
+                            sizes=sizes, supports=supports, fees=fees,
                             title=title, sanitize=sanitize,
                             sep=sep)
 

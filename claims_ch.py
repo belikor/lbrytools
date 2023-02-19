@@ -33,7 +33,7 @@ def list_ch_claims(channel,
                    number=0,
                    create=False, height=False, release=True,
                    claim_id=False, typ=True, ch_name=False,
-                   sizes=True, fees=True,
+                   sizes=True, supports=True, fees=True,
                    title=False, sanitize=False,
                    start=1, end=0,
                    reverse=False,
@@ -77,6 +77,10 @@ def list_ch_claims(channel,
         It defaults to `True`, in which case it will print the duration
         in minutes and seconds, and size in MB of each claim, if applicable
         (streams of type `'audio'` and `'video'`).
+    supports: bool, optional
+        It defaults to `True`, in which case it will print the total LBC
+        supporting the claim; this is the sum of the author's amount
+        and support amount.
     fees: bool, optional
         It defaults to `True`, in which case it will print the fee (quantity
         and currency) associated with accessing each claim, if applicable.
@@ -176,7 +180,7 @@ def list_ch_claims(channel,
                                create=create, height=height, release=release,
                                claim_id=claim_id, typ=typ, ch_name=ch_name,
                                long_chan=False,
-                               sizes=sizes, fees=fees,
+                               sizes=sizes, supports=supports, fees=fees,
                                title=title, sanitize=sanitize,
                                start=start, end=end,
                                reverse=reverse,

@@ -212,7 +212,7 @@ def list_trending_claims(threads=32,
                          bin_stream=False, model_stream=False,
                          create=False, height=False, release=True,
                          claim_id=False, typ=True, ch_name=True,
-                         sizes=True, fees=True,
+                         sizes=True, supports=True, fees=True,
                          title=False, sanitize=False,
                          file=None, fdate=False, sep=";",
                          server="http://localhost:5279"):
@@ -271,6 +271,10 @@ def list_trending_claims(threads=32,
         It defaults to `True`, in which case it will print the duration
         in minutes and seconds, and size in MB of each claim, if applicable
         (streams of type `'audio'` and `'video'`).
+    supports: bool, optional
+        It defaults to `True`, in which case it will print the total LBC
+        supporting the claim; this is the sum of the author's amount
+        and support amount.
     fees: bool, optional
         It defaults to `True`, in which case it will print the fee (quantity
         and currency) associated with accessing each claim, if applicable.
@@ -350,7 +354,7 @@ def list_trending_claims(threads=32,
                                create=create, height=height, release=release,
                                claim_id=claim_id, typ=typ, ch_name=ch_name,
                                long_chan=True,
-                               sizes=sizes, fees=fees,
+                               sizes=sizes, supports=supports, fees=fees,
                                title=title, sanitize=sanitize,
                                start=1, end=0,
                                reverse=False,
@@ -375,7 +379,7 @@ def list_search_claims(threads=32,
                        bin_stream=False, model_stream=False,
                        create=False, height=False, release=True,
                        claim_id=False, typ=True, ch_name=True,
-                       sizes=True, fees=True,
+                       sizes=True, supports=True, fees=True,
                        title=False, sanitize=False,
                        file=None, fdate=False, sep=";",
                        server="http://localhost:5279"):
@@ -442,6 +446,10 @@ def list_search_claims(threads=32,
         It defaults to `True`, in which case it will print the duration
         in minutes and seconds, and size in MB of each claim, if applicable
         (streams of type `'audio'` and `'video'`).
+    supports: bool, optional
+        It defaults to `True`, in which case it will print the total LBC
+        supporting the claim; this is the sum of the author's amount
+        and support amount.
     fees: bool, optional
         It defaults to `True`, in which case it will print the fee (quantity
         and currency) associated with accessing each claim, if applicable.
@@ -523,7 +531,7 @@ def list_search_claims(threads=32,
                                create=create, height=height, release=release,
                                claim_id=claim_id, typ=typ, ch_name=ch_name,
                                long_chan=True,
-                               sizes=sizes, fees=fees,
+                               sizes=sizes, supports=supports, fees=fees,
                                title=title, sanitize=sanitize,
                                start=1, end=0,
                                reverse=False,

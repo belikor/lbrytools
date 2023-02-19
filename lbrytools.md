@@ -1073,12 +1073,12 @@ Other information that we can display optionally include the creation time,
 the block height, the release time (or creation time if release time
 is unavailable), type of claim (also type of media), publishing channel name,
 size of the claim, given by its duration in minutes and seconds (if applicable),
-and size of the media in MiB (if applicable), and associated fee to access
-the content (if any):
+and size of the media in MiB (if applicable), total LBC support in the claim,
+and associated fee to access the content (if any):
 ```py
 g = lbryt.list_trending_claims(create=True, height=True, release=True,
                                claim_id=True, typ=True, ch_name=True,
-                               sizes=True, fees=True,
+                               sizes=True, supports=True, fees=True,
                                title=False, sanitize=True)
 ```
 
@@ -1123,7 +1123,7 @@ Other options are the same as for `list_trending_claims`, that is,
 `claim_type`, `video_stream`, `audio_stream`,
 `doc_stream`, `img_stream`, `bin_stream`, `model_stream`,
 `create`, `height`, `release`, `claim_id`, `typ`, `ch_name`,
-`sizes`, `fees`, `title`, `sanitize`, `file`, `fdate`, `sep`.
+`sizes`, `supports`, `fees`, `title`, `sanitize`, `file`, `fdate`, `sep`.
 
 [Go back to _Content_](#content)
 
@@ -1147,7 +1147,7 @@ that don't support emojis:
 k = lbryt.list_ch_claims("@lbry:3f", number=20,
                          create=True, height=True, release=True,
                          typ=True, ch_name=True,
-                         sizes=True, fees=True,
+                         sizes=True, supports=True, fees=True,
                          sanitize=True)
 ```
 
