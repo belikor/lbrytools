@@ -98,7 +98,6 @@ def ch_cleanup(channel=None, number=2, what="media",
     sorted_items = sort.sort_items(channel=channel,
                                    server=server)
     if not sorted_items:
-        print()
         return False
 
     n_items = len(sorted_items)
@@ -115,6 +114,7 @@ def ch_cleanup(channel=None, number=2, what="media",
 
         del_info = clean.delete_single(cid=item["claim_id"], what=what,
                                        server=server)
+
         list_info_del.append(del_info)
         remaining = n_items - it
 
