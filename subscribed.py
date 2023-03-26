@@ -378,11 +378,15 @@ def ch_search_latest_d(channel=None, number=4,
     name, cid = channel["uri"].lstrip("lbry://").split("#")
     f_name = name + "#" + cid[0:3]
 
-    claims = srch_ch.ch_search_latest(channel=f_name, number=number,
-                                      server=server)
+    claims = []
+
+    if channel["valid"]:
+        claims = srch_ch.ch_search_latest(channel=f_name, number=number,
+                                          server=server)
 
     return {"channel": f_name,
             "claim_id": cid,
+            "valid": channel["valid"],
             "claims": claims}
 
 
@@ -515,12 +519,16 @@ def print_ch_subs_latest(ch_latest_claims,
 
         channel = result["channel"]
         cid = result["claim_id"]
+        valid = result["valid"]
         claims = result["claims"]
 
-        out.append(f"Channel {num}/{n_channels}, {channel}, {cid}")
+        out.append(f"Channel {num}/{n_channels}{sep} {channel}{sep} {cid}")
 
-        if not claims:
-            out.append("  - Invalid channel (removed?)")
+        if not valid or not claims:
+            if not valid:
+                out.append("  - Unresolved channel (probably removed)")
+            elif not claims:
+                out.append("  - Channel with no claims")
 
             if num < n_channels:
                 out.append("")
