@@ -171,6 +171,7 @@ def search_ch_subs(shared=True,
     print(80 * "-")
     print(f"Synchronization: {sync}")
     print("Show all:", bool(show_all))
+
     if not show_all:
         print(f"Filtering: '{filtering}'")
         print("- Valid:", bool(valid))
@@ -190,6 +191,7 @@ def search_ch_subs(shared=True,
             print("No shared database, will use local")
         else:
             print("Database: local")
+
         channels = following_local
         n_channels = len(following_local)
 
@@ -212,21 +214,18 @@ def search_ch_subs(shared=True,
     if show_all:
         return res_channels
 
-    ch_valid_filtered = filter_valid(res_channels,
-                                     f_valid=valid)
+    if filtering in ("valid"):
+        ch_filtered = filter_valid(res_channels,
+                                   f_valid=valid)
+    elif filtering in ("notifications"):
+        ch_filtered = filter_notif(res_channels,
+                                   f_notifications=notifications)
+    elif filtering in ("both"):
+        ch_filtered = filter_valid(res_channels,
+                                   f_valid=valid)
 
-    ch_notif_filtered = filter_notif(res_channels,
-                                     f_notifications=notifications)
-
-    ch_both = filter_notif(ch_valid_filtered,
-                           f_notifications=notifications)
-
-    if filtering in "valid":
-        ch_filtered = ch_valid_filtered
-    elif filtering in "notifications":
-        ch_filtered = ch_notif_filtered
-    elif filtering in "both":
-        ch_filtered = ch_both
+        ch_filtered = filter_notif(ch_filtered,
+                                   f_notifications=notifications)
 
     return ch_filtered
 
@@ -247,17 +246,21 @@ def print_ch_subs(channels=None,
             ch_nots = not channel["notificationsDisabled"]
         else:
             ch_nots = False
+
         ch_nots = f"{ch_nots}"
 
         if "valid" in channel:
             valid = bool(channel["valid"])
         else:
             valid = "_____"
+
         valid = f"{valid}"
 
         line = f"{num:4d}/{n_channels:4d}" + f"{sep} "
+
         if claim_id:
             line += f"{cid}" + f"{sep} "
+
         line += f"{f_name:48s}" + f"{sep} "
         line += f"valid: {valid:5s}" + f"{sep} "
         line += f"notifications: {ch_nots:5s}"
