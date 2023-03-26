@@ -195,7 +195,7 @@ def delete_single(uri=None, cid=None, name=None, invalid=False,
         if ("signing_channel" in item
                 and "canonical_url" in item["signing_channel"]):
             channel = item["signing_channel"]["canonical_url"]
-            channel = channel.lstrip("lbry://")
+            channel = channel.split("lbry://")[1]
         else:
             channel = "@_Unknown_"
 
@@ -203,6 +203,7 @@ def delete_single(uri=None, cid=None, name=None, invalid=False,
     # and blob information.
     item = srch.search_item(cid=claim_id, offline=True,
                             server=server)
+
     if not item:
         print("No claim found locally, probably already deleted.")
         return True
@@ -215,6 +216,7 @@ def delete_single(uri=None, cid=None, name=None, invalid=False,
         print(f"claim_name: {claim_name}")
     else:
         print(f"canonical_url: {claim_uri}")
+
     print(f"claim_id: {claim_id}")
     print(f"Blobs found: {blobs} of {blobs_full}")
 
@@ -231,3 +233,7 @@ def delete_single(uri=None, cid=None, name=None, invalid=False,
     status = lbrynet_del(claim_id, claim_name=claim_name, what=what,
                          server=server)
     return status
+
+
+if __name__ == "__main__":
+    delete_single("1M")  # assuming it was downloaded first

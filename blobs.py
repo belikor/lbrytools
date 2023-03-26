@@ -72,7 +72,8 @@ def c_blobs(uri=None, cid=None, name=None,
     c_name = item["name"]
 
     if "signing_channel" in item and "name" in item["signing_channel"]:
-        ch_full = item["signing_channel"]["canonical_url"].lstrip("lbry://")
+        ch_full = item["signing_channel"]["canonical_url"]
+        ch_full = ch_full.split("lbry://")[1]
         c_channel = ch_full.replace("#", ":")
     else:
         c_channel = "@_Unknown_"

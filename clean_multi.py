@@ -320,19 +320,22 @@ def remove_media(never_delete=None,
     print(80 * "-")
     print("Delete all media files")
 
-    items = sort.sort_items(server=server)
-    n_items = len(items)
+    claims = sort.sort_items(server=server)
+    n_claims = len(claims)
 
-    for it, item in enumerate(items, start=1):
-        out = "{:4d}/{:4d}, {}, ".format(it, n_items, item["claim_name"])
+    for num, claim in enumerate(claims, start=1):
+        name = claim["claim_name"]
+
+        out = f"{num:4d}/{n_claims:4d}; {name}; "
+
         if never_delete:
-            channel = resch.find_channel(cid=item["claim_id"],
+            channel = resch.find_channel(cid=claim["claim_id"],
                                          full=False,
                                          server=server)
             if not channel:
                 continue
 
-            channel = channel.lstrip("@")
+            channel = channel.split("@")[1]
             skip = False
 
             for safe_channel in never_delete:
@@ -345,7 +348,8 @@ def remove_media(never_delete=None,
                       "Skipping.")
                 continue
 
-        path = item["download_path"]
+        path = claim["download_path"]
+
         if path:
             os.remove(path)
             print(out + f"delete {path}")

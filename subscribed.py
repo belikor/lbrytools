@@ -238,7 +238,7 @@ def print_ch_subs(channels=None,
     n_channels = len(channels)
 
     for num, channel in enumerate(channels, start=1):
-        name, cid = channel["uri"].lstrip("lbry://").split("#")
+        name, cid = channel["uri"].split("lbry://")[1].split("#")
         f_name = name + "#" + cid[0:3]
         f_name = f'"{f_name}"'
 
@@ -375,7 +375,7 @@ def list_ch_subs(shared=True,
 def ch_search_latest_d(channel=None, number=4,
                        server="http://localhost:5279"):
     """Search the claims from a channel taken from the wallet file."""
-    name, cid = channel["uri"].lstrip("lbry://").split("#")
+    name, cid = channel["uri"].split("lbry://")[1].split("#")
     f_name = name + "#" + cid[0:3]
 
     claims = []

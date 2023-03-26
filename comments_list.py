@@ -100,8 +100,8 @@ def print_r_comments(comments, sub_replies=True, full=False,
 
     for num, comment in enumerate(comments, start=1):
         ch = comment.get("channel_url", "lbry://_Unknown_#000")
-        ch = ch.lstrip("lbry://").split("#")
-        ch_name = ch[0] + "#" + ch[1][0:3]
+        name, cid = ch.split("lbry://")[1].split("#")
+        ch_name = name + "#" + cid[0:3]
 
         comm = comment["comment"]
 

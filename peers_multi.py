@@ -628,7 +628,7 @@ def list_ch_subs_peers(number=2, shuffle=False,
         if end != 0 and num > end:
             break
 
-        name, cid = channel["uri"].lstrip("lbry://").split("#")
+        name, cid = channel["uri"].split("lbry://")[1].split("#")
         c_name = name + "#" + cid[0:3]
 
         if not channel["valid"]:
