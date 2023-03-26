@@ -29,7 +29,7 @@ import time
 
 import lbrytools.funcs as funcs
 import lbrytools.peers_ch as peers_ch
-import lbrytools.channels as chs
+import lbrytools.subscribed as subs
 
 
 def process_chs_peers(base_chs_peers_info, print_msg=False):
@@ -612,13 +612,13 @@ def list_ch_subs_peers(number=2, shuffle=False,
     if not funcs.server_exists(server=server):
         return False
 
-    sub_channels = chs.list_ch_subs(shared=shared,
-                                    show_all=not valid,
-                                    filtering="valid", valid=True,
-                                    threads=32,
-                                    claim_id=False,
-                                    file=None, fdate=False, sep=sep,
-                                    server=server)
+    sub_channels = subs.list_ch_subs(shared=shared,
+                                     show_all=not valid,
+                                     filtering="valid", valid=True,
+                                     threads=32,
+                                     claim_id=False,
+                                     file=None, fdate=False, sep=sep,
+                                     server=server)
 
     channels = []
 

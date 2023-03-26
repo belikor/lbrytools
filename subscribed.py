@@ -734,3 +734,9 @@ def list_ch_subs_latest(number=4, override=False,
                          file=file, fdate=fdate, sep=sep)
 
     return ch_latest_claims
+
+
+if __name__ == "__main__":
+    list_ch_subs()
+    print()
+    list_ch_subs_latest(number=1)

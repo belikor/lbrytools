@@ -125,8 +125,8 @@ from lbrytools.claims_search import list_trending_claims
 from lbrytools.claims_search import list_search_claims
 from lbrytools.claims_check import check
 
-from lbrytools.channels import list_ch_subs
-from lbrytools.channels import list_ch_subs_latest
+from lbrytools.subscribed import list_ch_subs
+from lbrytools.subscribed import list_ch_subs_latest
 
 from lbrytools.accounts import list_accounts
 from lbrytools.publishes_ch import list_channels
