@@ -309,9 +309,9 @@ def count_blobs(uri=None, cid=None, name=None,
     return blob_info
 
 
-def c_blobs_th(cid, blobfiles, print_msg, server):
+def c_blobs_th(cid, name, blobfiles, print_msg, server):
     """Wrapper to use with threads in 'count_blobs_all'."""
-    blob_info = c_blobs(cid=cid,
+    blob_info = c_blobs(cid=cid, name=name,
                         blobfiles=blobfiles,
                         print_msg=print_msg, insubfunc=True,
                         server=server)
@@ -408,12 +408,12 @@ def count_blobs_all(blobfiles=None, channel=None,
         if not channel.startswith("@"):
             channel = "@" + channel
 
-    items = sort.sort_items(channel=channel,
-                            server=server)
-    if not items:
+    claims = sort.sort_items(channel=channel,
+                             server=server)
+    if not claims:
         return False
 
-    n_items = len(items)
+    n_claims = len(claims)
     print()
 
     if channel:
@@ -434,28 +434,29 @@ def count_blobs_all(blobfiles=None, channel=None,
 
     # Iterables to be passed to the ThreadPoolExecutor
     results = []
-    cids = (item["claim_id"] for item in items)
-    blobfs = (blobfiles for n in range(n_items))
-    prt_msgs = (print_msg for n in range(n_items))
-    servers = (server for n in range(n_items))
+    cids = (claim["claim_id"] for claim in claims)
+    names = (claim["claim_name"] for claim in claims)
+    blobfs = (blobfiles for n in range(n_claims))
+    prt_msgs = (print_msg for n in range(n_claims))
+    servers = (server for n in range(n_claims))
 
     if threads:
         with fts.ThreadPoolExecutor(max_workers=threads) as executor:
             # The input must be iterables
             results = executor.map(c_blobs_th,
-                                   cids, blobfs, prt_msgs, servers)
+                                   cids, names, blobfs, prt_msgs, servers)
             print("Waiting for blob count to finish; "
                   f"max threads: {threads}")
             results = list(results)  # generator to list
     else:
-        for num, item in enumerate(items, start=1):
+        for num, claim in enumerate(claims, start=1):
             print("Waiting for blob count to finish")
             if num < start:
                 continue
             if end != 0 and num > end:
                 break
 
-            result = c_blobs_th(item["claim_id"],
+            result = c_blobs_th(claim["claim_id"], claim["claim_name"],
                                 blobfiles, print_msg, server)
             results.append(result)
 
@@ -467,7 +468,7 @@ def count_blobs_all(blobfiles=None, channel=None,
         if (print_msg
                 or "error_not_found" in blob_info
                 or "error_no_sd_hash" in blob_info):
-            print(f"Claim {num}/{n_items}, {c_name}")
+            print(f"Claim {num}/{n_claims}, {c_name}")
             prnt_blobs(blob_info, print_each=print_each,
                        file=None, fdate=False)
             print()
