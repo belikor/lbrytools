@@ -56,13 +56,12 @@ def c_blobs(uri=None, cid=None, name=None,
         print(f"blobfiles={blobfiles}")
 
     item = srch.search_item(uri=uri, cid=cid, name=name,
+                            repost=True, offline=False,
+                            print_error=False,
                             server=server)
 
     if not item:
-        if insubfunc:
-            print()
-
-        return {"error_not_found": "item was not found in the network",
+        return {"error_not_found": "claim was not found in the network",
                 "canonical_url": uri,
                 "claim_id": cid,
                 "name": name}
@@ -85,7 +84,7 @@ def c_blobs(uri=None, cid=None, name=None,
     # if not os.path.exists(sd_hash_f) or sd_hash not in list_all_blobs:
     if not os.path.exists(sd_hash_f):
         return {"error_no_sd_hash": "'sd_hash' blob not in directory "
-                                    f"{blobfiles}",
+                                    f"'{blobfiles}'",
                 "canonical_url": c_uri,
                 "claim_id": c_cid,
                 "name": c_name,
@@ -159,12 +158,15 @@ def prnt_blobs(blob_info, print_each=False,
     c_cid = blob_info["claim_id"]
     c_name = blob_info["name"]
 
-    if "error_not_found" in blob_info:
-        return False
-
     output = [f"canonical_url: {c_uri}",
               f"claim_id: {c_cid}",
               f"name: {c_name}"]
+
+    if "error_not_found" in blob_info:
+        error = blob_info["error_not_found"]
+        output.append(f">>> {error}")
+        funcs.print_content(output, file=file, fdate=fdate)
+        return False
 
     c_channel = blob_info["channel"]
     sd_hash = blob_info["sd_hash"]
@@ -173,7 +175,8 @@ def prnt_blobs(blob_info, print_each=False,
     output.append(f"sd_hash: {sd_hash}")
 
     if "error_no_sd_hash" in blob_info:
-        output.append(">>> 'sd_hash' missing, "
+        error = blob_info["error_no_sd_hash"]
+        output.append(f">>> {error}, "
                       "cannot determine the number of blobs")
         output.append(">>> Start downloading the claim, or redownload it")
         funcs.print_content(output, file=file, fdate=fdate)
