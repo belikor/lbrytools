@@ -283,7 +283,7 @@ def print_f_claims(items=None, show="all",
             line += f"{sep} " + f"{st_claim_id}"
 
         if blobs:
-            line += f"{sep} " + f"{st_blobs:3d}/{st_blobs_in_stream:3d}"
+            line += f"{sep} " + f"{st_blobs:4d}/{st_blobs_in_stream:4d}"
 
         if size:
             line += f"{sep} " + f"{rem_min:3d}:{rem_s:02d}"
