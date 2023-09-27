@@ -203,17 +203,22 @@ for example,
 and
 [lbrydseed](https://github.com/belikor/lbrydseed).
 
-To install this repository as a submodule in your own repository:
+Assuming you already have a `custom_project`,
+you can install this repository as a submodule:
 ```sh
+cd custom_project
 git submodule add https://github.com/belikor/lbrytools
+git add .gitmodules lbrytools/
+git commit .gitmodules lbrytools/ -m "Add submodule"
 ```
 
-Then in your `custom_project` you can clone and download the submodule at the same time:
+Then if you wish to clone your `custom_project`
+and include all submodules at the same time:
 ```sh
 git clone --recurse-submodules https://github.com/user/custom_project
 ```
 
-Then, if needed, the submodule can be updated from the toplevel of the project:
+If needed, the submodule can be updated from the toplevel of the project:
 ```sh
 cd custom_project
 git submodule update --remote --rebase lbrytools/
