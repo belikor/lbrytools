@@ -616,7 +616,7 @@ channels = [
     "AlisonMorrow",
     "ThePholosopher",
     "ChrissieMayr",
-    "Karlyn"
+    "freedomain"
 ]
 
 c = lbryt.ch_cleanup_multi(channels=channels, number=4)
@@ -825,7 +825,7 @@ b = lbryt.download_missing_blobs(blobfiles=bdir, ddir=ddir)
 If we already have many claims in our system this may take a while,
 so we may decide to restrict this to only a single channel:
 ```py
-b = lbryt.download_missing_blobs(ddir=ddir, channel="@EatMoreVegans")
+b = lbryt.download_missing_blobs(ddir=ddir, channel="@freedomain")
 ```
 
 [Go back to _Content_](#content)
@@ -1722,8 +1722,7 @@ or the title of the claim.
 If we use the `sanitize` option, it will remove the emojis from the output,
 which may be useful if we use the output in applications
 that don't support emojis:
-```
-py
+```py
 uu = lbryt.list_peers("vim-alchemy-with-macros",
                       inline=True,
                       claim_id=True, typ=True, title=True,
